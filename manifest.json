@@ -1,0 +1,30 @@
+{
+	"name" :"The Time Companion",
+	"manifest_version": 2,
+	"version" : "0.0.1",
+	"description" :"This extension will call you to order on a recurring basis, so that you does not lose sight of the essential goals of your life.",
+	"icons": 
+	{
+		"128": "icon128.png",
+		"48": "icon48.png",
+		"16": "icon16.png"
+	},
+	"browser_action" :
+	{
+		"default_icon" : "icon16.png",
+		"default_popup" :"popup.html"
+	},
+
+	"options_page" : "options.html",
+
+	"background": {
+		"scripts" : ["eventPage.js"],
+		"persistent": false
+	},
+
+	"permissions": [
+		"storage",
+		"notifications",
+		"contextMenus"
+	]
+}
