@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>The Time Companion Options</title>
+    <link rel="stylesheet" href="setlist.css" />
+    <script src="options.js"></script>
+</head>
+
+<body>
+    <div class=listes>
+
+        <section gauche>
+
+            <h1>Liste noire</h1>
+            <p description>Mettre ici les sites distrayants.
+                Pour inclure tous les sites web, écrire *.* </p>
+
+            <div inputbar>
+                <input type="text" placeholder="Entrez une url (ex: youtube.com)" />
+                <a id="addtoblacklist" class="btn btn-3">Ajouter</a>
+            </div>
+
+            <div class=conteneurdetableau>
+                <table listenoire></table>
+            </div>
+
+            <div inputbar>
+                <input type="text" placeholder="Nom de la liste (ex:distractions)" />
+                <a id="addblacklist" class="btn btn-3">Enregistrer</a>
+            </div>
+
+        </section>
+
+
+
+        <section milieu>
+            <h1>Liste blanche</h1>
+            <p description>Permet de ne pas prendre en compte une partie spécifique incluse dans la liste noire.
+                Également très
+                utile pour "autoriser tout sauf:"</p>
+
+            <div inputbar>
+                <input type="text" placeholder="Entrez une url (ex: youtube.com)" />
+                <a id="addtowhitelist" class="btn btn-3">Ajouter</a>
+            </div>
+
+            <div class=conteneurdetableau>
+                <table listeblanche></table>
+            </div>
+
+
+            <div inputbar>
+                <input type="text" placeholder="Nom de la liste (ex:distractions)" />
+                <a id="addblacklist" class="btn btn-3">Enregistrer</a>
+            </div>
+
+        </section>
+
+
+    </div>
+
+    <section droite>
+        <h1 logo>
+            The T<span class=sablier>⧗</span>me Companion
+        </h1>
+        <div checks>
+            <input/ type=checkbox id=ch1> <label for="ch1"> Redirection lors du niveau 3 </label> <br>
+            <input/ type=checkbox id=ch2> <label for="ch2"> Autoriser le son du site web lors du niveau 2 et
+                3</label><br>
+            <input/ type=checkbox id=ch3> <label for="ch3"> Désactiver distractions sur Youtube </label><br>
+            <input/ type=checkbox id=ch4> <label for="ch4"> Désactiver distractions sur Wikipedia </label><br>
+            <input/ type=checkbox id=ch5> <label for="ch5"> Désactiver distractions sur Quora </label><br>
+            <input/ type=checkbox id=ch6> <label for="ch6"> Désactiver distractions sur Reddit </label><br>
+        </div>
+
+        <div id=optionbtn>
+            <a href="options.html" id="editlist" class="btn btn-3" special>Retour</a>
+            <a id="editlist" class="btn btn-3" special>Modifier une liste</a>
+        </div>
+
+        <div class=conteneurdetableau mini>
+            <table listeblanche></table>
+        </div>
+
+    </section>
+
+</body>
+
+</html>
