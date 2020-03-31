@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>The Time Companion Options</title>
     <link rel="stylesheet" href="setlist.css" />
-    <script src="options.js"></script>
+    <script src="setlist.js"></script>
 </head>
 
 <body>
@@ -18,7 +18,7 @@
                 Pour inclure tous les sites web, écrire *.* </p>
 
             <div inputbar>
-                <input type="text" placeholder="Entrez une url (ex: youtube.com)" />
+                <input type="url" id=inputurlbl placeholder="Entrez une url (ex: youtube.com)" />
                 <a id="addtoblacklist" class="btn btn-3">Ajouter</a>
             </div>
 
@@ -27,8 +27,8 @@
             </div>
 
             <div inputbar>
-                <input type="text" placeholder="Nom de la liste (ex:distractions)" />
-                <a id="addblacklist" class="btn btn-3">Enregistrer</a>
+                <input type="text" class=inputlistname placeholder="Nom de la liste (ex:distractions)" />
+                <a id="saveblacklist" class="btn btn-3 savebtn">Enregistrer</a>
             </div>
 
         </section>
@@ -42,7 +42,7 @@
                 utile pour "autoriser tout sauf:"</p>
 
             <div inputbar>
-                <input type="text" placeholder="Entrez une url (ex: youtube.com)" />
+                <input type="url" id=inputurlwl placeholder="Entrez une url (ex: youtube.com)" />
                 <a id="addtowhitelist" class="btn btn-3">Ajouter</a>
             </div>
 
@@ -52,8 +52,8 @@
 
 
             <div inputbar>
-                <input type="text" placeholder="Nom de la liste (ex:distractions)" />
-                <a id="addblacklist" class="btn btn-3">Enregistrer</a>
+                <input type="text" class=inputlistname placeholder="Nom de la liste (ex:distractions)" />
+                <a id="savewhitelist" class="btn btn-3 savebtn">Enregistrer</a>
             </div>
 
         </section>
@@ -76,13 +76,13 @@
         </div>
 
         <div id=optionbtn>
-            <a href="options.html" id="editlist" class="btn btn-3" special>Retour</a>
+            <a href="options.html" id="return" class="btn btn-3" special>Retour</a>
             <a id="editlist" class="btn btn-3" special>Modifier une liste</a>
         </div>
 
-        <div class=conteneurdetableau mini>
-            <table listeblanche></table>
-        </div>
+        <!-- <div class=conteneurdetableau mini>
+            <table></table>
+        </div> -->
 
     </section>
 
