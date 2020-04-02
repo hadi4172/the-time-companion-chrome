@@ -1,6 +1,6 @@
-* {
+/* * {
     border: 1px black dotted;
-}
+} */
 
 body {
     display: flex;
@@ -17,7 +17,7 @@ body {
 }
 
 tr{
-    font-size: 1.2em;
+    font-size: 1.4em;
     white-space: nowrap;
 }
 

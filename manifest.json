@@ -15,15 +15,25 @@
 		"default_popup" :"popup.html"
 	},
 
+	"content_scripts": [
+		{
+		  "matches": [
+			"<all_urls>"
+		  ],
+		  "js": ["library/timeme.min.js","content.js"]
+		}
+	  ],
+
 	"options_page" : "options.html",
 
 	"background": {
-		"scripts" : ["eventPage.js"],
+		"scripts" : ["library/timeme.min.js","background.js"],
 		"persistent": false
 	},
 
 	"permissions": [
 		"storage",
+		"tabs",
 		"notifications",
 		"contextMenus"
 	]

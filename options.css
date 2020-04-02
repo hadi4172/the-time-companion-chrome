@@ -11,8 +11,22 @@ html {
   background-color: rgba(231, 219, 219,0.5);
   min-width: 390px;
   min-height: 300px;
+  max-height: 29vh;
+  max-width: 28.25vw;
   overflow : scroll;
   margin: 15px;
+}
+
+table{
+    table-layout: fixed;
+    width: 26vw;
+}
+
+tr{
+  font-size: 1em;
+  width:28vw;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .titreduconteneur {
@@ -165,6 +179,18 @@ h1{
   user-select: none;
   color: #ffffff;
 }
+
+.middle input[type="radio"]:checked+.box span[temps] {
+  transform: translateY(160px)!important;
+  display: initial;
+  opacity:0.5;
+}
+
+.middle .box span[temps] {
+  display: none;
+  font-size: 1.15em;
+}
+
 
 .middle p {
   color: #fff;

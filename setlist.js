@@ -14,7 +14,8 @@ window.onload = function () {
     var btnsAjout = [btnAjoutLN, btnAjoutLB];
     var btnsEnregistrer = [btnEnregistrerLN, btnEnregistrerLB];
     var indiceSauvegarde = [{ donneesListeNoire: listeNoire.innerHTML }, { donneesListeBlanche: listeBlanche.innerHTML }];
-    var saveBeforeQuit=false;
+    var uRLS = [{ urlsListeNoire: [] }, { urlsListeBlanche: [] }];
+    var saveBeforeQuit = false;
 
     window.onbeforeunload = function (e) {
         if (saveBeforeQuit) {
@@ -39,8 +40,8 @@ window.onload = function () {
         });
 
         btnsEnregistrer[i].addEventListener("click", function () {
-            btnsEnregistrer[i].style.boxShadow = "0 0 0 0 red";
-            saveBeforeQuit=false;
+            btnsEnregistrer[i].style.removeProperty("box-shadow");
+            saveBeforeQuit = false;
             apply(i);
         });
 
@@ -54,9 +55,12 @@ window.onload = function () {
     function addtoL(val, liste, i) {
         val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "");
         if (entreeUrlConforme(val) && !(liste.innerHTML.includes(val))) {
+            entrees[i].style.removeProperty("box-shadow");
             let row = liste.insertRow(-1);
             row.insertCell(0).appendChild(document.createTextNode(val));
             ajoutFonctionRetirer(row, i);
+        } else {
+            entrees[i].style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
         }
     }
 
@@ -69,41 +73,51 @@ window.onload = function () {
         listes = [listeNoire, listeBlanche];
     }
 
-    function resetData() {
-        chrome.storage.sync.set({ donneesListeNoire: "" });
-        chrome.storage.sync.set({ donneesListeBlanche: "" });
-    }
+    // function resetData() {
+    //     chrome.storage.sync.set({ donneesListeNoire: "" });
+    //     chrome.storage.sync.set({ donneesListeBlanche: "" });
+    // }
 
     function apply(i) {
         update();
         indiceSauvegarde[i][Object.keys(indiceSauvegarde[i])[0]] = listes[i].innerHTML;
+        uRLS[i][Object.keys(uRLS[i])[0]] = listes[i].innerHTML.replace(/<\/?tbody>|<td>|<\/?tr>/g, "").split("</td>").slice(0, -1);
         save(i);
     }
 
     function save(i) {
         chrome.storage.sync.set(indiceSauvegarde[i]);
+        chrome.storage.sync.set(uRLS[i]);
     }
 
     function charger(i) {
         chrome.storage.sync.get(Object.keys(indiceSauvegarde[i])[0], function (donnees) {
-            let string = donnees[Object.keys(indiceSauvegarde[i])[0]];
-            listes[i].innerHTML = string;
+            listes[i].innerHTML = donnees[Object.keys(indiceSauvegarde[i])[0]];;
+        });
+
+        chrome.storage.sync.get(Object.keys(uRLS[i])[0], function (tableau) {
+            uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
         });
 
     }
 
     function initEventBtnAjout(i) {
         update();
+        let lengthBefore = listes[i].innerHTML.replace(/<\/?tbody>|<td>|<\/?tr>/g, "").split("</td>").slice(0, -1).length;
         addtoL(entrees[i].value, listes[i], i);
         entrees[i].value = "";
-        btnsEnregistrer[i].style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
-        saveBeforeQuit=true;
+        let change = lengthBefore !== listes[i].innerHTML.replace(/<\/?tbody>|<td>|<\/?tr>/g, "").split("</td>").slice(0, -1).length;
+        if (change) {
+            btnsEnregistrer[i].style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
+            saveBeforeQuit = true;
+        }
+
     }
 
     function initFonctionRetirer(i) {
         for (let j = 0, trlength = listes[i].rows.length; j < trlength; j++) {
             ajoutFonctionRetirer(listes[i].rows[j], i);
-            apply(i);
+            // apply(i);
         }
     }
 
@@ -111,7 +125,7 @@ window.onload = function () {
         row.addEventListener("click", function () {
             row.parentNode.removeChild(row);
             btnsEnregistrer[i].style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
-            saveBeforeQuit=true;
+            saveBeforeQuit = true;
         });
     }
 

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>The Time Companion Menu</title>
     <link rel="stylesheet" href="options.css" />
+    <script src="setlist.js"></script>
     <script src="options.js"></script>
 </head>
 
@@ -15,34 +16,38 @@
         <div class="middle">
 
             <label>
-                <input type="radio" name="radio" checked />
+                <input type="radio" name="radio" id=l1 />
                 <div class="front-end box">
                     <span>Niveau 1</span>
                     <span description>Notification</span>
+                    <span description temps></span>
                 </div>
             </label>
 
             <label>
-                <input type="radio" name="radio" />
+                <input type="radio" name="radio" id=l2 />
                 <div class="front-end box">
                     <span>Niveau 2</span>
                     <span description>Entrer un texte pour continuer</span>
+                    <span description temps></span>
                 </div>
             </label>
 
             <label>
-                <input type="radio" name="radio" />
+                <input type="radio" name="radio" id=l3 />
                 <div class="front-end box">
                     <span>Niveau 3</span>
                     <span description>Blocage</span>
+                    <span description temps></span>
                 </div>
             </label>
 
             <label>
-                <input type="radio" name="radio" />
+                <input type="radio" name="radio" id=l4 />
                 <div class="front-end box">
                     <span>Niveau 4</span>
                     <span description>Fermeture de Chrome</span>
+                    <span description temps></span>
                 </div>
             </label>
 
@@ -69,13 +74,13 @@
     </section>
 
     <section droite>
-        
+
         <h1>The T<span class=sablier>⧗</span>me Companion ⌛</h1>
 
         <div class=boutons>
 
-            <a href="setlist.html" class="btn btn-3">Options</a> 
-            <a href="horaire.html" class="btn btn-3">Horaire</a> 
+            <a href="setlist.html" class="btn btn-3">Options</a>
+            <a href="horaire.html" class="btn btn-3">Horaire</a>
 
         </div>
 
