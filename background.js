@@ -1,71 +1,168 @@
 setTimeout(() => {
 
+    var url;  //url de la page actuelle
+    var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
+    var listesUrl;  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
+    var tempsParUrl = {};  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
+    var nombreDeTempsStockes;
+
     TimeMe.initialize({
         currentPageName: "my-home-page", // current page
         idleTimeoutInSeconds: 30 // seconds
     });
 
+    update();
 
-var url;
+    //changement du tab selectionné parmis les tabs ouverts
+    chrome.tabs.onActivated.addListener(function (activeInfo) {
+        chrome.tabs.get(activeInfo.tabId, function (tab) {
+            url = tab.url;
+            if (urlValide(url)) {
+                console.log("start by onActivated");
+                (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
+                setTimeout(() => {
+                    // console.log(url, timeSpent);
+                    // storeData(url, timeSpent);
+                    console.log(tempsParUrl.times);
+                });
 
-//changement du tab selectionné parmis les tabs ouverts
-chrome.tabs.onActivated.addListener(function (activeInfo) {
-    chrome.tabs.get(activeInfo.tabId, function (tab) {
-        url = tab.url;
-        if (urlValide(url)) {
-            // console.log("start by onActivated");
-            console.log(url);
-            askForTimeSpent();
-            // console.log("end by onActivated");
-        }
-    });
-});
-
-//changement à l'intérieur du tab actif (raffraichir ou nouveau lien)
-chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
-    if (tab.active && change.url) {
-        url = change.url;
-        if (urlValide(url)) {
-            // console.log("start by onUpdated");
-            console.log(url);
-            askForTimeSpent();
-            // console.log("end by onUpdated");
-        }
-    }
-});
-
-function urlValide(val) {
-    var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/gm;
-    return regexURL.test(val);
-}
-
-//detecter le temps qu'a pris un tab avant d'être fermé
-chrome.runtime.onMessage.addListener(
-    function (message, sender, sendResponse) {
-        // console.log("start by beforeUnload");
-        console.log(sender.tab.url);
-        console.log(message.timeElapsed);
-        // console.log("start by beforeUnload");
-        // sendResponse({ responseMessage: "goodbye" });
-    });
-
-
-// setInterval(() => {
-//     // console.log(TimeMe.getTimeOnCurrentPageInSeconds());
-//     // if (typeof url !== 'undefined') {
-//     //     console.log(url);
-//     // }
-// }, 1000);
-
-function askForTimeSpent() {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
-            if (typeof response !== 'undefined') {
-                console.log(response.timeElapsed);
+                // console.log("end by onActivated");
             }
         });
     });
-}
+
+    //################################################################################################################################
+    //changement à l'intérieur du tab actif (raffraichir ou nouveau lien)
+    chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
+        if (tab.active && change.url) {
+            url = change.url;
+            if (urlValide(url)) {
+                console.log("start by onUpdated");
+                (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
+                // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
+                setTimeout(() => {
+                    // storeData(url, timeSpent);
+                    console.log(tempsParUrl.times);
+                    // console.log(timeSpent);
+                });
+
+                // console.log("end by onUpdated");
+            }
+        }
+    });
+
+    function urlValide(val) {
+        var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/gm;
+        return regexURL.test(val);
+    }
+
+    //detecter le temps qu'a pris un tab avant d'être fermé
+    // Message reçu du content script
+    //##############################################################################################
+    chrome.runtime.onMessage.addListener(
+        function (message, sender, sendResponse) {
+            // console.log("start by beforeUnload");
+            if (message.request == "sendMePreviousTimeData") {
+
+                console.log("sending previous time...");
+                assurerInitialisationTableauTemps();
+                let urlIsPresent = lookForURL(sender.tab.url) !== -1;
+                sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
+            } else {
+                console.log("start by runtime");
+                console.log("stored new data..!");
+                storeData(sender.tab.url, message.timeElapsed);
+                console.log(tempsParUrl.times);
+            }
+        });
+
+
+    // Demander au content script de donner combien de temps s'est écoulé
+    function askForTimeSpent() {
+        return new Promise((resolve, reject) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
+                    if (typeof response !== 'undefined') {
+                        // console.log(response.timeElapsed);
+                        console.log("TIME SPENT: ", response.timeElapsed)
+                        console.log("Good time");
+                        resolve(response.timeElapsed);
+                    }
+                    else {
+                        assurerInitialisationTableauTemps();
+                        console.log("bad time");
+                        reject(0);
+                    }
+                });
+            });
+            // console.log("datatoreturn: ", theTimeSpent)
+        });
+    }
+
+
+    function getHostnameFromRegex(url) {
+        let matches = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im);
+        return matches && matches[1];
+    }
+
+    chrome.storage.onChanged.addListener(function (changes, areaName) {
+        update();
+    });
+
+    function update() {
+        chrome.storage.sync.get(["urlsListeNoire", "urlsListeBlanche", "niveauSeverite", "proprietesDeRappel"], function (donnees) {
+            donneesSeverite = [parseInt(donnees.niveauSeverite[1]), donnees.proprietesDeRappel[0], donnees.proprietesDeRappel[1]];
+            listesUrl = [donnees.urlsListeNoire, donnees.urlsListeBlanche];
+        });
+    }
+
+    function lookForURL(url) {
+        let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+        for (let i = 0; i < tempsParUrl.times.length; i++) {
+            if (tempsParUrl.times[i][0] == checkedUrl) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function assurerInitialisationTableauTemps() {
+        if (!("times" in tempsParUrl)) {
+            tempsParUrl.times = [];
+        }
+    }
+
+    function storeData(url, temps, erreur = false) {
+
+        assurerInitialisationTableauTemps();
+
+        let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+
+        let trouve = false
+        for (let i = 0; i < tempsParUrl.times.length && !trouve; i++) {
+            if (tempsParUrl.times[i][0] == checkedUrl) {
+                let tempsTraite = ((!isNaN(temps)) ? temps : 0);
+                // if (memeFenetre && tempsTraite>tempsParUrl.times[i][1]) {
+                //     tempsTraite -= tempsParUrl.times[i][1];
+                // }
+                if (!erreur) {
+                    tempsParUrl.times[i][1] = tempsTraite;
+                }
+                trouve = true;
+            }
+        }
+        if (!trouve) {
+            tempsParUrl.times.push([checkedUrl, temps]);
+        }
+    }
 
 });
+
+
+    // setInterval(() => {
+    //     // console.log(TimeMe.getTimeOnCurrentPageInSeconds());
+    //     // if (typeof url !== 'undefined') {
+    //     //     console.log(url);
+    //     // }
+    // }, 1000);
 

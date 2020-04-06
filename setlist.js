@@ -28,6 +28,7 @@ window.onload = function () {
 
         charger(i);
         // resetData();
+        console.log(uRLS[i])
 
         btnsAjout[i].addEventListener("click", function () {
             initEventBtnAjout(i)

@@ -25,9 +25,9 @@ window.onload = function () {
             severite[i].parentElement.querySelector("span[temps]").innerHTML = "";
             setTimeout(() => {
                 let temps = parseFloat(prompt(messageEntreeTempsSeverite[i]));
-                if (!isNaN(temps) && (temps >= 0)) {
+                if (!isNaN(temps) && (temps >= 0) && (temps <= 500)) {
                     let debut = i < 2 ? confirm("Prévenir aussi au début de l'accès a un site sur la liste noire ?") : false;
-                    let textProprietes = "[" + (debut ? "début et " : "") + (i < 2 ? "chaque " : "apres ") + temps + " min]";
+                    let textProprietes = "[" + (debut ? "début et " : "") + (i < 2 ? "chaque " : "après ") + temps + " min]";
                     severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
                     chrome.storage.sync.set({ 
                         niveauSeverite: severite[i].id,
