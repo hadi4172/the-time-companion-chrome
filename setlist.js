@@ -93,11 +93,15 @@ window.onload = function () {
 
     function charger(i) {
         chrome.storage.sync.get(Object.keys(indiceSauvegarde[i])[0], function (donnees) {
-            listes[i].innerHTML = donnees[Object.keys(indiceSauvegarde[i])[0]];;
+            if (typeof donnees[Object.keys(indiceSauvegarde[i])[0]] !== "undefined") {
+                listes[i].innerHTML = donnees[Object.keys(indiceSauvegarde[i])[0]];
+            }
         });
 
         chrome.storage.sync.get(Object.keys(uRLS[i])[0], function (tableau) {
-            uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
+            if (typeof tableau[Object.keys(uRLS[i])[0]] !== "undefined") {
+                uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
+            }
         });
 
     }

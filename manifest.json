@@ -1,36 +1,40 @@
 {
-	"name" :"The Time Companion",
+	"name": "The Time Companion",
 	"manifest_version": 2,
-	"version" : "0.0.1",
-	"description" :"This extension will call you to order on a recurring basis, so that you does not lose sight of the essential goals of your life.",
-	"icons": 
-	{
+	"version": "0.6.8",
+	"description": "This extension will call you to order on a recurring basis, so that you does not lose sight of the essential goals of your life.",
+	"icons": {
 		"128": "icon128.png",
 		"48": "icon48.png",
 		"16": "icon16.png"
 	},
-	"browser_action" :
-	{
-		"default_icon" : "icon16.png",
-		"default_popup" :"popup.html"
+	"browser_action": {
+		"default_icon": "icon16.png",
+		"default_popup": "popup.html"
 	},
-
-	"content_scripts": [
-		{
-		  "matches": [
-			"<all_urls>"
-		  ],
-		  "js": ["library/timeme.min.js","content.js"]
-		}
-	  ],
-
-	"options_page" : "options.html",
-
+	"content_scripts": [{
+		"matches": ["<all_urls>"],
+		"css": ["css/font-awesome.min.css",
+			"library/AWN/style.css"
+		],
+		"js": [
+			"library/TimeMe/timeme.min.js",
+			"library/AWN/index.var.js",
+			"content.js"
+		]
+	}],
+	"options_page": "options.html",
 	"background": {
-		"scripts" : ["library/timeme.min.js","background.js"],
+		"scripts": [
+			"library/TimeMe/timeme.min.js",
+			"background.js"
+		],
 		"persistent": false
 	},
-
+	"web_accessible_resources": [
+		"fonts/*",
+		"library/AWN/style.css"
+	],
 	"permissions": [
 		"storage",
 		"tabs",

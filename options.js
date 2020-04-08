@@ -8,8 +8,12 @@ window.onload = function () {
     charger();
 
     chrome.storage.sync.get(["donneesListeNoire", "donneesListeBlanche"], function (donnees) {
-        listeNoire.innerHTML = donnees["donneesListeNoire"];
-        listeBlanche.innerHTML = donnees["donneesListeBlanche"];
+        if (typeof donnees["donneesListeNoire"] !== "undefined") {
+            listeNoire.innerHTML = donnees["donneesListeNoire"];
+        }
+        if (typeof donnees["donneesListeBlanche"] !== "undefined") {
+            listeBlanche.innerHTML = donnees["donneesListeBlanche"];
+        }
     });
 
 
@@ -29,11 +33,11 @@ window.onload = function () {
                     let debut = i < 2 ? confirm("Prévenir aussi au début de l'accès a un site sur la liste noire ?") : false;
                     let textProprietes = "[" + (debut ? "début et " : "") + (i < 2 ? "chaque " : "après ") + temps + " min]";
                     severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
-                    chrome.storage.sync.set({ 
+                    chrome.storage.sync.set({
                         niveauSeverite: severite[i].id,
                         texteDePropriete: textProprietes,
                         proprietesDeRappel: [temps, debut]
-                     });
+                    });
                 }
                 else {
                     alert("Entrée invalide!");
@@ -44,8 +48,8 @@ window.onload = function () {
     }
 
     function charger() {
-        chrome.storage.sync.get(["niveauSeverite","texteDePropriete"], function (niveauSeverite) {
-            if ((niveauSeverite["niveauSeverite"]||niveauSeverite["texteDePropriete"]) != null) {
+        chrome.storage.sync.get(["niveauSeverite", "texteDePropriete"], function (niveauSeverite) {
+            if ((niveauSeverite["niveauSeverite"] || niveauSeverite["texteDePropriete"]) != null) {
                 let checked = document.getElementById(niveauSeverite["niveauSeverite"]);
                 checked.checked = "checked";
                 checked.parentElement.querySelector("span[temps]").innerHTML = niveauSeverite["texteDePropriete"];

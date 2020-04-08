@@ -1,10 +1,44 @@
+chrome.runtime.onInstalled.addListener(function (object) {
+    chrome.tabs.create({ url: "options.html" }, function (tab) {
+    });
+});
+
 setTimeout(() => {
 
     var url;  //url de la page actuelle
     var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
-    var listesUrl;  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
+    var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
     var tempsParUrl = {};  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var nombreDeTempsStockes;
+    var dateOfLastSave;
+
+
+
+    chrome.storage.local.get("date", function (arg) {
+        console.log(arg.date);
+        let today = new Date();
+        today = JSON.stringify([today.getDate(), today.getMonth() + 1, today.getFullYear()]);
+        if (typeof arg.date !== "undefined") {
+            dateOfLastSave = arg["date"];
+            console.log("Données de date existantes");
+            if (today === dateOfLastSave) {
+                initTempsParUrl();
+                console.log("Chargé tempsparurl");
+            }
+        } else {
+            dateOfLastSave = today;
+            console.log("Pas de données dispo pour tempsparurl");
+        }
+    });
+
+    setTimeout(() => {
+        console.log("dateOfLastSave:", dateOfLastSave);
+        chrome.storage.local.set({ date: dateOfLastSave });
+    }, 1000);
+
+
+    showBytesInUse()
+
 
     TimeMe.initialize({
         currentPageName: "my-home-page", // current page
@@ -12,6 +46,17 @@ setTimeout(() => {
     });
 
     update();
+
+    //initialisation de tempsParUrl
+    function initTempsParUrl() {
+        chrome.storage.local.get("times", function (arg) {
+            if (typeof arg.times !== "undefined") {
+                tempsParUrl.times = arg.times;
+                console.log("TempsParURL:",tempsParUrl);
+            }
+        });
+    }
+
 
     //changement du tab selectionné parmis les tabs ouverts
     chrome.tabs.onActivated.addListener(function (activeInfo) {
@@ -61,6 +106,7 @@ setTimeout(() => {
     //##############################################################################################
     chrome.runtime.onMessage.addListener(
         function (message, sender, sendResponse) {
+            update();
             // console.log("start by beforeUnload");
             if (message.request == "sendMePreviousTimeData") {
 
@@ -68,6 +114,25 @@ setTimeout(() => {
                 assurerInitialisationTableauTemps();
                 let urlIsPresent = lookForURL(sender.tab.url) !== -1;
                 sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
+
+            } else if (message.request == "sendMeDonneesSeverite") {
+                console.log("listes:", listesUrl);
+                console.log("current url:", sender.tab.url)
+                console.log("IsitHere?", listesUrl[0].find(x => (sender.tab.url).includes(x)));
+                assurerInitialisationTableauTemps();
+                if (listesUrl[1].some(x => (sender.tab.url).includes(x))) {           //est dans la liste blanche
+                    sendResponse({ responseMessage: [0, 0, false] });
+                    console.log("is in whitelist");
+                } else if (listesUrl[0].some(x => (sender.tab.url).includes(x))) {    //est dans la liste noire
+                    console.log("is in blacklist");
+                    sendResponse({ responseMessage: donneesSeverite });
+                } else {                                                              //est nul part
+                    sendResponse({ responseMessage: [0, 0, false] });
+                    console.log("is not in a list");
+                }
+
+            } else if (message.lauchThisLevelNow == 4) {
+                ;
             } else {
                 console.log("start by runtime");
                 console.log("stored new data..!");
@@ -111,16 +176,24 @@ setTimeout(() => {
 
     function update() {
         chrome.storage.sync.get(["urlsListeNoire", "urlsListeBlanche", "niveauSeverite", "proprietesDeRappel"], function (donnees) {
-            donneesSeverite = [parseInt(donnees.niveauSeverite[1]), donnees.proprietesDeRappel[0], donnees.proprietesDeRappel[1]];
+            if (typeof (donnees.niveauSeverite || donnees.proprietesDeRappel) !== "undefined") {
+                donneesSeverite = [parseInt(donnees.niveauSeverite[1]), donnees.proprietesDeRappel[0], donnees.proprietesDeRappel[1]];
+            } else { donneesSeverite = [0, 0, false]; }
+
+
             listesUrl = [donnees.urlsListeNoire, donnees.urlsListeBlanche];
+
         });
     }
 
     function lookForURL(url) {
-        let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
-        for (let i = 0; i < tempsParUrl.times.length; i++) {
-            if (tempsParUrl.times[i][0] == checkedUrl) {
-                return i;
+
+        if (typeof url !== "undefined") {
+            let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+            for (let i = 0; i < tempsParUrl.times.length; i++) {
+                if (tempsParUrl.times[i][0] == checkedUrl) {
+                    return i;
+                }
             }
         }
         return -1;
@@ -130,6 +203,21 @@ setTimeout(() => {
         if (!("times" in tempsParUrl)) {
             tempsParUrl.times = [];
         }
+    }
+
+    function showBytesInUse() {
+        chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
+            console.log("SyncBytesInUse : " + bytesInUse);
+        });
+        chrome.storage.local.getBytesInUse(null, function (bytesInUse) {
+            console.log("LocalBytesInUse : " + bytesInUse);
+        });
+        chrome.storage.sync.get(null, function (arg) {
+            console.log("Obj in Sync", arg);
+        });
+        chrome.storage.local.get(null, function (arg) {
+            console.log("Obj in Local", arg);
+        });
     }
 
     function storeData(url, temps, erreur = false) {
@@ -142,9 +230,6 @@ setTimeout(() => {
         for (let i = 0; i < tempsParUrl.times.length && !trouve; i++) {
             if (tempsParUrl.times[i][0] == checkedUrl) {
                 let tempsTraite = ((!isNaN(temps)) ? temps : 0);
-                // if (memeFenetre && tempsTraite>tempsParUrl.times[i][1]) {
-                //     tempsTraite -= tempsParUrl.times[i][1];
-                // }
                 if (!erreur) {
                     tempsParUrl.times[i][1] = tempsTraite;
                 }
@@ -154,6 +239,9 @@ setTimeout(() => {
         if (!trouve) {
             tempsParUrl.times.push([checkedUrl, temps]);
         }
+        chrome.storage.local.set(tempsParUrl);
+
+        showBytesInUse();
     }
 
 });
