@@ -25,6 +25,7 @@ setTimeout(() => {
                 console.log("Chargé tempsparurl");
             } else {
                 dateOfLastSave = today;
+                chrome.storage.local.set(tempsParUrl);
                 console.log("Nouveau jour");
             }
         } else {

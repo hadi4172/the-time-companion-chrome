@@ -36,6 +36,7 @@ window.onload = function () {
             "Je dois bien utiliser mon temps pour réussir.",
             "La vie, ce n'est pas seulement s'amuser.",
             "Je suis sur de vouloir continuer.",
+            "Pour s'accomplir, il faut arrêter de parler et commencer à faire.",
             "J'ai installé cette extension pour m'améliorer dans ma vie.",
             "J'aime me sentir productif."
         ];
@@ -90,7 +91,7 @@ window.onload = function () {
 
                         let contenuDeLaBoite2 = `<div><p>Vous venez d'entrer sur un site dans la liste noire.</p><p style="text-align: center;">Entrez ce texte pour continuer :<br />
                 <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                <input id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></div>`;
+                <form autocomplete="off"><input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
 
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                         break;
@@ -144,7 +145,7 @@ window.onload = function () {
 
                     let contenuDeLaBoite2 = `<div><p>Vous êtes sur ce site depuis <strong>${tempsEnMinutesArrondi} minutes</strong>, aujourd'hui.</p><p style="text-align: center;">Entrez ce texte pour continuer :<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <input id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></div>`;
+                    <form autocomplete="off"> <input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
 
                     creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
 
