@@ -8,7 +8,7 @@ setTimeout(() => {
     var url;  //url de la page actuelle
     var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
     var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
-    var tempsParUrl = {};  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
+    var tempsParUrl = {times:[]};  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var dateOfLastSave;
 
 
@@ -111,7 +111,7 @@ setTimeout(() => {
             if (message.request == "sendMePreviousTimeData") {
 
                 console.log("sending previous time...");
-                assurerInitialisationTableauTemps();
+                //assurerInitialisationTableauTemps();
                 let urlIsPresent = lookForURL(sender.tab.url) !== -1;
                 sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
 
@@ -119,11 +119,11 @@ setTimeout(() => {
                 console.log("listes:", listesUrl);
                 console.log("current url:", sender.tab.url)
                 console.log("IsitHere?", listesUrl[0].find(x => (sender.tab.url).includes(x)));
-                assurerInitialisationTableauTemps();
+                //assurerInitialisationTableauTemps();
                 if (listesUrl[1].some(x => (sender.tab.url).includes(x))) {           //est dans la liste blanche
                     sendResponse({ responseMessage: [0, 0, false] });
                     console.log("is in whitelist");
-                } else if (listesUrl[0].some(x => (sender.tab.url).includes(x))) {    //est dans la liste noire
+                } else if (listesUrl[0].some(x => (sender.tab.url).includes(x)|| listesUrl[0].some(x=>x=="*.*"))) {    //est dans la liste noire
                     console.log("is in blacklist");
                     sendResponse({ responseMessage: donneesSeverite });
                 } else {                                                              //est nul part
@@ -195,7 +195,7 @@ setTimeout(() => {
                         resolve(response.timeElapsed);
                     }
                     else {
-                        assurerInitialisationTableauTemps();
+                        //assurerInitialisationTableauTemps();
                         console.log("bad time");
                         reject(0);
                     }
@@ -240,11 +240,15 @@ setTimeout(() => {
         return -1;
     }
 
-    function assurerInitialisationTableauTemps() {
-        if (!("times" in tempsParUrl)) {
-            tempsParUrl.times = [];
-        }
-    }
+    // function assurerInitialisationTableauTemps() {
+    //     if (!("times" in tempsParUrl)) {
+    //         tempsParUrl.times = [];
+    //     }
+    // }
+
+    // function regExpEscape(literal_string) {
+    //     return literal_string.replace(/[-[\]{}()+!<=:?.\/\\^$|#\s,]/g, '\\$&').replace(/\*/g,".*");
+    // }
 
     function showBytesInUse() {
         chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
@@ -263,7 +267,7 @@ setTimeout(() => {
 
     function storeData(url, temps, erreur = false) {
 
-        assurerInitialisationTableauTemps();
+        //assurerInitialisationTableauTemps();
 
         let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
 
