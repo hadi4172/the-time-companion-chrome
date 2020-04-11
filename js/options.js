@@ -22,7 +22,7 @@ window.onload = function () {
         "Entrer un texte pour continuer chaque [Entrer le nombre] minutes",
         "Bloquer la page après [Entrer le nombre] minutes",
         "Fermer le navigateur après [Entrer le nombre] minutes"
-    ]
+    ];
 
     for (let i = 0, length = severite.length; i < length; i++) {
         severite[i].addEventListener("click", function () {
@@ -65,4 +65,4 @@ window.onload = function () {
 
 
 
-}
+};

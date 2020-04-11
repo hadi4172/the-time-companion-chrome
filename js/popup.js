@@ -60,7 +60,7 @@ window.onload = function () {
 
         for (let i = 0; i < tempsParUrl.length; i++) {
             labels.push(tempsParUrl[i][0]);
-            data.push(fancyTimeFormat(tempsParUrl[i][1]))
+            data.push(fancyTimeFormat(tempsParUrl[i][1]));
             dataFormatted.push((~~(tempsParUrl[i][1] / 60 * 10)) / 10);
         }
 
@@ -89,4 +89,4 @@ window.onload = function () {
 
 
 
-}
+};

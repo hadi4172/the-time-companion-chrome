@@ -172,7 +172,7 @@ section {
 }
 
 .btn-3:active {
-    box-shadow: 0px 0px 10px 5px #ca1b15 inset;
+    box-shadow: 0 0 10px 5px #ca1b15 inset;
 }
 
 .btn-3[special] {

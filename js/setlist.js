@@ -21,14 +21,14 @@ window.onload = function () {
         if (saveBeforeQuit) {
             return 'You should save before quiting';
         };
-    }
+    };
 
 
     for (let i = 0, length = listes.length; i < length; i++) {
 
         charger(i);
         // resetData();
-        console.log(uRLS[i])
+        console.log(uRLS[i]);
 
         btnsAjout[i].addEventListener("click", function () {
             initEventBtnAjout(i)
@@ -138,4 +138,4 @@ window.onload = function () {
     }
 
 
-}
+};

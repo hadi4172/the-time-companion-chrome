@@ -1,7 +1,7 @@
 html {
   background-color: whitesmoke;
   overflow: hidden;
-  background-image: url("wallpaper.jpg");
+  background-image: url("../img/wallpaper.jpg");
   background-size: cover;
   overflow: auto;
 }
