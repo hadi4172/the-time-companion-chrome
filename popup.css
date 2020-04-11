@@ -1,6 +1,32 @@
-body{
-    width:200px;
-    /* background-image: url("popup.png") */
+a{
+  margin: 10px auto 0 auto;
+}
+
+strong{
+  font-size: medium;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+div{
+  text-align: center;
+  color: dimgray;
+}
+
+.titre{
+  margin-bottom: 10px;
+}
+
+.titre2{
+  margin-top: 10px;
+}
+
+table{
+  margin:0 auto 0 auto;
+  
+}
+
+td{
+  padding: 0 10px 0 10px;
 }
 
 .btn {

@@ -9,7 +9,6 @@ setTimeout(() => {
     var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
     var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
     var tempsParUrl = {};  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
-    var nombreDeTempsStockes;
     var dateOfLastSave;
 
 
@@ -24,6 +23,9 @@ setTimeout(() => {
             if (today === dateOfLastSave) {
                 initTempsParUrl();
                 console.log("Chargé tempsparurl");
+            } else {
+                dateOfLastSave = today;
+                console.log("Nouveau jour");
             }
         } else {
             dateOfLastSave = today;
@@ -52,7 +54,7 @@ setTimeout(() => {
         chrome.storage.local.get("times", function (arg) {
             if (typeof arg.times !== "undefined") {
                 tempsParUrl.times = arg.times;
-                console.log("TempsParURL:",tempsParUrl);
+                console.log("[TEMPS PAR URL]:", tempsParUrl.times);
             }
         });
     }
@@ -68,7 +70,7 @@ setTimeout(() => {
                 setTimeout(() => {
                     // console.log(url, timeSpent);
                     // storeData(url, timeSpent);
-                    console.log(tempsParUrl.times);
+                    console.log("[TEMPS PAR URL]:", tempsParUrl.times);
                 });
 
                 // console.log("end by onActivated");
@@ -76,7 +78,6 @@ setTimeout(() => {
         });
     });
 
-    //################################################################################################################################
     //changement à l'intérieur du tab actif (raffraichir ou nouveau lien)
     chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
         if (tab.active && change.url) {
@@ -87,7 +88,7 @@ setTimeout(() => {
                 // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
                 setTimeout(() => {
                     // storeData(url, timeSpent);
-                    console.log(tempsParUrl.times);
+                    console.log("[TEMPS PAR URL]:", tempsParUrl.times);
                     // console.log(timeSpent);
                 });
 
@@ -103,7 +104,6 @@ setTimeout(() => {
 
     //detecter le temps qu'a pris un tab avant d'être fermé
     // Message reçu du content script
-    //##############################################################################################
     chrome.runtime.onMessage.addListener(
         function (message, sender, sendResponse) {
             update();
@@ -130,14 +130,55 @@ setTimeout(() => {
                     sendResponse({ responseMessage: [0, 0, false] });
                     console.log("is not in a list");
                 }
+            } else if (message.setBadge) {
+                //Original source : https://stackoverflow.com/a/32168534/7551620
+                chrome.tabs.get(sender.tab.id, function (tab) {
+                    if (chrome.runtime.lastError) {
+                        return; // the prerendered tab has been nuked, happens in omnibox search
+                    }
+                    if (tab.index >= 0) { // tab is visible
+                        chrome.browserAction.setBadgeText({ tabId: tab.id, text: message.setBadge });
+                    } else { // prerendered tab, invisible yet, happens quite rarely
+                        var tabId = sender.tab.id, text = message.setBadge;
+                        chrome.webNavigation.onCommitted.addListener(function update(details) {
+                            if (details.tabId == tabId) {
+                                chrome.browserAction.setBadgeText({ tabId: tabId, text: text });
+                                chrome.webNavigation.onCommitted.removeListener(update);
+                            }
+                        });
+                    }
+                });
 
-            } else if (message.lauchThisLevelNow == 4) {
-                ;
+            } else if (message.mute == 0) {
+
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    var mutedInfo = tabs[0].mutedInfo;
+                    if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
+                });
+
+            } else if (message.mute == 1) {  // Mute sounds
+
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    var mutedInfo = tabs[0].mutedInfo;
+                    if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
+                });
+
+            } else if (message.lauchThisLevelNow == 3) {   //Close tab
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.remove(tabs[0].id);
+                });
+            } else if (message.lauchThisLevelNow == 4) {   //Close chrome
+                console.log("Entered Message.launchThisNow");
+                chrome.tabs.query({}, function (tabs) {
+                    for (var i = 0; i < tabs.length; i++) {
+                        chrome.tabs.remove(tabs[i].id);
+                    }
+                });
             } else {
                 console.log("start by runtime");
                 console.log("stored new data..!");
                 storeData(sender.tab.url, message.timeElapsed);
-                console.log(tempsParUrl.times);
+                console.log("[TEMPS PAR URL]:", tempsParUrl.times);
             }
         });
 

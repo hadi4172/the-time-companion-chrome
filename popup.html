@@ -3,12 +3,17 @@
 	<head>
 		<title>Hello World</title>
 		<meta charset="UTF-8">
-		<!-- <script src="jquery.min.js"></script> -->
+		<script src="library/Chart/Chart.min.js"></script>
 		<script src="popup.js"></script>
 		<link rel="stylesheet" type="text/css" href="popup.css">
 	</head>
 
 	<body>
-		<a href="options.html" target="_blank" class="btn btn-3">Réglages</a> 
+		<div class=titre><strong >Temps (en min) par site web aujourd'hui</strong></div>
+		
+		<canvas id="myChart" width="270" height="270"></canvas>
+		<div class=titre2><span>Sites les plus consultés</span></div>
+		<p id="websites"><table><tbody></tbody></table><p>
+		<a style="margin: 10px auto 0 auto;" href="options.html" target="_blank" class="btn btn-3">Réglages</a> 
 	</body>
 </html>
