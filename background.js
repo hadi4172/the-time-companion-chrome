@@ -8,7 +8,7 @@ setTimeout(() => {
     var url;  //url de la page actuelle
     var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
     var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
-    var tempsParUrl = {times:[]};  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
+    var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var dateOfLastSave;
 
 
@@ -71,7 +71,7 @@ setTimeout(() => {
                 setTimeout(() => {
                     // console.log(url, timeSpent);
                     // storeData(url, timeSpent);
-                    console.log("[TEMPS PAR URL]:", tempsParUrl.times);
+                    console.log("[TEMPS PAR URL ONACTIVATED]:", tempsParUrl.times.slice().toString());
                 });
 
                 // console.log("end by onActivated");
@@ -84,12 +84,12 @@ setTimeout(() => {
         if (tab.active && change.url) {
             url = change.url;
             if (urlValide(url)) {
-                console.log("start by onUpdated");
-                (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
+                console.log(`start by onUpdated`);
+                askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
                 // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
                 setTimeout(() => {
                     // storeData(url, timeSpent);
-                    console.log("[TEMPS PAR URL]:", tempsParUrl.times);
+                    console.log("[TEMPS PAR URL ONUPDATED]:", tempsParUrl.times.slice().toString());
                     // console.log(timeSpent);
                 });
 
@@ -114,6 +114,7 @@ setTimeout(() => {
                 console.log("sending previous time...");
                 //assurerInitialisationTableauTemps();
                 let urlIsPresent = lookForURL(sender.tab.url) !== -1;
+                console.log('___Sent time___:', tempsParUrl.times[lookForURL(sender.tab.url)][1], sender.tab.url);
                 sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
 
             } else if (message.request == "sendMeDonneesSeverite") {
@@ -121,10 +122,10 @@ setTimeout(() => {
                 console.log("current url:", sender.tab.url)
                 console.log("IsitHere?", listesUrl[0].find(x => (sender.tab.url).includes(x)));
                 //assurerInitialisationTableauTemps();
-                if (listesUrl[1].some(x => (sender.tab.url).includes(x))) {           //est dans la liste blanche
+                if (listesUrl[1].some(x => (sender.tab.url).includes(x))|| listesUrl[1].some(x => x == "*.*")) {           //est dans la liste blanche
                     sendResponse({ responseMessage: [0, 0, false] });
                     console.log("is in whitelist");
-                } else if (listesUrl[0].some(x => (sender.tab.url).includes(x)|| listesUrl[0].some(x=>x=="*.*"))) {    //est dans la liste noire
+                } else if (listesUrl[0].some(x => (sender.tab.url).includes(x) || listesUrl[0].some(x => x == "*.*"))) {    //est dans la liste noire
                     console.log("is in blacklist");
                     sendResponse({ responseMessage: donneesSeverite });
                 } else {                                                              //est nul part
@@ -175,11 +176,20 @@ setTimeout(() => {
                         chrome.tabs.remove(tabs[i].id);
                     }
                 });
-            } else {
+            } else if (message.timeElapsed) {  //partie problématique
                 console.log("start by runtime");
                 console.log("stored new data..!");
-                storeData(sender.tab.url, message.timeElapsed);
-                console.log("[TEMPS PAR URL]:", tempsParUrl.times);
+                console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0])
+                setTimeout(() => {
+                    console.log("[[SENDER URL FUTURE]] (listener) :" + sender.tab.url, message.timeElapsed[0])
+                });
+                if (getHostnameFromRegex(sender.tab.url) === getHostnameFromRegex(message.timeElapsed[1])) {
+                    storeData(sender.tab.url, message.timeElapsed[0]);
+                    console.log('URLS SIMILAIRES :)');
+                } else {
+                    console.log('Erreur URLS Differents:', sender.tab.url, message.timeElapsed[1]);
+                }
+                console.log("[TEMPS PAR URL TIMEELAPSED]:", tempsParUrl.times.slice().toString());
             }
         });
 
@@ -190,10 +200,15 @@ setTimeout(() => {
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
                     if (typeof response !== 'undefined') {
-                        // console.log(response.timeElapsed);
-                        console.log("TIME SPENT: ", response.timeElapsed)
-                        console.log("Good time");
-                        resolve(response.timeElapsed);
+                        if (typeof response.timeElapsed[0] !== 'undefined') {
+                            console.log("TIME SPENT: ", response.timeElapsed[0])
+                            console.log("Good time");
+                            resolve(response.timeElapsed[0]);
+                        }
+                        else {
+                            console.log("bad time");
+                            reject(0);
+                        }
                     }
                     else {
                         //assurerInitialisationTableauTemps();
@@ -217,15 +232,20 @@ setTimeout(() => {
     });
 
     function update() {
-        chrome.storage.sync.get(["urlsListeNoire", "urlsListeBlanche", "niveauSeverite", "proprietesDeRappel"], function (donnees) {
-            if (typeof (donnees.niveauSeverite || donnees.proprietesDeRappel) !== "undefined") {
+        chrome.storage.sync.get(["niveauSeverite", "proprietesDeRappel"], function (donnees) {
+            if (typeof donnees.niveauSeverite !== "undefined" && typeof donnees.proprietesDeRappel !== "undefined") {
                 donneesSeverite = [parseInt(donnees.niveauSeverite[1]), donnees.proprietesDeRappel[0], donnees.proprietesDeRappel[1]];
             } else { donneesSeverite = [0, 0, false]; }
 
-
-            listesUrl = [donnees.urlsListeNoire, donnees.urlsListeBlanche];
-
         });
+
+        chrome.storage.local.get(["urlsListeNoire", "urlsListeBlanche"], function (donnees) {
+            listesUrl = [
+                typeof donnees.urlsListeNoire !== "undefined" ? donnees.urlsListeNoire : []
+                , typeof donnees.urlsListeBlanche !== "undefined" ? donnees.urlsListeBlanche : []
+            ];
+        });
+
     }
 
     function lookForURL(url) {
@@ -234,6 +254,7 @@ setTimeout(() => {
             let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
             for (let i = 0; i < tempsParUrl.times.length; i++) {
                 if (tempsParUrl.times[i][0] == checkedUrl) {
+                    console.log('lookforurlResult:', url, checkedUrl);
                     return i;
                 }
             }
@@ -268,26 +289,32 @@ setTimeout(() => {
 
     function storeData(url, temps, erreur = false) {
 
-        //assurerInitialisationTableauTemps();
+        console.log('Preparing to store data.........');
 
-        let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+        if (urlValide(url)) {
 
-        let trouve = false
-        for (let i = 0; i < tempsParUrl.times.length && !trouve; i++) {
-            if (tempsParUrl.times[i][0] == checkedUrl) {
-                let tempsTraite = ((!isNaN(temps)) ? temps : 0);
-                if (!erreur) {
-                    tempsParUrl.times[i][1] = tempsTraite;
+            //assurerInitialisationTableauTemps();
+
+            let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+
+            let trouve = false
+            for (let i = 0; i < tempsParUrl.times.length && !trouve; i++) {
+                if (tempsParUrl.times[i][0] == checkedUrl) {
+                    let tempsTraite = ((!isNaN(temps)) ? temps : 0);
+                    if (!erreur) {
+                        tempsParUrl.times[i][1] = tempsTraite;
+                        console.log('______storing_sucess..._____');
+                    } else { console.log('____________failed to store data_________ '); }
+                    trouve = true;
                 }
-                trouve = true;
             }
-        }
-        if (!trouve) {
-            tempsParUrl.times.push([checkedUrl, temps]);
-        }
-        chrome.storage.local.set(tempsParUrl);
+            if (!trouve) {
+                tempsParUrl.times.push([checkedUrl, temps]);
+            }
+            chrome.storage.local.set(tempsParUrl);
 
-        showBytesInUse();
+            showBytesInUse();
+        }
     }
 
 });

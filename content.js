@@ -251,7 +251,7 @@ window.onload = function () {
 
             if (typeof chrome.runtime !== 'undefined') {
 
-                chrome.runtime.sendMessage({ timeElapsed: TimeMe.getTimeOnCurrentPageInSeconds() + previousTime });
+                chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime),window.location.href] });
                 console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
             }
             return;
@@ -259,7 +259,7 @@ window.onload = function () {
 
         document.addEventListener("visibilitychange", function () {
             if (document.hidden) {
-                chrome.runtime.sendMessage({ timeElapsed: TimeMe.getTimeOnCurrentPageInSeconds() + previousTime });
+                chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime),window.location.href] });
                 console.log("Browser tab is hidden")
                 console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
             }

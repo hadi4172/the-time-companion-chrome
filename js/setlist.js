@@ -91,7 +91,7 @@ window.onload = function () {
 
     function save(i) {
         chrome.storage.sync.set(indiceSauvegarde[i]);
-        chrome.storage.sync.set(uRLS[i]);
+        chrome.storage.local.set(uRLS[i]);
     }
 
     function charger(i) {
@@ -101,7 +101,7 @@ window.onload = function () {
             }
         });
 
-        chrome.storage.sync.get(Object.keys(uRLS[i])[0], function (tableau) {
+        chrome.storage.local.get(Object.keys(uRLS[i])[0], function (tableau) {
             if (typeof tableau[Object.keys(uRLS[i])[0]] !== "undefined") {
                 uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
             }

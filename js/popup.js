@@ -11,24 +11,32 @@ window.onload = function () {
         });
     }
 
-    function selectionSort(arr){
-        var minIdx, temp, 
+    function selectionSort(arr) {
+        var minIdx, temp,
             len = arr.length;
-        for(var i = 0; i < len; i++){
-          minIdx = i;
-          for(var  j = i+1; j<len; j++){
-             if(arr[j][1]>arr[minIdx][1]){
-                minIdx = j;
-             }
-          }
-          temp = arr[i];
-          arr[i] = arr[minIdx];
-          arr[minIdx] = temp;
+        for (var i = 0; i < len; i++) {
+            minIdx = i;
+            for (var j = i + 1; j < len; j++) {
+                if (arr[j][1] > arr[minIdx][1]) {
+                    minIdx = j;
+                }
+            }
+            temp = arr[i];
+            arr[i] = arr[minIdx];
+            arr[minIdx] = temp;
         }
         return arr;
-      }
+    }
 
-      function fancyTimeFormat(time) {
+    function obtenirRepartitionEnPourcentage(tableau) {
+        let total = 0;
+        for (let i = 0, length = tableau.length; i < length; i++) {
+            total += Math.abs(tableau[i]);
+        }
+        return tableau.map((x) => { return total != 0 ? ~~((x / total)*100*100)/100 : tableau })
+    }
+
+    function fancyTimeFormat(time) {
         //Original Source: https://stackoverflow.com/a/11486026/7551620
 
         // Hours, minutes and seconds
@@ -56,12 +64,12 @@ window.onload = function () {
         let data = [];
         let dataFormatted = [];
         let labels = [];
-        let backgroundColors = ["#FE0008","#FF9C00","#F5FC00","#3CF10E","#2EF87D","#20FFE4","#0F88F2","#022DFF","#C528FF","#FD019C"];
+        let backgroundColors = ["#FE0008", "#FF9C00", "#F5FC00", "#3CF10E", "#2EF87D", "#20FFE4", "#0F88F2", "#022DFF", "#C528FF", "#FD019C"];
 
         for (let i = 0; i < tempsParUrl.length; i++) {
             labels.push(tempsParUrl[i][0]);
             data.push(fancyTimeFormat(tempsParUrl[i][1]));
-            dataFormatted.push((~~(tempsParUrl[i][1] / 60 * 10)) / 10);
+            dataFormatted.push(tempsParUrl[i][1]);
         }
 
         let website = document.querySelector("tbody");
@@ -70,18 +78,18 @@ window.onload = function () {
             type: 'doughnut',
             data: {
                 datasets: [{
-                    data: dataFormatted,
+                    data: obtenirRepartitionEnPourcentage(dataFormatted),
                     backgroundColor: backgroundColors
                 }],
-                labels: labels
+                labels: labels.map(x=>x+=" (%) ")
             },
             options: { legend: { display: false, position: 'bottom' } }
         });
 
         setTimeout(() => {
 
-            for (let i = 0, length = labels.length>10?10:labels.length; i < length; i++) {
-                website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>`+labels[i] + "</td><td> " + data[i] + "</td></tr>");
+            for (let i = 0, length = labels.length > 10 ? 10 : labels.length; i < length; i++) {
+                website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
             }
         });
 
