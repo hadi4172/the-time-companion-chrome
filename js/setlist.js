@@ -9,6 +9,25 @@ window.onload = function () {
     var btnEnregistrerLN = document.querySelector("#saveblacklist");
     var btnEnregistrerLB = document.querySelector("#savewhitelist");
 
+    document.querySelector("#lntitre").innerHTML = chrome.i18n.getMessage("setlist_listenoire");
+    document.querySelector("#lbtitre").innerHTML = chrome.i18n.getMessage("setlist_listeblanche");
+    document.querySelector("#lntitre + p").innerHTML = chrome.i18n.getMessage("setlist_listenoire_description");
+    document.querySelector("#lbtitre + p").innerHTML = chrome.i18n.getMessage("setlist_listeblanche_description");
+    document.querySelector("#return").innerHTML = chrome.i18n.getMessage("setlist_retour_btn");
+
+    entreeUrlLN.placeholder = chrome.i18n.getMessage("setlist_inputbar_placeholder");
+    entreeUrlLB.placeholder = chrome.i18n.getMessage("setlist_inputbar_placeholder");
+    btnAjoutLN.innerHTML = chrome.i18n.getMessage("setlist_addurl_btn");
+    btnAjoutLB.innerHTML = chrome.i18n.getMessage("setlist_addurl_btn");
+    btnEnregistrerLN.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
+    btnEnregistrerLB.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
+
+    for (let i = 0, length = ["ch3","ch4","ch5","ch6"].length; i < length; i++) {
+        let checkbox = document.querySelector(`label[for=${["ch3","ch4","ch5","ch6"][i]}]`);
+        checkbox.innerHTML = chrome.i18n.getMessage("setlist_checkboxes_disabledistractionson")+checkbox.innerHTML;
+    }
+    
+
     var listes = [listeNoire, listeBlanche];
     var entrees = [entreeUrlLN, entreeUrlLB];
     var btnsAjout = [btnAjoutLN, btnAjoutLB];
@@ -19,7 +38,7 @@ window.onload = function () {
 
     window.onbeforeunload = function (e) {
         if (saveBeforeQuit) {
-            return 'You should save before quiting';
+            return chrome.i18n.getMessage("setlist_onbeforeunload");
         };
     };
 

@@ -13,13 +13,12 @@
 
         <section gauche>
 
-            <h1>Liste noire</h1>
-            <p description>Mettre ici les sites distrayants.
-                Pour inclure tous les sites web, écrire *.* </p>
+            <h1 id=lntitre></h1>
+            <p description></p>
 
             <div inputbar>
                 <input type="url" id=inputurlbl placeholder="Entrez une url (ex: youtube.com)" />
-                <a id="addtoblacklist" class="btn btn-3">Ajouter</a>
+                <a id="addtoblacklist" class="btn btn-3"></a>
             </div>
 
             <div class=conteneurdetableau>
@@ -28,7 +27,7 @@
 
             <div inputbar>
                 <input type="text" class=inputlistname placeholder="Nom de la liste (ex:distractions)" />
-                <a id="saveblacklist" class="btn btn-3 savebtn">Enregistrer</a>
+                <a id="saveblacklist" class="btn btn-3 savebtn"></a>
             </div>
 
         </section>
@@ -36,14 +35,12 @@
 
 
         <section milieu>
-            <h1>Liste blanche</h1>
-            <p description>Permet de ne pas prendre en compte une partie spécifique incluse dans la liste noire.
-                Également très
-                utile pour "autoriser tout sauf:"</p>
+            <h1 id=lbtitre></h1>
+            <p description></p>
 
             <div inputbar>
                 <input type="url" id=inputurlwl placeholder="Entrez une url (ex: youtube.com)" />
-                <a id="addtowhitelist" class="btn btn-3">Ajouter</a>
+                <a id="addtowhitelist" class="btn btn-3"></a>
             </div>
 
             <div class=conteneurdetableau>
@@ -53,7 +50,7 @@
 
             <div inputbar>
                 <input type="text" class=inputlistname placeholder="Nom de la liste (ex:distractions)" />
-                <a id="savewhitelist" class="btn btn-3 savebtn">Enregistrer</a>
+                <a id="savewhitelist" class="btn btn-3 savebtn"></a>
             </div>
 
         </section>
@@ -66,17 +63,17 @@
             The T<span class=sablier>⧗</span>me Companion
         </h1>
         <div checks>
-            <input type=checkbox id=ch1> <label for="ch1"> Redirection lors du niveau 3 </label> <br>
+            <!-- <input type=checkbox id=ch1> <label for="ch1"> Redirection lors du niveau 3 </label> <br>
             <input type=checkbox id=ch2> <label for="ch2"> Autoriser le son du site web lors du niveau 2 et
-                3</label><br>
-            <input type=checkbox id=ch3> <label for="ch3"> Désactiver distractions sur Youtube </label><br>
-            <input type=checkbox id=ch4> <label for="ch4"> Désactiver distractions sur Wikipedia </label><br>
-            <input type=checkbox id=ch5> <label for="ch5"> Désactiver distractions sur Quora </label><br>
-            <input type=checkbox id=ch6> <label for="ch6"> Désactiver distractions sur Reddit </label><br>
+                3</label><br> -->
+            <input type=checkbox id=ch3> <label for="ch3"> Youtube </label><br>
+            <input type=checkbox id=ch4> <label for="ch4"> Wikipedia </label><br>
+            <input type=checkbox id=ch5> <label for="ch5"> Quora </label><br>
+            <input type=checkbox id=ch6> <label for="ch6"> Reddit </label><br>
         </div>
 
         <div id=optionbtn>
-            <a href="options.html" id="return" class="btn btn-3" special>Retour</a>
+            <a href="options.html" id="return" class="btn btn-3" special></a>
             <a id="editlist" class="btn btn-3" special>Modifier une liste</a>
         </div>
 

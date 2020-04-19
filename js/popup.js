@@ -1,5 +1,9 @@
 window.onload = function () {
 
+    document.querySelector(`.titre`).innerHTML = chrome.i18n.getMessage(`popup_titre`);
+    document.querySelector(`.titre2`).innerHTML = chrome.i18n.getMessage(`popup_siteslesplusconsultes`);
+    document.querySelector(`a[href="options.html"]`).innerHTML = chrome.i18n.getMessage(`popup_reglages_btn`);
+
     var tempsParUrl;
 
     function initTempsParUrl() {
@@ -97,7 +101,7 @@ window.onload = function () {
                 website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
             }
             website.innerHTML += ("<tr><td style='color:dimgrey;'>------------------</td></tr>");
-            website.innerHTML += (`<tr><td><span style="color:dimgrey; font-weight:bold;"> Total: </span>` + "</td><td> " + fancyTimeFormat(calculerTempsTotal(dataUnformatted)) + "</td></tr>");
+            website.innerHTML += (`<tr><td><span style="color:dimgrey; font-weight:bold;"> ${chrome.i18n.getMessage("popup_total")}: </span>` + "</td><td> " + fancyTimeFormat(calculerTempsTotal(dataUnformatted)) + "</td></tr>");
         });
 
     }, 500);

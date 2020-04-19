@@ -19,11 +19,11 @@ window.onload = function () {
         var attributsModal = {
             maxNotifications: 2,
             labels: {
-                warning: "Rappel",
-                alert: "Attention!",
-                confirm: "Attention!",
-                confirmOk: "Continuer",
-                confirmCancel: "Quitter"
+                warning: chrome.i18n.getMessage("content_attributmodal_warning"),
+                alert: chrome.i18n.getMessage("content_attributmodal_alert"),
+                confirm: chrome.i18n.getMessage("content_attributmodal_confirm"),
+                confirmOk: chrome.i18n.getMessage("content_attributmodal_confirmOk"),
+                confirmCancel: chrome.i18n.getMessage("content_attributmodal_confirmCancel")
             },
             durations: {
                 warning: 0
@@ -33,18 +33,11 @@ window.onload = function () {
             }
         }
 
-        var texteAEntrer = [
-            "Je ne dois pas perdre mon temps.",
-            "Mon temps est important.",
-            "Je suis quelqu'un de productif",
-            "Je sais que ce que je fait actuellement est important.",
-            "Je dois bien utiliser mon temps pour réussir.",
-            "La vie, ce n'est pas seulement s'amuser.",
-            "Je suis sur de vouloir continuer.",
-            "Pour s'accomplir, il faut arrêter de parler et commencer à faire.",
-            "J'ai installé cette extension pour m'améliorer dans ma vie.",
-            "J'aime me sentir productif."
-        ];
+        var texteAEntrer = [];
+
+        for (let i = 0; i < 10; i++) {
+            texteAEntrer.push(chrome.i18n.getMessage(`content_texteaentrer_${i+1}`))
+        }
 
         var notifier = new AWN(attributsModal);
 
@@ -89,12 +82,12 @@ window.onload = function () {
 
             if (lancerSeveriteDuDebut) {
                 switch (niveauDeSeverite) {
-                    case 1: notifier.warning("Vous venez d'entrer sur un site dans la liste noire."); break;
+                    case 1: notifier.warning(chrome.i18n.getMessage("content_notifier_debut")); break;
                     case 2:
 
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
 
-                        let contenuDeLaBoite2 = `<div><p>Vous venez d'entrer sur un site dans la liste noire.</p><p style="text-align: center;">Entrez ce texte pour continuer :<br />
+                        let contenuDeLaBoite2 = `<div><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                 <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                 <form autocomplete="off"><input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
 
@@ -141,14 +134,14 @@ window.onload = function () {
             let tempsEnMinutesArrondi = (Math.round((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60 * 10) / 10);
             switch (niveau) {
                 case 1:
-                    notifier.alert(`Vous êtes sur ce site depuis ${tempsEnMinutesArrondi} minutes, aujourd'hui.`);
+                    notifier.alert(`${chrome.i18n.getMessage("content_notifier_l1_p1")}${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l1_p2")}`);
                     break;
 
                 case 2:
 
                     let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
 
-                    let contenuDeLaBoite2 = `<div><p>Vous êtes sur ce site depuis <strong>${tempsEnMinutesArrondi} minutes</strong>, aujourd'hui.</p><p style="text-align: center;">Entrez ce texte pour continuer :<br />
+                    let contenuDeLaBoite2 = `<div><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                     <form autocomplete="off"> <input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
 
@@ -157,8 +150,8 @@ window.onload = function () {
                     break;
 
                 case 3:
-                    let contenuDeLaBoite3 = `<div><p style="text-align: center;">Elle sera fermée dans 10 secondes...</p>`;
-                    let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, { labels: { confirm: "Page bloquée pour votre bien" }, icons: { confirm: "exclamation-triangle" } }).newNode;
+                    let contenuDeLaBoite3 = `<div><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l3")}</p>`;
+                    let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, { labels: { confirm: chrome.i18n.getMessage("content_notifier_l3_title") }, icons: { confirm: "exclamation-triangle" } }).newNode;
                     let buttons = case3box.querySelector(".awn-buttons");
                     buttons.parentNode.removeChild(buttons);
                     setTimeout(() => {
@@ -243,6 +236,8 @@ window.onload = function () {
                     chrome.runtime.sendMessage({ mute: 0 });
                     body.style.overflow = "initial";
                     case2boxInterval.parentNode.removeChild(case2boxInterval);
+                } else {
+                    case2boxInterval.querySelector("#entreetexte").style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
                 }
             });
 

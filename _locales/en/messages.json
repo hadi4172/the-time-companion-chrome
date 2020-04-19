@@ -1,0 +1,207 @@
+{
+    "extName": {
+        "message": "Time Companion"
+    },
+    "options": {
+        "message": "field text"
+    },
+    "options_onseveriteinput_l1": {
+        "message": "Send a notification every [Enter number] minutes"
+    },
+    "options_onseveriteinput_l2": {
+        "message": "Enter a text to continue every [Enter number] minutes."
+    },
+    "options_onseveriteinput_l3": {
+        "message": "Block the page after [Enter number] minutes"
+    },
+    "options_onseveriteinput_l4": {
+        "message": "Close the browser after [Enter the number] minutes."
+    },
+    "options_onseveriteinput_debutquestion": {
+        "message": "Also warn at the beginning of the access to a blacklisted site?"
+    },
+    "options_onseveriteinput_debut": {
+        "message": "on enter & "
+    },
+    "options_onseveriteinput_chaque": {
+        "message": "every "
+    },
+    "options_onseveriteinput_apres": {
+        "message": "after "
+    },
+    "options_onseveriteinput_min": {
+        "message": " min"
+    },
+    "options_onseveriteinput_invalid": {
+        "message": "Invalid input!"
+    },
+    "options_onseveriteinput_inactive": {
+        "message": "Inactive"
+    },
+    "options_niveau": {
+        "message": "Level "
+    },
+    "options_l1_text": {
+        "message": "Notification"
+    },
+    "options_l2_text": {
+        "message": "Enter a text to continue"
+    },
+    "options_l3_text": {
+        "message": "Block"
+    },
+    "options_l4_text": {
+        "message": "Close Chrome"
+    },
+    "options_listenoire": {
+        "message": "Blacklist"
+    },
+    "options_listeblanche": {
+        "message": "Whitelist"
+    },
+    "options_options": {
+        "message": "Options"
+    },
+    "options_horaire": {
+        "message": "Schedule"
+    },
+    "options_dons": {
+        "message": "Donate"
+    },
+    "options_contact": {
+        "message": "Contact"
+    },
+    "options_reportbug": {
+        "message": "Report a bug"
+    },
+    "options_suggestfeature": {
+        "message": "Suggest a new feature"
+    },
+    "popup": {
+        "message": "field text"
+    },
+    "popup_titre": {
+        "message": "Time (%) per website today"
+    },
+    "popup_siteslesplusconsultes": {
+        "message": "Most visited sites"
+    },
+    "popup_reglages_btn": {
+        "message": "Settings"
+    },
+    "popup_total": {
+        "message": "Total"
+    },
+    "setlist": {
+        "message": "field text"
+    },
+    "setlist_listenoire": {
+        "message": "Blacklist"
+    },
+    "setlist_listenoire_description": {
+        "message": "Put the distracting sites here. To include all websites, write *.*"
+    },
+    "setlist_listeblanche": {
+        "message": "Whitelist"
+    },
+    "setlist_listeblanche_description": {
+        "message": "Allows to ignore a specific part included in the blacklist. Also very useful for \"allow everything except:\""
+    },
+    "setlist_inputbar_placeholder": {
+        "message": "Enter an url (ex: youtube.com)"
+    },
+    "setlist_addurl_btn": {
+        "message": "Add"
+    },
+    "setlist_savelist_btn": {
+        "message": "Save"
+    },
+    "setlist_checkboxes_disabledistractionson": {
+        "message": "Disable distractions on "
+    },
+    "setlist_retour_btn": {
+        "message": "Back"
+    },
+    "setlist_onbeforeunload": {
+        "message": "You should save your changes before exiting"
+    },
+    "horaire": {
+        "message": "field text"
+    },
+    "content": {
+        "message": "field text"
+    },
+    "content_attributmodal_warning": {
+        "message": "Reminder"
+    },
+    "content_attributmodal_alert": {
+        "message": "Warning!"
+    },
+    "content_attributmodal_confirm": {
+        "message": "Warning!"
+    },
+    "content_attributmodal_confirmOk": {
+        "message": "Continue"
+    },
+    "content_attributmodal_confirmCancel": {
+        "message": "Exit"
+    },
+    "content_texteaentrer_1": {
+        "message": "I shouldn't waste my time."
+    },
+    "content_texteaentrer_2": {
+        "message": "My time is important."
+    },
+    "content_texteaentrer_3": {
+        "message": "I'm a productive person."
+    },
+    "content_texteaentrer_4": {
+        "message": "I know that what I'm doing right now is important."
+    },
+    "content_texteaentrer_5": {
+        "message": "I have to use my time well to succeed."
+    },
+    "content_texteaentrer_6": {
+        "message": "There's more than just fun in life."
+    },
+    "content_texteaentrer_7": {
+        "message": "I'm sure I want to keep going."
+    },
+    "content_texteaentrer_8": {
+        "message": "To be successful, you have to stop talking and start doing."
+    },
+    "content_texteaentrer_9": {
+        "message": "I installed this extension to improve my life."
+    },
+    "content_texteaentrer_10": {
+        "message": "I like to feel productive."
+    },
+    "content_notifier_debut": {
+        "message": "You've just entered a blacklisted site."
+    },
+    "content_notifier_l1_p1": {
+        "message": "You are on this site since "
+    },
+    "content_notifier_l1_p2": {
+        "message": " minutes, today."
+    },
+    "content_notifier_l2": {
+        "message": "Enter this text to continue:"
+    },
+    "content_notifier_l2_p1": {
+        "message": "You are on this site since "
+    },
+    "content_notifier_l2_p2": {
+        "message": " minutes"
+    },
+    "content_notifier_l2_p3": {
+        "message": ", today."
+    },
+    "content_notifier_l3_title": {
+        "message": "Page blocked for your own good"
+    },
+    "content_notifier_l3": {
+        "message": "It'll shut down in 10 seconds...."
+    }
+
+}

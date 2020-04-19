@@ -1,0 +1,207 @@
+{
+    "extName": {
+        "message": "Time Companion"
+    },
+    "options": {
+        "message": "field text"
+    },
+    "options_onseveriteinput_l1": {
+        "message": "Envoyer une notification chaque [Entrer le nombre] minutes"
+    },
+    "options_onseveriteinput_l2": {
+        "message": "Entrer un texte pour continuer chaque [Entrer le nombre] minutes"
+    },
+    "options_onseveriteinput_l3": {
+        "message": "Bloquer la page après [Entrer le nombre] minutes"
+    },
+    "options_onseveriteinput_l4": {
+        "message": "Fermer le navigateur après [Entrer le nombre] minutes"
+    },
+    "options_onseveriteinput_debutquestion": {
+        "message": "Prévenir aussi au début de l'accès a un site sur la liste noire ?"
+    },
+    "options_onseveriteinput_debut": {
+        "message": "début et "
+    },
+    "options_onseveriteinput_chaque": {
+        "message": "chaque "
+    },
+    "options_onseveriteinput_apres": {
+        "message": "après "
+    },
+    "options_onseveriteinput_min": {
+        "message": " min"
+    },
+    "options_onseveriteinput_invalid": {
+        "message": "Entrée invalide!"
+    },
+    "options_onseveriteinput_inactive": {
+        "message": "Inactif"
+    },
+    "options_niveau": {
+        "message": "Niveau "
+    },
+    "options_l1_text": {
+        "message": "Notification"
+    },
+    "options_l2_text": {
+        "message": "Entrer un texte pour continuer"
+    },
+    "options_l3_text": {
+        "message": "Blocage"
+    },
+    "options_l4_text": {
+        "message": "Fermeture de Chrome"
+    },
+    "options_listenoire": {
+        "message": "Liste Noire"
+    },
+    "options_listeblanche": {
+        "message": "Liste Blanche"
+    },
+    "options_options": {
+        "message": "Options"
+    },
+    "options_horaire": {
+        "message": "Horaire"
+    },
+    "options_dons": {
+        "message": "Dons"
+    },
+    "options_contact": {
+        "message": "Contact"
+    },
+    "options_reportbug": {
+        "message": "Reporter un bug"
+    },
+    "options_suggestfeature": {
+        "message": "Suggérer une amélioration"
+    },
+    "popup": {
+        "message": "field text"
+    },
+    "popup_titre": {
+        "message": "Temps (%) par site web aujourd'hui"
+    },
+    "popup_siteslesplusconsultes": {
+        "message": "Sites les plus consultés"
+    },
+    "popup_reglages_btn": {
+        "message": "Réglages"
+    },
+    "popup_total": {
+        "message": "Total"
+    },
+    "setlist": {
+        "message": "field text"
+    },
+    "setlist_listenoire": {
+        "message": "Liste noire"
+    },
+    "setlist_listenoire_description": {
+        "message": "Mettre ici les sites distrayants. Pour inclure tous les sites web, écrire *.*"
+    },
+    "setlist_listeblanche": {
+        "message": "Liste blanche"
+    },
+    "setlist_listeblanche_description": {
+        "message": "Permet de ne pas prendre en compte une partie spécifique incluse dans la liste noire. Également très utile pour \"autoriser tout sauf:\""
+    },
+    "setlist_inputbar_placeholder": {
+        "message": "Entrez une url (ex: youtube.com)"
+    },
+    "setlist_addurl_btn": {
+        "message": "Ajouter"
+    },
+    "setlist_savelist_btn": {
+        "message": "Enregistrer"
+    },
+    "setlist_checkboxes_disabledistractionson": {
+        "message": "Désactiver distractions sur "
+    },
+    "setlist_retour_btn": {
+        "message": "Retour"
+    },
+    "setlist_onbeforeunload": {
+        "message": "Vous devriez sauvegarder vos modifications avant de quitter"
+    },
+    "horaire": {
+        "message": "field text"
+    },
+    "content": {
+        "message": "field text"
+    },
+    "content_attributmodal_warning": {
+        "message": "Rappel"
+    },
+    "content_attributmodal_alert": {
+        "message": "Attention!"
+    },
+    "content_attributmodal_confirm": {
+        "message": "Attention!"
+    },
+    "content_attributmodal_confirmOk": {
+        "message": "Continuer"
+    },
+    "content_attributmodal_confirmCancel": {
+        "message": "Quitter"
+    },
+    "content_texteaentrer_1": {
+        "message": "Je ne dois pas perdre mon temps."
+    },
+    "content_texteaentrer_2": {
+        "message": "Mon temps est important."
+    },
+    "content_texteaentrer_3": {
+        "message": "Je suis quelqu'un de productif."
+    },
+    "content_texteaentrer_4": {
+        "message": "Je sais que ce que je fait actuellement est important."
+    },
+    "content_texteaentrer_5": {
+        "message": "Je dois bien utiliser mon temps pour réussir."
+    },
+    "content_texteaentrer_6": {
+        "message": "La vie, ce n'est pas seulement s'amuser."
+    },
+    "content_texteaentrer_7": {
+        "message": "Je suis sur de vouloir continuer."
+    },
+    "content_texteaentrer_8": {
+        "message": "Pour s'accomplir, il faut arrêter de parler et commencer à faire."
+    },
+    "content_texteaentrer_9": {
+        "message": "J'ai installé cette extension pour m'améliorer dans ma vie."
+    },
+    "content_texteaentrer_10": {
+        "message": "J'aime me sentir productif."
+    },
+    "content_notifier_debut": {
+        "message": "Vous venez d'entrer sur un site dans la liste noire."
+    },
+    "content_notifier_l1_p1": {
+        "message": "Vous êtes sur ce site depuis "
+    },
+    "content_notifier_l1_p2": {
+        "message": " minutes, aujourd'hui."
+    },
+    "content_notifier_l2": {
+        "message": "Entrez ce texte pour continuer :"
+    },
+    "content_notifier_l2_p1": {
+        "message": "Vous êtes sur ce site depuis "
+    },
+    "content_notifier_l2_p2": {
+        "message": " minutes"
+    },
+    "content_notifier_l2_p3": {
+        "message": ", aujourd'hui."
+    },
+    "content_notifier_l3_title": {
+        "message": "Page bloquée pour votre bien"
+    },
+    "content_notifier_l3": {
+        "message": "Elle sera fermée dans 10 secondes..."
+    }
+
+}
