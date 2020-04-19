@@ -29,11 +29,16 @@ window.onload = function () {
     }
 
     function obtenirRepartitionEnPourcentage(tableau) {
+        let total = calculerTempsTotal(tableau);
+        return tableau.map((x) => { return total != 0 ? ~~((x / total)*100*100)/100 : tableau })
+    }
+
+    function calculerTempsTotal(tableau){
         let total = 0;
         for (let i = 0, length = tableau.length; i < length; i++) {
             total += Math.abs(tableau[i]);
         }
-        return tableau.map((x) => { return total != 0 ? ~~((x / total)*100*100)/100 : tableau })
+        return total;
     }
 
     function fancyTimeFormat(time) {
@@ -62,23 +67,23 @@ window.onload = function () {
     setTimeout(() => {
 
         let data = [];
-        let dataFormatted = [];
+        let dataUnformatted = [];
         let labels = [];
         let backgroundColors = ["#FE0008", "#FF9C00", "#F5FC00", "#3CF10E", "#2EF87D", "#20FFE4", "#0F88F2", "#022DFF", "#C528FF", "#FD019C"];
 
         for (let i = 0; i < tempsParUrl.length; i++) {
             labels.push(tempsParUrl[i][0]);
             data.push(fancyTimeFormat(tempsParUrl[i][1]));
-            dataFormatted.push(tempsParUrl[i][1]);
+            dataUnformatted.push(tempsParUrl[i][1]);
         }
 
         let website = document.querySelector("tbody");
 
-        var statistiques = new Chart(document.getElementById('myChart'), {
+        new Chart(document.getElementById('myChart'), {
             type: 'doughnut',
             data: {
                 datasets: [{
-                    data: obtenirRepartitionEnPourcentage(dataFormatted),
+                    data: obtenirRepartitionEnPourcentage(dataUnformatted),
                     backgroundColor: backgroundColors
                 }],
                 labels: labels.map(x=>x+=" (%) ")
@@ -91,6 +96,8 @@ window.onload = function () {
             for (let i = 0, length = labels.length > 10 ? 10 : labels.length; i < length; i++) {
                 website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
             }
+            website.innerHTML += ("<tr><td style='color:dimgrey;'>------------------</td></tr>");
+            website.innerHTML += (`<tr><td><span style="color:dimgrey; font-weight:bold;"> Total: </span>` + "</td><td> " + fancyTimeFormat(calculerTempsTotal(dataUnformatted)) + "</td></tr>");
         });
 
     }, 500);

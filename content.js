@@ -1,3 +1,8 @@
+TimeMe.initialize({
+    currentPageName: "webpage", // current page
+    idleTimeoutInSeconds: 80 // seconds
+});
+
 window.onload = function () {
 
     setTimeout(() => {
@@ -69,10 +74,10 @@ window.onload = function () {
         getDonneesSeverite();
 
 
-        TimeMe.initialize({
-            currentPageName: "webpage", // current page
-            idleTimeoutInSeconds: 80 // seconds
-        });
+        // TimeMe.initialize({
+        //     currentPageName: "webpage", // current page
+        //     idleTimeoutInSeconds: 80 // seconds
+        // });
 
         setIntervalImmediately(() => {
             console.log(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime);
@@ -110,7 +115,7 @@ window.onload = function () {
                     if (!isInactive(TimeMe.getTimeOnPageInMilliseconds("webpage"))) {
                         switch (niveauDeSeverite) {
                             case 1: case 2:
-                                if ((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite * 60) < 1) {
+                                if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite * 60) < 1)&&(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime)>1) {
                                     traitementSeverite(niveauDeSeverite);
                                 }
                                 break;

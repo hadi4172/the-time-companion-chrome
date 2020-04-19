@@ -122,7 +122,7 @@ setTimeout(() => {
                 console.log("current url:", sender.tab.url)
                 console.log("IsitHere?", listesUrl[0].find(x => (sender.tab.url).includes(x)));
                 //assurerInitialisationTableauTemps();
-                if (listesUrl[1].some(x => (sender.tab.url).includes(x))|| listesUrl[1].some(x => x == "*.*")) {           //est dans la liste blanche
+                if (listesUrl[1].some(x => (sender.tab.url).includes(x)) || listesUrl[1].some(x => x == "*.*")) {           //est dans la liste blanche
                     sendResponse({ responseMessage: [0, 0, false] });
                     console.log("is in whitelist");
                 } else if (listesUrl[0].some(x => (sender.tab.url).includes(x) || listesUrl[0].some(x => x == "*.*"))) {    //est dans la liste noire
@@ -183,12 +183,9 @@ setTimeout(() => {
                 setTimeout(() => {
                     console.log("[[SENDER URL FUTURE]] (listener) :" + sender.tab.url, message.timeElapsed[0])
                 });
-                if (getHostnameFromRegex(sender.tab.url) === getHostnameFromRegex(message.timeElapsed[1])) {
-                    storeData(sender.tab.url, message.timeElapsed[0]);
-                    console.log('URLS SIMILAIRES :)');
-                } else {
-                    console.log('Erreur URLS Differents:', sender.tab.url, message.timeElapsed[1]);
-                }
+
+                storeData(message.timeElapsed[1], message.timeElapsed[0]);
+
                 console.log("[TEMPS PAR URL TIMEELAPSED]:", tempsParUrl.times.slice().toString());
             }
         });
