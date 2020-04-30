@@ -1,5 +1,7 @@
 window.onload = function () {
 
+    comingSoonInitializer(document.querySelectorAll("input[type=checkbox]"));
+
     var listeNoire = document.querySelector("table[listenoire]");
     var listeBlanche = document.querySelector("table[listeblanche]");
     var entreeUrlLN = document.querySelector("#inputurlbl");
@@ -9,11 +11,17 @@ window.onload = function () {
     var btnEnregistrerLN = document.querySelector("#saveblacklist");
     var btnEnregistrerLB = document.querySelector("#savewhitelist");
 
-    document.querySelector("#lntitre").innerHTML = chrome.i18n.getMessage("setlist_listenoire");
-    document.querySelector("#lbtitre").innerHTML = chrome.i18n.getMessage("setlist_listeblanche");
-    document.querySelector("#lntitre + p").innerHTML = chrome.i18n.getMessage("setlist_listenoire_description");
-    document.querySelector("#lbtitre + p").innerHTML = chrome.i18n.getMessage("setlist_listeblanche_description");
-    document.querySelector("#return").innerHTML = chrome.i18n.getMessage("setlist_retour_btn");
+    let elements = [
+        ["#lntitre","setlist_listenoire"],
+        ["#lbtitre","setlist_listeblanche"],
+        ["#lntitre + p","setlist_listenoire_description"],
+        ["#lbtitre + p","setlist_listeblanche_description"],
+        ["#return","setlist_retour_btn"]
+    ];
+
+    for (let i = 0, length = elements.length; i < length; i++) {
+        document.querySelector(elements[i][0]).innerHTML = chrome.i18n.getMessage(elements[i][1]);
+    }
 
     entreeUrlLN.placeholder = chrome.i18n.getMessage("setlist_inputbar_placeholder");
     entreeUrlLB.placeholder = chrome.i18n.getMessage("setlist_inputbar_placeholder");
@@ -22,11 +30,11 @@ window.onload = function () {
     btnEnregistrerLN.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
     btnEnregistrerLB.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
 
-    for (let i = 0, length = ["ch3","ch4","ch5","ch6"].length; i < length; i++) {
-        let checkbox = document.querySelector(`label[for=${["ch3","ch4","ch5","ch6"][i]}]`);
-        checkbox.innerHTML = chrome.i18n.getMessage("setlist_checkboxes_disabledistractionson")+checkbox.innerHTML;
+    for (let i = 0, length = ["ch3", "ch4", "ch5", "ch6"].length; i < length; i++) {
+        let checkbox = document.querySelector(`label[for=${["ch3", "ch4", "ch5", "ch6"][i]}]`);
+        checkbox.innerHTML = chrome.i18n.getMessage("setlist_checkboxes_disabledistractionson") + checkbox.innerHTML;
     }
-    
+
 
     var listes = [listeNoire, listeBlanche];
     var entrees = [entreeUrlLN, entreeUrlLB];
@@ -85,7 +93,7 @@ window.onload = function () {
     }
 
     function entreeUrlConforme(val) {
-        if (val =="*.*") {
+        if (val == "*.*") {
             return true;
         }
         var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/gm;
@@ -111,6 +119,15 @@ window.onload = function () {
     function save(i) {
         chrome.storage.sync.set(indiceSauvegarde[i]);
         chrome.storage.local.set(uRLS[i]);
+    }
+
+    function comingSoonInitializer(objects){
+        for (let i = 0, length = objects.length; i < length; i++) {
+            objects[i].addEventListener('click', function () {
+                alert(chrome.i18n.getMessage("horaire_comingsoon"));
+                objects[i].disabled = "disabled";
+            });
+        }
     }
 
     function charger(i) {

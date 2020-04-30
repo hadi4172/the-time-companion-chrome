@@ -10,13 +10,13 @@ setTimeout(() => {
     var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var dateOfLastSave;
+    var sitesImmunises = [];  //tableau qui contient les pages webs ouvertes depuis moins de 7 minutes avec début activé
 
 
 
     chrome.storage.local.get("date", function (arg) {
         console.log(arg.date);
-        let today = new Date();
-        today = JSON.stringify([today.getDate(), today.getMonth() + 1, today.getFullYear()]);
+        today = getTodayInString();
         if (typeof arg.date !== "undefined") {
             dateOfLastSave = arg["date"];
             console.log("Données de date existantes");
@@ -34,12 +34,8 @@ setTimeout(() => {
         }
     });
 
-    setTimeout(() => {
-        console.log("dateOfLastSave:", dateOfLastSave);
-        chrome.storage.local.set({ date: dateOfLastSave });
-    }, 1000);
-
-
+    gererUnNouveauJour();
+    saveDateOfLastSave();
     showBytesInUse()
 
 
@@ -57,6 +53,46 @@ setTimeout(() => {
                 tempsParUrl.times = arg.times;
                 console.log("[TEMPS PAR URL]:", tempsParUrl.times);
             }
+        });
+    }
+
+    function gererUnNouveauJour() {
+        let dateOfOpen = (new Date()).getTime();
+        let dateOfTomorrow = new Date(dateOfOpen + (24 * 60 * 60 * 1000));
+        dateOfTomorrow.setHours(0); dateOfTomorrow.setMinutes(0); dateOfTomorrow.setSeconds(1); dateOfTomorrow.setMilliseconds(0);
+        let tempsRestantPourDemainEnMs = dateOfTomorrow.getTime() - dateOfOpen;
+        console.log('tempsRestantPourDemainEnH:', tempsRestantPourDemainEnMs / (1000 * 60 * 60));
+        setTimeout(() => {
+            commencerUnNouveauJour();
+            console.log("Nouveau jour [1]");
+            setInterval(() => {
+                commencerUnNouveauJour();
+                console.log("Nouveau jour [2+]");
+            }, (24 * 60 * 60 * 1000));
+        }, tempsRestantPourDemainEnMs);
+    }
+
+    function getTodayInString() {
+        let today = new Date();
+        return JSON.stringify([today.getDate(), today.getMonth() + 1, today.getFullYear()]);
+    }
+
+    function saveDateOfLastSave() {
+        setTimeout(() => {
+            console.log("dateOfLastSave:", dateOfLastSave);
+            chrome.storage.local.set({ date: dateOfLastSave });
+        }, 1000);
+    }
+
+    function commencerUnNouveauJour() {
+        tempsParUrl = { times: [] };
+        chrome.storage.local.set(tempsParUrl);
+        dateOfLastSave = getTodayInString();
+        saveDateOfLastSave();
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { resetYourTime: true }, function (response) {
+                console.log('Sent Message to content script to reset the time');
+            });
         });
     }
 
@@ -81,19 +117,34 @@ setTimeout(() => {
 
     //changement à l'intérieur du tab actif (raffraichir ou nouveau lien)
     chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
-        if (tab.active && change.url) {
-            url = change.url;
-            if (urlValide(url)) {
-                console.log(`start by onUpdated`);
-                askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
-                // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
-                setTimeout(() => {
-                    // storeData(url, timeSpent);
-                    console.log("[TEMPS PAR URL ONUPDATED]:", tempsParUrl.times.slice().toString());
-                    // console.log(timeSpent);
-                });
+        if (tab.active) {
+            if (change.url) {
+                url = change.url;
+                if (urlValide(url)) {
+                    console.log(`start by onUpdated`);
+                    askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
+                    // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
+                    setTimeout(() => {
+                        // storeData(url, timeSpent);
+                        console.log("[TEMPS PAR URL ONUPDATED]:", tempsParUrl.times.slice().toString());
+                        // console.log(timeSpent);
+                    });
 
-                // console.log("end by onUpdated");
+                    // console.log("end by onUpdated");
+                }
+            }
+            if (change.audible == true) {
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, { keepTracking: "true" }, function (response) {
+                        console.log('___tab is audible___');
+                    });
+                });
+            } else if (change.audible == false) {
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, { keepTracking: "false" }, function (response) {
+                        console.log('___tab is no more audible___');
+                    });
+                });
             }
         }
     });
@@ -127,6 +178,10 @@ setTimeout(() => {
                     console.log("is in whitelist");
                 } else if (listesUrl[0].some(x => (sender.tab.url).includes(x) || listesUrl[0].some(x => x == "*.*"))) {    //est dans la liste noire
                     console.log("is in blacklist");
+                    if (donneesSeverite[2] == true && sitesImmunises.some(x => (sender.tab.url).includes(x))) {
+                        console.log('__site immunisé!');
+                        sendResponse({ responseMessage: donneesSeverite.map(x => x == true ? false : x) });
+                    }
                     sendResponse({ responseMessage: donneesSeverite });
                 } else {                                                              //est nul part
                     sendResponse({ responseMessage: [0, 0, false] });
@@ -158,6 +213,10 @@ setTimeout(() => {
                     if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
                 });
 
+            } else if (message.immuniser) {
+                console.log('__added to sites immunisé');
+                addToSitesImmunises(sender.tab.url);
+
             } else if (message.mute == 1) {  // Mute sounds
 
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -166,9 +225,10 @@ setTimeout(() => {
                 });
 
             } else if (message.lauchThisLevelNow == 3) {   //Close tab
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.remove(tabs[0].id);
-                });
+                setTimeout(() => {
+                    chrome.tabs.remove(sender.tab.id);
+                }, 10 * 1000);
+
             } else if (message.lauchThisLevelNow == 4) {   //Close chrome
                 console.log("Entered Message.launchThisNow");
                 chrome.tabs.query({}, function (tabs) {
@@ -176,7 +236,7 @@ setTimeout(() => {
                         chrome.tabs.remove(tabs[i].id);
                     }
                 });
-            } else if (message.timeElapsed) {  //partie problématique
+            } else if (message.timeElapsed) { 
                 console.log("start by runtime");
                 console.log("stored new data..!");
                 console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0])
@@ -218,10 +278,25 @@ setTimeout(() => {
         });
     }
 
+    function addToSitesImmunises(url) {
+        let hostname = getHostnameFromRegex(url);
+        if (!sitesImmunises.includes(hostname)) {
+            sitesImmunises.push(hostname);
+            setTimeout(() => {
+                sitesImmunises = sitesImmunises.filter(x => x !== hostname);
+            }, 7 * 60 * 1000);
+        }
+        console.log('.._..sitesImmunises:', JSON.stringify(sitesImmunises));
+    }
+
 
     function getHostnameFromRegex(url) {
+        /* //old version
         let matches = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im);
         return matches && matches[1];
+        */
+        let hostname = (new URL(url)).hostname.replace(/^www\./ig, '');
+        return hostname;
     }
 
     chrome.storage.onChanged.addListener(function (changes, areaName) {
@@ -299,7 +374,9 @@ setTimeout(() => {
                 if (tempsParUrl.times[i][0] == checkedUrl) {
                     let tempsTraite = ((!isNaN(temps)) ? temps : 0);
                     if (!erreur) {
-                        tempsParUrl.times[i][1] = tempsTraite;
+                        if ((!isNaN(tempsParUrl.times[i][1])) ? tempsParUrl.times[i][1] < tempsTraite : true) {
+                            tempsParUrl.times[i][1] = tempsTraite;
+                        }
                         console.log('______storing_sucess..._____');
                     } else { console.log('____________failed to store data_________ '); }
                     trouve = true;

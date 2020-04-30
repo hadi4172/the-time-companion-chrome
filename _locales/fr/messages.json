@@ -2,6 +2,9 @@
     "extName": {
         "message": "Time Companion"
     },
+    "extDescription": {
+        "message": "Cette extension sera votre compagnion, afin que vous ne perdiez pas de vue les objectifs essentiels de votre vie."
+    },
     "options": {
         "message": "field text"
     },
@@ -127,6 +130,9 @@
     },
     "horaire": {
         "message": "field text"
+    },
+    "horaire_comingsoon": {
+        "message": "à venir..."
     },
     "content": {
         "message": "field text"
