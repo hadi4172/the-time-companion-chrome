@@ -3,6 +3,7 @@ window.onload = function () {
     var listeNoire = document.querySelector("table[valeurslistenoire]");
     var listeBlanche = document.querySelector("table[valeurslisteblanche]");
     var severite = document.querySelectorAll("input[type = 'radio']");
+    var groupes = document.querySelector(".dropdown-select");
     // var severiteSelectionne = document.querySelector(input[checked]);
     for (let i = 0; i < 4; i++) {
         document.querySelector(`span[n${i+1}]`).innerHTML = (chrome.i18n.getMessage("options_niveau")+(i+1));
@@ -60,19 +61,34 @@ window.onload = function () {
     }
 
     function charger() {
-        chrome.storage.sync.get(["niveauSeverite", "texteDePropriete"], function (niveauSeverite) {
-            if ((niveauSeverite["niveauSeverite"] || niveauSeverite["texteDePropriete"]) != null) {
-                let checked = document.getElementById(niveauSeverite["niveauSeverite"]);
+        chrome.storage.sync.get(["niveauSeverite", "texteDePropriete","groupes"], function (arg) {
+            if ((arg["niveauSeverite"] || arg["texteDePropriete"]) != null) {
+                let checked = document.getElementById(arg["niveauSeverite"]);
                 checked.checked = "checked";
-                checked.parentElement.querySelector("span[temps]").innerHTML = niveauSeverite["texteDePropriete"];
+                checked.parentElement.querySelector("span[temps]").innerHTML = arg["texteDePropriete"];
             }
             else {
                 severite[0].checked = "checked";
                 severite[0].parentElement.querySelector("span[temps]").innerHTML = chrome.i18n.getMessage("options_onseveriteinput_inactive");
             }
-
+            groupes.innerHTML = arg["groupes"][0];
+            groupes.addEventListener("change", function () {
+                let selectedIndex = groupes.options.selectedIndex;
+                console.log('selectedIndex:', selectedIndex);
+                for (let option of groupes.options) {
+                    option.removeAttribute("selected");
+                }
+                groupes.options[selectedIndex].setAttribute("selected", "selected");;
+                chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+            });
+        });
+        setTimeout(() => {
+            if (groupes.options.length === 0) {
+                groupes.innerHTML += `<option value="Groupe_1">Groupe 1</option>`;
+            }
         });
     }
+
 
 
 

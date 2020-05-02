@@ -2,6 +2,8 @@ window.onload = function () {
 
     comingSoonInitializer(document.querySelectorAll("input[type=checkbox]"));
 
+    var notifier = new AWN();
+
     var listeNoire = document.querySelector("table[listenoire]");
     var listeBlanche = document.querySelector("table[listeblanche]");
     var entreeUrlLN = document.querySelector("#inputurlbl");
@@ -10,13 +12,16 @@ window.onload = function () {
     var btnAjoutLB = document.querySelector("#addtowhitelist");
     var btnEnregistrerLN = document.querySelector("#saveblacklist");
     var btnEnregistrerLB = document.querySelector("#savewhitelist");
+    var btnAjouterGroupe = document.querySelector("#addgroup");
+    var btnSupprimerGroupe = document.querySelector("#deletegroup");
+    var groupes = document.querySelector(".dropdown-select");
 
     let elements = [
-        ["#lntitre","setlist_listenoire"],
-        ["#lbtitre","setlist_listeblanche"],
-        ["#lntitre + p","setlist_listenoire_description"],
-        ["#lbtitre + p","setlist_listeblanche_description"],
-        ["#return","setlist_retour_btn"]
+        ["#lntitre", "setlist_listenoire"],
+        ["#lbtitre", "setlist_listeblanche"],
+        ["#lntitre + p", "setlist_listenoire_description"],
+        ["#lbtitre + p", "setlist_listeblanche_description"],
+        ["#return", "setlist_retour_btn"]
     ];
 
     for (let i = 0, length = elements.length; i < length; i++) {
@@ -42,6 +47,7 @@ window.onload = function () {
     var btnsEnregistrer = [btnEnregistrerLN, btnEnregistrerLB];
     var indiceSauvegarde = [{ donneesListeNoire: listeNoire.innerHTML }, { donneesListeBlanche: listeBlanche.innerHTML }];
     var uRLS = [{ urlsListeNoire: [] }, { urlsListeBlanche: [] }];
+    var listeValeursGroupes = [];
     var saveBeforeQuit = false;
 
     window.onbeforeunload = function (e) {
@@ -50,6 +56,9 @@ window.onload = function () {
         };
     };
 
+    initGroups();
+    initEventBtnAddGroup();
+    initEventBtnSupprimerGroup();
 
     for (let i = 0, length = listes.length; i < length; i++) {
 
@@ -121,7 +130,7 @@ window.onload = function () {
         chrome.storage.local.set(uRLS[i]);
     }
 
-    function comingSoonInitializer(objects){
+    function comingSoonInitializer(objects) {
         for (let i = 0, length = objects.length; i < length; i++) {
             objects[i].addEventListener('click', function () {
                 alert(chrome.i18n.getMessage("horaire_comingsoon"));
@@ -156,6 +165,73 @@ window.onload = function () {
             saveBeforeQuit = true;
         }
 
+    }
+
+    function initEventBtnAddGroup() {
+        btnAjouterGroupe.addEventListener("click", function () {
+            let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :').replace(/<|>/g, "");
+            if (groupes.querySelector(`option[value="${nomDuNouveauGroupe.replace(/ /g, "_")}"]`) == null) {
+                groupes.innerHTML += `<option value=${nomDuNouveauGroupe.replace(/ /g, "_")}>${nomDuNouveauGroupe}</option>`;
+                chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+            } else {
+                alert("Un groupe portant ce nom existe déja...");
+            }
+        });
+    }
+
+    function initEventBtnSupprimerGroup() {
+        btnSupprimerGroupe.addEventListener("click", function () {
+            let contenu = `<h1 style="margin:0 0 10px 0;">Supprimer un groupe</h1><table groups style="margin:auto;"><tbody>`;
+            for (let i = 0, length = groupes.options.length; i < length; i++) {
+                contenu += `<tr><td>${groupes.options[i].innerHTML}</td></tr>`;
+            }
+            contenu += "</tbody></table>";
+            notifier.modal(contenu);
+            setTimeout(() => {
+                initSupprimerGroupe();
+            }, 100);
+        });
+    }
+
+    function initSupprimerGroupe() {
+        let groupsTab = document.querySelector("table[groups]").rows;
+        for (let groupRow of groupsTab) {
+            groupRow.addEventListener("click", function () {
+                if (confirm("Etes vous sur de vouloir supprimer ce groupe?\nToutes les listes qu'il contient seront supprimées")) {
+                    if (groupes.options.length > 1) {
+                        let optionCorrespondante = groupes.querySelector(`option[value="${groupRow.textContent.replace(/ /g, "_")}"]`);
+                        if (typeof optionCorrespondante !== 'undefined') {
+                            optionCorrespondante.parentNode.removeChild(optionCorrespondante);
+                            groupRow.parentNode.removeChild(groupRow);
+                            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+                        }
+                    } else {
+                        alert("Vous n'avez qu'un seul groupe : Vous ne pouvez pas le supprimer.");
+                    }
+                }
+            });
+        }
+    }
+
+    function initGroups() {
+        chrome.storage.sync.get("groupes", function (arg) {
+            groupes.innerHTML = arg["groupes"][0];
+            listeValeursGroupes = arg["groupes"][1];
+            console.log('arg.groupes:',arg.groupes);
+        });
+        groupes.addEventListener("change", function () {
+            let selectedIndex = groupes.options.selectedIndex;
+            for (let option of groupes.options) {
+                option.removeAttribute("selected");
+            }
+            groupes.options[selectedIndex].setAttribute("selected", "selected");;
+            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+        });
+        setTimeout(() => {
+            if (groupes.options.length === 0) {
+                groupes.innerHTML += `<option value="Groupe_1">Groupe 1</option>`;
+            }
+        });
     }
 
     function initFonctionRetirer(i) {

@@ -29,7 +29,7 @@ tr:hover{
 .conteneurdetableau {
     background-color: rgba(231, 219, 219, 0.5);
     border: 1px rgba(200, 188, 188, 0.5) solid;
-    min-width: 200px;
+    min-width: 98%;
     min-height: 200px;
     height: 70%;
     max-height: 60vh;
@@ -47,7 +47,7 @@ tr:hover{
 #optionbtn {
     display: flex;
     flex-direction: row;
-    width: 70%;
+    width: 80%;
     margin: 0 auto 0 auto;
 }
 
@@ -75,8 +75,7 @@ input[type=text], input[type=url] {
     width: 100%;
 }
 
-.inputlistname,
-#editlist {
+.inputlistname{
     /* A venir */
     visibility: hidden;
 }
@@ -98,11 +97,40 @@ section[droite] {
 }
 
 div[checks] label {
-    font-size: 1.5em;
+    display: inline-block;
+    margin-right: -100px;
+    font-size: 1.5vw;
 }
 
 input[type=checkbox] {
-    margin: 10px 10px 10px 20px;
+    display: inline-block;
+    margin-right: -100px;
+    margin: 10px 10px 10px 10%;
+}
+
+#groupeactuel{
+    display:flex;
+    align-content: center;
+    /* width: 90%; */
+    margin: auto auto 0 auto;
+    align-self: flex-end;
+}
+
+.positionneur{
+    width: 100%;
+    min-height: calc(100% - 400px);
+    display: flex;
+}
+
+#textegroupeactuel{
+    font-family: 'Roboto', sans-serif;
+    line-height: 30px;
+    color:rgb(93, 83, 83);
+    font-weight: bolder;
+    /* text-transform: uppercase; */
+    font-size: medium;
+    margin-right: 15px;
+    /* vertical-align: top; */
 }
 
 
@@ -114,6 +142,7 @@ section[milieu] {
     flex: 1;
     flex-grow: 0.45;
 }
+
 
 section {
     flex-wrap: wrap;
@@ -177,6 +206,12 @@ section {
 
 .btn-3[special] {
     line-height: 25px;
-    margin: 20px auto 25px auto;
+    margin: 10px auto 15px auto;
 
 }
+
+.long-text-btn{
+    line-height: 15px;
+    font-size: 11px;
+    
+  }

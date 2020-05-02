@@ -5,7 +5,6 @@ chrome.runtime.onInstalled.addListener(function (object) {
 
 setTimeout(() => {
 
-    var url;  //url de la page actuelle
     var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
     var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
@@ -34,9 +33,9 @@ setTimeout(() => {
         }
     });
 
-    gererUnNouveauJour();
+    gererSleepMode();
     saveDateOfLastSave();
-    showBytesInUse()
+    showBytesInUse();
 
 
     TimeMe.initialize({
@@ -62,7 +61,7 @@ setTimeout(() => {
         dateOfTomorrow.setHours(0); dateOfTomorrow.setMinutes(0); dateOfTomorrow.setSeconds(1); dateOfTomorrow.setMilliseconds(0);
         let tempsRestantPourDemainEnMs = dateOfTomorrow.getTime() - dateOfOpen;
         console.log('tempsRestantPourDemainEnH:', tempsRestantPourDemainEnMs / (1000 * 60 * 60));
-        setTimeout(() => {
+        return setTimeout(() => {
             commencerUnNouveauJour();
             console.log("Nouveau jour [1]");
             setInterval(() => {
@@ -70,6 +69,24 @@ setTimeout(() => {
                 console.log("Nouveau jour [2+]");
             }, (24 * 60 * 60 * 1000));
         }, tempsRestantPourDemainEnMs);
+    }
+
+    function gererSleepMode() {
+        let derniereFois = (new Date()).getTime();
+        let timerDeRecommencement = gererUnNouveauJour();
+
+        setInterval(() => {
+            let tempsActuel = (new Date()).getTime();
+            if (tempsActuel > (derniereFois + 3*60*1000)) {  // vérifie si l'écart entre la dernière fois est grand
+                // L'ordinateur vien de se réveiller
+                if (dateOfLastSave!=getTodayInString()) {
+                    commencerUnNouveauJour();
+                }
+                clearTimeout(timerDeRecommencement);
+                timerDeRecommencement = gererUnNouveauJour();
+            }
+            derniereFois = tempsActuel;
+        }, 30*1000);
     }
 
     function getTodayInString() {
@@ -100,7 +117,7 @@ setTimeout(() => {
     //changement du tab selectionné parmis les tabs ouverts
     chrome.tabs.onActivated.addListener(function (activeInfo) {
         chrome.tabs.get(activeInfo.tabId, function (tab) {
-            url = tab.url;
+            let url = tab.url;
             if (urlValide(url)) {
                 console.log("start by onActivated");
                 (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
@@ -119,7 +136,7 @@ setTimeout(() => {
     chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
         if (tab.active) {
             if (change.url) {
-                url = change.url;
+                let url = change.url;
                 if (urlValide(url)) {
                     console.log(`start by onUpdated`);
                     askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
@@ -236,7 +253,7 @@ setTimeout(() => {
                         chrome.tabs.remove(tabs[i].id);
                     }
                 });
-            } else if (message.timeElapsed) { 
+            } else if (message.timeElapsed) {
                 console.log("start by runtime");
                 console.log("stored new data..!");
                 console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0])
@@ -284,7 +301,7 @@ setTimeout(() => {
             sitesImmunises.push(hostname);
             setTimeout(() => {
                 sitesImmunises = sitesImmunises.filter(x => x !== hostname);
-            }, 7 * 60 * 1000);
+            }, 10 * 60 * 1000);
         }
         console.log('.._..sitesImmunises:', JSON.stringify(sitesImmunises));
     }

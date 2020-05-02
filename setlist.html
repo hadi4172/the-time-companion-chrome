@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>The Time Companion Options</title>
+    <link rel="stylesheet" href="library/AWN/style.css" />
+    <link rel="stylesheet" href="css/dropdownlist.css" />
     <link rel="stylesheet" href="css/setlist.css" />
+    <script src="library/AWN/index.var.js"></script>
     <script src="js/setlist.js"></script>
 </head>
 
@@ -59,22 +62,34 @@
     </div>
 
     <section droite>
-        <h1 logo>
-            The T<span class=sablier>⧗</span>me Companion
-        </h1>
-        <div checks>
-            <!-- <input type=checkbox id=ch1> <label for="ch1"> Redirection lors du niveau 3 </label> <br>
+            <h1 logo>
+                The T<span class=sablier>⧗</span>me Companion
+            </h1>
+            <div checks>
+                <!-- <input type=checkbox id=ch1> <label for="ch1"> Redirection lors du niveau 3 </label> <br>
             <input type=checkbox id=ch2> <label for="ch2"> Autoriser le son du site web lors du niveau 2 et
                 3</label><br> -->
-            <input type=checkbox id=ch3> <label for="ch3"> Youtube </label><br>
-            <input type=checkbox id=ch4> <label for="ch4"> Wikipedia </label><br>
-            <input type=checkbox id=ch5> <label for="ch5"> Quora </label><br>
-            <input type=checkbox id=ch6> <label for="ch6"> Reddit </label><br>
-        </div>
+                <input type=checkbox id=ch3> <label for="ch3"> Youtube </label><br>
+                <input type=checkbox id=ch4> <label for="ch4"> Wikipedia </label><br>
+                <input type=checkbox id=ch5> <label for="ch5"> Quora </label><br>
+                <input type=checkbox id=ch6> <label for="ch6"> Reddit </label><br>
+            </div>
 
-        <div id=optionbtn>
+            <div id="optionbtn">
+                <a id="addgroup" class="btn btn-3 long-text-btn" special>Ajouter un groupe</a>
+                <a id="deletegroup" class="btn btn-3 long-text-btn" special>Supprimer un groupe</a>
+            </div>
             <a href="options.html" id="return" class="btn btn-3" special></a>
-            <a id="editlist" class="btn btn-3" special>Modifier une liste</a>
+       
+
+        <div class="positionneur">
+            <div id="groupeactuel">
+                <span id="textegroupeactuel">Groupe :</span>
+                <div class="dropdown">
+                    <select class="dropdown-select">
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- <div class=conteneurdetableau mini>
