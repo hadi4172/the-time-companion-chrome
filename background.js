@@ -77,16 +77,16 @@ setTimeout(() => {
 
         setInterval(() => {
             let tempsActuel = (new Date()).getTime();
-            if (tempsActuel > (derniereFois + 3*60*1000)) {  // vérifie si l'écart entre la dernière fois est grand
+            if (tempsActuel > (derniereFois + 3 * 60 * 1000)) {  // vérifie si l'écart entre la dernière fois est grand
                 // L'ordinateur vien de se réveiller
-                if (dateOfLastSave!=getTodayInString()) {
+                if (dateOfLastSave != getTodayInString()) {
                     commencerUnNouveauJour();
                 }
                 clearTimeout(timerDeRecommencement);
                 timerDeRecommencement = gererUnNouveauJour();
             }
             derniereFois = tempsActuel;
-        }, 30*1000);
+        }, 30 * 1000);
     }
 
     function getTodayInString() {
@@ -106,10 +106,17 @@ setTimeout(() => {
         chrome.storage.local.set(tempsParUrl);
         dateOfLastSave = getTodayInString();
         saveDateOfLastSave();
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { resetYourTime: true }, function (response) {
-                console.log('Sent Message to content script to reset the time');
-            });
+        // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        //     chrome.tabs.sendMessage(tabs[0].id, { resetYourTime: true }, function (response) {
+        //         console.log('Sent Message to content script to reset the time');
+        //     });
+        // });
+        chrome.tabs.query({}, function (tabs) {
+            for (var i = 0; i < tabs.length; i++) {
+                chrome.tabs.sendMessage(tabs[i].id, { resetYourTime: true }, function (response) {
+                    console.log('Sent Message to content script to reset the time');
+                });
+            }
         });
     }
 

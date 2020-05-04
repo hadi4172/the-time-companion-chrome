@@ -46,7 +46,7 @@ window.onload = function () {
                     let debut = i < 2 ? confirm(chrome.i18n.getMessage("options_onseveriteinput_debutquestion")) : false;
                     let textProprietes = "[" + (debut ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") + (i < 2 ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + temps + chrome.i18n.getMessage("options_onseveriteinput_min")+"]";
                     severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
-                    chrome.storage.sync.set({
+                    chrome.storage.sync.set({   ////1: (str) id de radio  2: (str) contenu html de radio 3: (arr) [(int),(bool)]
                         niveauSeverite: severite[i].id,
                         texteDePropriete: textProprietes,
                         proprietesDeRappel: [temps, debut]
@@ -60,8 +60,21 @@ window.onload = function () {
         });
     }
 
+    function affichageListeParGroupe() {
+        let listes = [listeNoire,listeBlanche];
+        for (let i = 0, length = listes.length; i < length; i++) {
+            for (let row of listes[i].rows) {
+                if (row.getAttribute("togroup") !== groupes.value) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.removeProperty("display");
+                }
+            }
+        }
+    }
+
     function charger() {
-        chrome.storage.sync.get(["niveauSeverite", "texteDePropriete","groupes"], function (arg) {
+        chrome.storage.sync.get(["niveauSeverite", "texteDePropriete","groupes"], function (arg) {   //1: (str) id de radio  2: (str) contenu html de radio
             if ((arg["niveauSeverite"] || arg["texteDePropriete"]) != null) {
                 let checked = document.getElementById(arg["niveauSeverite"]);
                 checked.checked = "checked";
@@ -80,13 +93,16 @@ window.onload = function () {
                 }
                 groupes.options[selectedIndex].setAttribute("selected", "selected");;
                 chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+                affichageListeParGroupe();
             });
         });
         setTimeout(() => {
             if (groupes.options.length === 0) {
                 groupes.innerHTML += `<option value="Groupe_1">Groupe 1</option>`;
             }
+            affichageListeParGroupe();
         });
+
     }
 
 

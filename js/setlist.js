@@ -10,8 +10,7 @@ window.onload = function () {
     var entreeUrlLB = document.querySelector("#inputurlwl");
     var btnAjoutLN = document.querySelector("#addtoblacklist");
     var btnAjoutLB = document.querySelector("#addtowhitelist");
-    var btnEnregistrerLN = document.querySelector("#saveblacklist");
-    var btnEnregistrerLB = document.querySelector("#savewhitelist");
+    var btnEnregistrer = document.querySelector("#savelists");
     var btnAjouterGroupe = document.querySelector("#addgroup");
     var btnSupprimerGroupe = document.querySelector("#deletegroup");
     var groupes = document.querySelector(".dropdown-select");
@@ -32,8 +31,7 @@ window.onload = function () {
     entreeUrlLB.placeholder = chrome.i18n.getMessage("setlist_inputbar_placeholder");
     btnAjoutLN.innerHTML = chrome.i18n.getMessage("setlist_addurl_btn");
     btnAjoutLB.innerHTML = chrome.i18n.getMessage("setlist_addurl_btn");
-    btnEnregistrerLN.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
-    btnEnregistrerLB.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
+    btnEnregistrer.innerHTML = chrome.i18n.getMessage("setlist_savelist_btn");
 
     for (let i = 0, length = ["ch3", "ch4", "ch5", "ch6"].length; i < length; i++) {
         let checkbox = document.querySelector(`label[for=${["ch3", "ch4", "ch5", "ch6"][i]}]`);
@@ -44,9 +42,8 @@ window.onload = function () {
     var listes = [listeNoire, listeBlanche];
     var entrees = [entreeUrlLN, entreeUrlLB];
     var btnsAjout = [btnAjoutLN, btnAjoutLB];
-    var btnsEnregistrer = [btnEnregistrerLN, btnEnregistrerLB];
     var indiceSauvegarde = [{ donneesListeNoire: listeNoire.innerHTML }, { donneesListeBlanche: listeBlanche.innerHTML }];
-    var uRLS = [{ urlsListeNoire: [] }, { urlsListeBlanche: [] }];
+    var uRLS = [{ urlsListeNoire: [] }, { urlsListeBlanche: [] }];  //tableaux en deux dimension contenant leurs urls par groupe
     var listeValeursGroupes = [];
     var saveBeforeQuit = false;
 
@@ -56,9 +53,6 @@ window.onload = function () {
         };
     };
 
-    initGroups();
-    initEventBtnAddGroup();
-    initEventBtnSupprimerGroup();
 
     for (let i = 0, length = listes.length; i < length; i++) {
 
@@ -76,18 +70,24 @@ window.onload = function () {
             }
         });
 
-        btnsEnregistrer[i].addEventListener("click", function () {
-            btnsEnregistrer[i].style.removeProperty("box-shadow");
-            saveBeforeQuit = false;
-            apply(i);
-        });
-
         setTimeout(() => {
             initFonctionRetirer(i);
         });
 
+        btnEnregistrer.addEventListener("click", function () {
+            btnEnregistrer.style.removeProperty("box-shadow");
+            saveBeforeQuit = false;
+            apply();
+        });
+
 
     }
+    setTimeout(() => {
+        initGroups();
+        initEventBtnAddGroup();
+        initEventBtnSupprimerGroup();
+    });
+
 
     function addtoL(val, liste, i) {
         val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "");
@@ -96,6 +96,8 @@ window.onload = function () {
             let row = liste.insertRow(-1);
             row.insertCell(0).appendChild(document.createTextNode(val));
             ajoutFonctionRetirer(row, i);
+            row.setAttribute("togroup", groupes.value);
+            console.log(liste);
         } else {
             entrees[i].style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
         }
@@ -105,7 +107,7 @@ window.onload = function () {
         if (val == "*.*") {
             return true;
         }
-        var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/gm;
+        var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/igm;
         return regexURL.test(val);
     }
 
@@ -118,11 +120,26 @@ window.onload = function () {
     //     chrome.storage.sync.set({ donneesListeBlanche: "" });
     // }
 
-    function apply(i) {
-        update();
-        indiceSauvegarde[i][Object.keys(indiceSauvegarde[i])[0]] = listes[i].innerHTML;
-        uRLS[i][Object.keys(uRLS[i])[0]] = listes[i].innerHTML.replace(/<\/?tbody>|<td>|<\/?tr>/g, "").split("</td>").slice(0, -1);
-        save(i);
+    function apply() {
+        for (let i = 0, length = listes.length; i < length; i++) {
+
+            update();
+            indiceSauvegarde[i][Object.keys(indiceSauvegarde[i])[0]] = listes[i].innerHTML;
+            // let allUrls = Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, ""));
+            let urlsOrdonne = [];
+            listeValeursGroupes = Array.from(groupes.options).map(x => x.value);
+            for (let j = 0, length = listeValeursGroupes.length; j < length; j++) {
+                urlsOrdonne.push(Array.from(listes[i].rows).filter(x => x.getAttribute("togroup") === listeValeursGroupes[j]).map(x => x.innerHTML.replace(/<\/?td>/g, "")));
+            }
+
+            console.log('urlsOrdonne:', urlsOrdonne);
+            uRLS[i][Object.keys(uRLS[i])[0]] = urlsOrdonne;
+            // uRLS[1-i][Object.keys(uRLS[1-i])[0]] = urlsOrdonneAutreListe;
+            console.log('uRLS:', uRLS);
+            console.log('indiceSauvegarde:', indiceSauvegarde);
+
+            save(i);
+        }
     }
 
     function save(i) {
@@ -149,6 +166,10 @@ window.onload = function () {
         chrome.storage.local.get(Object.keys(uRLS[i])[0], function (tableau) {
             if (typeof tableau[Object.keys(uRLS[i])[0]] !== "undefined") {
                 uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
+                setTimeout(() => {
+                    console.log('uRLS[i]:', JSON.stringify(tableau[Object.keys(uRLS[i])[0]]));
+                }, 50);
+
             }
         });
 
@@ -156,12 +177,12 @@ window.onload = function () {
 
     function initEventBtnAjout(i) {
         update();
-        let lengthBefore = listes[i].innerHTML.replace(/<\/?tbody>|<td>|<\/?tr>/g, "").split("</td>").slice(0, -1).length;
+        let lengthBefore = Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
         addtoL(entrees[i].value, listes[i], i);
         entrees[i].value = "";
-        let change = lengthBefore !== listes[i].innerHTML.replace(/<\/?tbody>|<td>|<\/?tr>/g, "").split("</td>").slice(0, -1).length;
+        let change = lengthBefore !== Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
         if (change) {
-            btnsEnregistrer[i].style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
+            btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
             saveBeforeQuit = true;
         }
 
@@ -172,7 +193,10 @@ window.onload = function () {
             let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :').replace(/<|>/g, "");
             if (groupes.querySelector(`option[value="${nomDuNouveauGroupe.replace(/ /g, "_")}"]`) == null) {
                 groupes.innerHTML += `<option value=${nomDuNouveauGroupe.replace(/ /g, "_")}>${nomDuNouveauGroupe}</option>`;
-                chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+                chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)] });
+                // for (let i = 0, length = listes.length; i < length; i++) {
+                //     apply(i);
+                // }
             } else {
                 alert("Un groupe portant ce nom existe déja...");
             }
@@ -198,12 +222,29 @@ window.onload = function () {
         for (let groupRow of groupsTab) {
             groupRow.addEventListener("click", function () {
                 if (confirm("Etes vous sur de vouloir supprimer ce groupe?\nToutes les listes qu'il contient seront supprimées")) {
+                    update();
                     if (groupes.options.length > 1) {
                         let optionCorrespondante = groupes.querySelector(`option[value="${groupRow.textContent.replace(/ /g, "_")}"]`);
                         if (typeof optionCorrespondante !== 'undefined') {
+                            for (let i = 0, length = listes.length; i < length; i++) {
+
+                                //supprimer les liens des listes du groupe supprimé
+                                for (let j = listes[i].rows.length - 1; j >= 0; j--) {
+                                    if (listes[i].rows[j].getAttribute("togroup") === optionCorrespondante.value) {
+                                        console.log('[deleted]:', listes[i].rows[j]);
+                                        listes[i].rows[j].parentNode.removeChild(listes[i].rows[j]);
+                                    } else {
+                                        console.log("[not deleted]:", listes[i].rows[j].getAttribute("togroup"));
+                                    }
+                                }
+
+                            }
+
                             optionCorrespondante.parentNode.removeChild(optionCorrespondante);
                             groupRow.parentNode.removeChild(groupRow);
-                            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+                            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)] });
+                            apply();
+                            affichageListeParGroupe();
                         }
                     } else {
                         alert("Vous n'avez qu'un seul groupe : Vous ne pouvez pas le supprimer.");
@@ -213,23 +254,44 @@ window.onload = function () {
         }
     }
 
+    function affichageListeParGroupe() {
+        for (let i = 0, length = listes.length; i < length; i++) {
+            for (let row of listes[i].rows) {
+                if (row.getAttribute("togroup") !== groupes.value) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.removeProperty("display");
+                }
+            }
+        }
+    }
+
     function initGroups() {
         chrome.storage.sync.get("groupes", function (arg) {
             groupes.innerHTML = arg["groupes"][0];
             listeValeursGroupes = arg["groupes"][1];
-            console.log('arg.groupes:',arg.groupes);
+            console.log('arg.groupes:', arg.groupes);
+            affichageListeParGroupe();
         });
+
         groupes.addEventListener("change", function () {
+            update();
+            console.log('liste noire:', listes[0]);
+            console.log('liste blanche:', listes[1]);
             let selectedIndex = groupes.options.selectedIndex;
             for (let option of groupes.options) {
                 option.removeAttribute("selected");
             }
             groupes.options[selectedIndex].setAttribute("selected", "selected");;
-            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x=>x.value)] });
+            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)] });
+            affichageListeParGroupe();
         });
         setTimeout(() => {
             if (groupes.options.length === 0) {
                 groupes.innerHTML += `<option value="Groupe_1">Groupe 1</option>`;
+                for (let i = 0, length = listes.length; i < length; i++) {
+                    // apply(i);
+                }
             }
         });
     }
@@ -244,7 +306,7 @@ window.onload = function () {
     function ajoutFonctionRetirer(row, i) {
         row.addEventListener("click", function () {
             row.parentNode.removeChild(row);
-            btnsEnregistrer[i].style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
+            btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
             saveBeforeQuit = true;
         });
     }
