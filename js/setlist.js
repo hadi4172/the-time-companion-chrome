@@ -91,7 +91,9 @@ window.onload = function () {
 
     function addtoL(val, liste, i) {
         val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "");
-        if (entreeUrlConforme(val) && !(liste.innerHTML.includes(val))) {
+        let entreeExistanteDansLeGroupe = Array.from(liste.rows).some(x=>x.querySelector("td").innerHTML === val && x.getAttribute("togroup") === groupes.value);
+
+        if (entreeUrlConforme(val)&&!entreeExistanteDansLeGroupe) {
             entrees[i].style.removeProperty("box-shadow");
             let row = liste.insertRow(-1);
             row.insertCell(0).appendChild(document.createTextNode(val));
@@ -135,7 +137,7 @@ window.onload = function () {
             console.log('urlsOrdonne:', urlsOrdonne);
             uRLS[i][Object.keys(uRLS[i])[0]] = urlsOrdonne;
             // uRLS[1-i][Object.keys(uRLS[1-i])[0]] = urlsOrdonneAutreListe;
-            console.log('uRLS:', uRLS);
+            console.log('uRLS:', JSON.stringify(uRLS[i]));
             console.log('indiceSauvegarde:', indiceSauvegarde);
 
             save(i);
@@ -190,17 +192,42 @@ window.onload = function () {
 
     function initEventBtnAddGroup() {
         btnAjouterGroupe.addEventListener("click", function () {
-            let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :').replace(/<|>/g, "");
-            if (groupes.querySelector(`option[value="${nomDuNouveauGroupe.replace(/ /g, "_")}"]`) == null) {
-                groupes.innerHTML += `<option value=${nomDuNouveauGroupe.replace(/ /g, "_")}>${nomDuNouveauGroupe}</option>`;
-                chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)] });
-                // for (let i = 0, length = listes.length; i < length; i++) {
-                //     apply(i);
-                // }
-            } else {
-                alert("Un groupe portant ce nom existe déja...");
+            let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :');
+            if (nomDuNouveauGroupe !== null) {
+                nomDuNouveauGroupe = nomDuNouveauGroupe.replace(/<|>|"/g, "");
+
+                if (nomDuNouveauGroupe.replace(/ /g, "").length === 0) {
+                    nomDuNouveauGroupe = "[]";
+                }
+                if (groupes.querySelector(`option[value="${nomDuNouveauGroupe.replace(/ /g, "_")}"]`) == null) {
+                    groupes.innerHTML += `<option value=${nomDuNouveauGroupe.replace(/ /g, "_")}>${nomDuNouveauGroupe}</option>`;
+
+                    apply();
+
+                    let donneesSeverite;
+                    chrome.storage.sync.get("donneesSeverite", function (arg) {
+                        console.log('donnesSeveriteOnGet:', JSON.stringify(arg.donneesSeverite));
+                        donneesSeverite = arg.donneesSeverite;
+                        donneesSeverite.push([0, 0, false]);
+                        console.log('donnesSeveriteAfterGet:', JSON.stringify(donneesSeverite));
+                    });
+                    saveBeforeQuit = true;
+                    setTimeout(() => {
+                        console.log('donnesSeveriteBeforeSet:', JSON.stringify(donneesSeverite));
+                        chrome.storage.sync.set({
+                            groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)],
+                            donneesSeverite: donneesSeverite
+                        });
+                        saveBeforeQuit = false;
+                    },100);
+
+
+                } else {
+                    alert("Un groupe portant ce nom existe déja...");
+                }
             }
         });
+
     }
 
     function initEventBtnSupprimerGroup() {
@@ -240,11 +267,31 @@ window.onload = function () {
 
                             }
 
-                            optionCorrespondante.parentNode.removeChild(optionCorrespondante);
-                            groupRow.parentNode.removeChild(groupRow);
-                            chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)] });
-                            apply();
-                            affichageListeParGroupe();
+                            let donneesSeverite;
+                            chrome.storage.sync.get("donneesSeverite", function (arg) {
+                                console.log('donnesSeveriteOnGet:', JSON.stringify(arg.donneesSeverite));
+                                donneesSeverite = arg.donneesSeverite;
+                                donneesSeverite.splice(optionCorrespondante.index, 1);
+                                console.log('____indexOfDeletedGroup:', optionCorrespondante.index);
+                                console.log('donnesSeveriteAfterGet:', JSON.stringify(donneesSeverite));
+                            });
+                            saveBeforeQuit = true;
+                            setTimeout(() => {
+                                optionCorrespondante.parentNode.removeChild(optionCorrespondante);
+                                groupRow.parentNode.removeChild(groupRow);
+                                setTimeout(() => {
+                                    console.log('donnesSeveriteBeforeSet:', JSON.stringify(donneesSeverite));
+                                    chrome.storage.sync.set({
+                                        groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)],
+                                        donneesSeverite: donneesSeverite
+                                    });
+                                    apply();
+                                    affichageListeParGroupe();
+                                    saveBeforeQuit = false;
+                                });
+                            });
+
+
                         }
                     } else {
                         alert("Vous n'avez qu'un seul groupe : Vous ne pouvez pas le supprimer.");
@@ -268,10 +315,12 @@ window.onload = function () {
 
     function initGroups() {
         chrome.storage.sync.get("groupes", function (arg) {
-            groupes.innerHTML = arg["groupes"][0];
-            listeValeursGroupes = arg["groupes"][1];
-            console.log('arg.groupes:', arg.groupes);
-            affichageListeParGroupe();
+            if (typeof arg.groupes !== 'undefined') {
+                groupes.innerHTML = arg["groupes"][0];
+                listeValeursGroupes = arg["groupes"][1];
+                console.log('arg.groupes:', arg.groupes);
+                affichageListeParGroupe();
+            }
         });
 
         groupes.addEventListener("change", function () {
@@ -282,7 +331,7 @@ window.onload = function () {
             for (let option of groupes.options) {
                 option.removeAttribute("selected");
             }
-            groupes.options[selectedIndex].setAttribute("selected", "selected");;
+            groupes.options[selectedIndex].setAttribute("selected", "selected");
             chrome.storage.sync.set({ groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)] });
             affichageListeParGroupe();
         });

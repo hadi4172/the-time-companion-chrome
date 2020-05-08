@@ -98,7 +98,9 @@ window.onload = function () {
         setTimeout(() => {
 
             for (let i = 0, length = labels.length > 10 ? 10 : labels.length; i < length; i++) {
-                website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
+                if (data[i]!=="0:00") {
+                    website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
+                }
             }
             website.innerHTML += ("<tr><td style='color:dimgrey;'>------------------</td></tr>");
             website.innerHTML += (`<tr><td><span style="color:dimgrey; font-weight:bold;"> ${chrome.i18n.getMessage("popup_total")}: </span>` + "</td><td> " + fancyTimeFormat(calculerTempsTotal(dataUnformatted)) + "</td></tr>");

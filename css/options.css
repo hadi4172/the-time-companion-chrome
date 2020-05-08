@@ -16,24 +16,25 @@ html {
   min-height: 300px;
   max-height: 29vh;
   /* max-width: 28.25vw; */
-  overflow : scroll;
+  overflow : auto;
   margin: 15px;
+  border-radius: 50px;
 }
 
 table{
     table-layout: fixed;
-    width: 26vw;
+    width: 100%;
 }
 
 tr{
   font-size: 1em;
-  width:28vw;
+  width:100%;
   text-align: center;
   white-space: nowrap;
 }
 
 .titreduconteneur {
-  margin-left: 32%;
+  margin-left: 40%;
   font-size: 1.3em;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   text-shadow: 2px 2px 4px rgb(236, 236, 236); 
@@ -45,17 +46,25 @@ tr{
 
 .listes {
   min-height: max-content;
+  max-width: max-content;
   display: flex; 
   flex-direction: row;
+  justify-content:center;
   flex-wrap:wrap;
   background-color: rgba(231, 219, 219,0.5);
   margin-top: 40px;
+  border-radius: 50px;
+}
+
+.liste{
+  max-width: 425px;
 }
 
 .boutons {
   display: flex; 
-  flex-wrap:wrap;
+  
   flex-direction: row;
+  flex-wrap:wrap;
   margin: 5px;
   margin-top: auto;
 }
@@ -99,7 +108,7 @@ section[droite]{
   flex-direction: column;
   flex-wrap:wrap;
   margin: 10px;
-  max-width: 32vw;
+  max-width: 425px;
   position:relative
 }
 
@@ -148,6 +157,7 @@ h1{
 }
 
 .middle .box {
+  /* border-radius: 20px; */
   width: 200px;
   height: 200px;
   background-color: #007e90;

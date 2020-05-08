@@ -5,8 +5,8 @@ chrome.runtime.onInstalled.addListener(function (object) {
 
 setTimeout(() => {
 
-    var donneesSeverite;   //tableau qui contient 1: niveau de sévérité(int) 2: temps de cycle/d'activation(int)  3:activation du début(bool)
-    var listesUrl = [[], []];  //tableau de 2 dimensions qui contient les urls de 1. la liste noire et 2.la liste blanche
+    var donneesSeverite;   //avant: [niveau,temps,(bool)début] -> maintenant : [[niveau,temps,début],[niveau,temps,début],....]
+    var listesUrl = [[], []];  //avant : [tableauListeNoire,tableauListeBlanche] -> maintenant : [tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var dateOfLastSave;
     var sitesImmunises = [];  //tableau qui contient les pages webs ouvertes depuis moins de 7 minutes avec début activé
@@ -193,24 +193,55 @@ setTimeout(() => {
                 sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
 
             } else if (message.request == "sendMeDonneesSeverite") {
-                console.log("listes:", listesUrl);
+                console.log("listes:", JSON.stringify(listesUrl));
                 console.log("current url:", sender.tab.url)
-                console.log("IsitHere?", listesUrl[0].find(x => (sender.tab.url).includes(x)));
-                //assurerInitialisationTableauTemps();
-                if (listesUrl[1].some(x => (sender.tab.url).includes(x)) || listesUrl[1].some(x => x == "*.*")) {           //est dans la liste blanche
-                    sendResponse({ responseMessage: [0, 0, false] });
-                    console.log("is in whitelist");
-                } else if (listesUrl[0].some(x => (sender.tab.url).includes(x) || listesUrl[0].some(x => x == "*.*"))) {    //est dans la liste noire
-                    console.log("is in blacklist");
-                    if (donneesSeverite[2] == true && sitesImmunises.some(x => (sender.tab.url).includes(x))) {
-                        console.log('__site immunisé!');
-                        sendResponse({ responseMessage: donneesSeverite.map(x => x == true ? false : x) });
+                console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (sender.tab.url).includes(y))) ? listesUrl[0].find(x => x.some(y => (sender.tab.url).includes(y))).find(z => (sender.tab.url).includes(z)) : "NO");
+
+                let donneesAEnvoyer = [];
+                for (let i = 0, nbGroupes = listesUrl[0].length; i < nbGroupes; i++) {
+
+                    let presentDansListeNoire = listesUrl[0][i].some(x => sender.tab.url.includes(x) || x == "*.*");
+                    let presentDansListeBlanche = listesUrl[1][i].some(x => sender.tab.url.includes(x) || x == "*.*");
+                    let urlEstImmunisee = sitesImmunises.some(x => sender.tab.url.includes(x));
+
+                    if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
+                        console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}`);
+                    } else {
+                        console.log(`Groupe[${i}] N'est nul part`)
                     }
-                    sendResponse({ responseMessage: donneesSeverite });
-                } else {                                                              //est nul part
-                    sendResponse({ responseMessage: [0, 0, false] });
-                    console.log("is not in a list");
+
+                    if (presentDansListeNoire && !presentDansListeBlanche) {
+                        let severiteDeCeGroupe = donneesSeverite[i].slice();
+                        console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
+                        if (severiteDeCeGroupe[0] !== 0) {
+                            if (urlEstImmunisee) {
+                                severiteDeCeGroupe[2] = false;
+                            }
+                            donneesAEnvoyer.push(severiteDeCeGroupe);
+                        }
+                    }
                 }
+                console.log('::donneesAEnvoyer:', JSON.stringify(donneesAEnvoyer));
+
+                if (donneesAEnvoyer.length === 0) {
+                    sendResponse({ responseMessage: [[0, 0, false]] });
+                }
+                sendResponse({ responseMessage: donneesAEnvoyer });
+
+                // if (listesUrl[1].some(x => (sender.tab.url).includes(x)) || listesUrl[1].some(x => x == "*.*")) {           //est dans la liste blanche
+                //     sendResponse({ responseMessage: [0, 0, false] });
+                //     console.log("is in whitelist");
+                // } else if (listesUrl[0].some(x => (sender.tab.url).includes(x) || listesUrl[0].some(x => x == "*.*"))) {    //est dans la liste noire
+                //     console.log("is in blacklist");
+                //     if (donneesSeverite[2] == true && sitesImmunises.some(x => (sender.tab.url).includes(x))) {
+                //         console.log('__site immunisé!');
+                //         sendResponse({ responseMessage: donneesSeverite.map(x => x == true ? false : x) });
+                //     }
+                //     sendResponse({ responseMessage: donneesSeverite });
+                // } else {                                                              //est nul part
+                //     sendResponse({ responseMessage: [0, 0, false] });
+                //     console.log("is not in a list");
+                // }
             } else if (message.setBadge) {
                 //Original source : https://stackoverflow.com/a/32168534/7551620
                 chrome.tabs.get(sender.tab.id, function (tab) {
@@ -218,12 +249,14 @@ setTimeout(() => {
                         return; // the prerendered tab has been nuked, happens in omnibox search
                     }
                     if (tab.index >= 0) { // tab is visible
-                        chrome.browserAction.setBadgeText({ tabId: tab.id, text: message.setBadge });
+                        chrome.browserAction.setBadgeText({ tabId: tab.id, text: message.setBadge[0] });
+                        chrome.browserAction.setBadgeBackgroundColor({color: message.setBadge[1], tabId: tab.id});
                     } else { // prerendered tab, invisible yet, happens quite rarely
-                        var tabId = sender.tab.id, text = message.setBadge;
+                        var tabId = sender.tab.id, text = message.setBadge[0], color = message.setBadge[1] ;
                         chrome.webNavigation.onCommitted.addListener(function update(details) {
                             if (details.tabId == tabId) {
                                 chrome.browserAction.setBadgeText({ tabId: tabId, text: text });
+                                chrome.browserAction.setBadgeBackgroundColor({color: color, tabId: tabId});
                                 chrome.webNavigation.onCommitted.removeListener(update);
                             }
                         });
@@ -248,7 +281,11 @@ setTimeout(() => {
                     if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
                 });
 
-            } else if (message.lauchThisLevelNow == 3) {   //Close tab
+            } else if (message.lauchThisLevelNow == 2) {   //Close tab
+                
+                chrome.tabs.remove(sender.tab.id);
+
+            } else if (message.lauchThisLevelNow == 3) {   //Close tab after 10 seconds
                 setTimeout(() => {
                     chrome.tabs.remove(sender.tab.id);
                 }, 10 * 1000);
@@ -328,26 +365,28 @@ setTimeout(() => {
     });
 
     function update() {
-        chrome.storage.sync.get(["niveauSeverite", "proprietesDeRappel"], function (donnees) {
-            if (typeof donnees.niveauSeverite !== "undefined" && typeof donnees.proprietesDeRappel !== "undefined") {
-                donneesSeverite = [parseInt(donnees.niveauSeverite[1]), donnees.proprietesDeRappel[0], donnees.proprietesDeRappel[1]];
-            } else { donneesSeverite = [0, 0, false]; }
+        chrome.storage.sync.get(["donneesSeverite"], function (donnees) {
+            if (typeof donnees.donneesSeverite !== "undefined") {
+                donneesSeverite = donnees.donneesSeverite;
+            } else { donneesSeverite = [[0, 0, false]]; }
 
         });
 
         chrome.storage.local.get(["urlsListeNoire", "urlsListeBlanche"], function (donnees) {
             listesUrl = [
-                typeof donnees.urlsListeNoire !== "undefined" ? donnees.urlsListeNoire : []
-                , typeof donnees.urlsListeBlanche !== "undefined" ? donnees.urlsListeBlanche : []
+                typeof donnees.urlsListeNoire !== "undefined" ? donnees.urlsListeNoire : [[]]
+                , typeof donnees.urlsListeBlanche !== "undefined" ? donnees.urlsListeBlanche : [[]]
             ];
         });
 
     }
 
     function lookForURL(url) {
-
+        //vérifie si une partie spécifique d'un site web est dans une liste noire, si oui, enregistre cette partie spécifique, sinon enregistre tout le site
         if (typeof url !== "undefined") {
-            let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+            // let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+            let rechercheur = listesUrl[0].find(x => x.some(y => url.includes(y)));
+            let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostnameFromRegex(url);
             for (let i = 0; i < tempsParUrl.times.length; i++) {
                 if (tempsParUrl.times[i][0] == checkedUrl) {
                     console.log('lookforurlResult:', url, checkedUrl);
@@ -391,7 +430,8 @@ setTimeout(() => {
 
             //assurerInitialisationTableauTemps();
 
-            let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
+            let rechercheur = listesUrl[0].find(x => x.some(y => url.includes(y)));
+            let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostnameFromRegex(url);
 
             let trouve = false
             for (let i = 0; i < tempsParUrl.times.length && !trouve; i++) {

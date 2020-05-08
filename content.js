@@ -12,9 +12,9 @@ window.onload = function () {
 
         var previousTime = 0;
 
-        var niveauDeSeverite = 0;
-        var tempsActivationSeverite = 0;
-        var lancerSeveriteDuDebut = false;
+        var niveauDeSeverite = [];   //array de nombres
+        var tempsActivationSeverite = []; //array de nombre;
+        var lancerSeveriteDuDebut = [];  //array de bool
 
         var niveauActive = false;
 
@@ -52,13 +52,16 @@ window.onload = function () {
         }
 
         function getDonneesSeverite() {
+            niveauDeSeverite = []; tempsActivationSeverite = []; lancerSeveriteDuDebut = [] ;
             console.log("Entree 1 dans getDonneesSeverite()");
             chrome.runtime.sendMessage({ request: "sendMeDonneesSeverite" }, function (response) {
                 console.log("Entree 2 dans getDonneesSeverite()");
                 console.log("Reponse du background", response.responseMessage);
-                niveauDeSeverite = response.responseMessage[0];
-                tempsActivationSeverite = response.responseMessage[1];
-                lancerSeveriteDuDebut = response.responseMessage[2];
+                for (let i = 0, length = response.responseMessage.length; i < length; i++) {
+                    niveauDeSeverite.push(response.responseMessage[i][0]);
+                    tempsActivationSeverite.push(response.responseMessage[i][1]);
+                    lancerSeveriteDuDebut.push(response.responseMessage[i][2]);
+                }
             });
             setTimeout(() => {
                 verifierTemps();
@@ -83,64 +86,78 @@ window.onload = function () {
 
         setTimeout(() => {
 
-            if (lancerSeveriteDuDebut) {
-                switch (niveauDeSeverite) {
-                    case 1:
-                        if (document.querySelector(".awn-toast-warning") == null) {
-                            notifier.warning(chrome.i18n.getMessage("content_notifier_debut"));
-                            notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
-                            notificationSound.play();
-                            chrome.runtime.sendMessage({ immuniser: true }, function (response) {
-                            });
+            for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
 
-                        }
-                        break;
-                    case 2:
-                        notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
-                        notificationSound.play();
-                        let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                        let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;"><p style="text-align: center;">
+                if (lancerSeveriteDuDebut[i]) {
+                    switch (niveauDeSeverite[i]) {
+                        case 1:
+                            if (document.querySelector(".awn-toast-warning") == null) {
+                                notifier.warning(chrome.i18n.getMessage("content_notifier_debut"));
+                                notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
+                                notificationSound.play();
+                                chrome.runtime.sendMessage({ immuniser: true }, function (response) {
+                                });
+
+                            }
+                            break;
+                        case 2:
+                            notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
+                            notificationSound.play();
+                            let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
+                            let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                 <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                 <form autocomplete="off"><input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
 
-                        creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
-                        break;
+                            creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
+                            break;
 
-                    default: break;
+                        default: break;
+                    }
                 }
+
             }
+
         }, 500);
 
 
         function verifierTemps() {
-            console.log("niveauDeSeverite:", niveauDeSeverite);
-            if (niveauDeSeverite != 0 && niveauActive === false) {
+
+            console.log("niveauDeSeverite:", JSON.stringify(niveauDeSeverite));
+            console.log("tempsActivationSeverite:", JSON.stringify(tempsActivationSeverite));
+            console.log("lancerSeveriteDuDebut:", JSON.stringify(lancerSeveriteDuDebut));
+
+            if (niveauDeSeverite[0] != 0 && niveauActive === false) {
                 setIntervalImmediately(() => {
                     updateBadge();
                     if (!isInactive(TimeMe.getTimeOnPageInMilliseconds("webpage"))) {
-                        switch (niveauDeSeverite) {
-                            case 1: case 2:
-                                if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite * 60) < 1) && (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) > 1) {
-                                    traitementSeverite(niveauDeSeverite);
-                                }
-                                break;
-                            case 3: case 4:
-                                if ((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) >= (tempsActivationSeverite * 60)) {
-                                    traitementSeverite(niveauDeSeverite);
-                                }
-                                break;
-                            default:
-                                break;
+                        for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
+                            switch (niveauDeSeverite[i]) {
+                                case 1: case 2:
+                                    if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite[i] * 60) < 1) && (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) > 1) {
+                                        traitementSeverite(niveauDeSeverite[i]);
+                                    }
+                                    break;
+                                case 3: case 4:
+                                    if ((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) >= (tempsActivationSeverite[i] * 60)) {
+                                        traitementSeverite(niveauDeSeverite[i]);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                 }, 1000);
 
                 niveauActive = true;
             }
+
         }
 
-        console.log("Niveau:" + niveauDeSeverite);
+        for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
+            console.log(`Niveau[${i}]:` + niveauDeSeverite[i]);
+        }
 
         function traitementSeverite(niveau) {
             console.log("Entree 1 traitementSeverite(niveau)");
@@ -194,15 +211,16 @@ window.onload = function () {
         }
 
         function updateBadge() {
-            switch (niveauDeSeverite) {
+            let severiteLaPlusForte = Math.max(...niveauDeSeverite);
+            switch (severiteLaPlusForte) {
                 case 1: case 2:
                     let secondesEcoules = TimeMe.getTimeOnCurrentPageInSeconds() + previousTime;
-                    chrome.runtime.sendMessage({ setBadge: fancyTimeFormat(secondesEcoules) });
+                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesEcoules),"#6BAB2F"] });
 
                     break;
                 case 3: case 4:
-                    let secondesRestantes = ((tempsActivationSeverite * 60) - (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime));
-                    chrome.runtime.sendMessage({ setBadge: fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0) });
+                    let secondesRestantes = ((tempsActivationSeverite[niveauDeSeverite.indexOf(severiteLaPlusForte)] * 60) - (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime));
+                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0),"#ed3a2d"] });
 
                     break;
                 default:
@@ -259,7 +277,7 @@ window.onload = function () {
             case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
                 console.log('Cliqué!');
                 if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
-                    if (lancerSeveriteDuDebut) {
+                    if (lancerSeveriteDuDebut.some((x,i)=>{return (x==true && niveauDeSeverite[i]===2);})) {
                         chrome.runtime.sendMessage({ immuniser: true }, function (response) {
                         });
                     }
@@ -273,7 +291,7 @@ window.onload = function () {
 
             case2boxInterval.querySelector(".awn-btn-cancel").addEventListener("click", function () {
                 console.log('Cliqué Quitter!');
-                chrome.runtime.sendMessage({ lauchThisLevelNow: 3 });
+                chrome.runtime.sendMessage({ lauchThisLevelNow: 2 });
             });
         }
 

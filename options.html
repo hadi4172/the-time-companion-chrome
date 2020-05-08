@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>The Time Companion Menu</title>
+    <link rel="stylesheet" href="library/SimpleBar/simplebar.css" />
     <link rel="stylesheet" href="css/dropdownlist.css" />
     <link rel="stylesheet" href="css/options.css" />
+    <script src="library/SimpleBar/simplebar.min.js"></script>
     <script src="js/setlist.js"></script>
     <script src="js/options.js"></script>
 </head>
@@ -56,16 +58,16 @@
 
         <div class=listes>
 
-            <div class=listenoire>
+            <div class="listenoire liste">
                 <p id=lntitre class=titreduconteneur></p>
-                <div class=conteneurdetableau>
+                <div class=conteneurdetableau data-simplebar>
                     <table valeurslistenoire></table>
                 </div>
             </div>
 
-            <div class=listeblanche>
+            <div class="listeblanche liste">
                 <p id=lbtitre class=titreduconteneur></p>
-                <div class=conteneurdetableau>
+                <div class=conteneurdetableau data-simplebar>
                     <table valeurslisteblanche></table>
                 </div>
             </div>
@@ -93,7 +95,8 @@
             <a dons href="https://www.paypal.me/hadiyahia" target="_blank" class="btn btn-3"></a>
             <a contact href="mailto:hadiyahia@hotmail.com" class="btn btn-3"></a>
             <a bug href="mailto:hadiyahia@hotmail.com?subject=[Bug%20Report]" class="btn btn-3 long-text-btn"></a>
-            <a suggerer href="mailto:hadiyahia@hotmail.com?subject=[Request%20a%20new%20feature]" class="btn btn-3 long-text-btn"></a>
+            <a suggerer href="mailto:hadiyahia@hotmail.com?subject=[Request%20a%20new%20feature]"
+                class="btn btn-3 long-text-btn"></a>
 
         </div>
 
