@@ -52,7 +52,7 @@ window.onload = function () {
         }
 
         function getDonneesSeverite() {
-            niveauDeSeverite = []; tempsActivationSeverite = []; lancerSeveriteDuDebut = [] ;
+            niveauDeSeverite = []; tempsActivationSeverite = []; lancerSeveriteDuDebut = [];
             console.log("Entree 1 dans getDonneesSeverite()");
             chrome.runtime.sendMessage({ request: "sendMeDonneesSeverite" }, function (response) {
                 console.log("Entree 2 dans getDonneesSeverite()");
@@ -106,8 +106,9 @@ window.onload = function () {
                             let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
                             let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                <form autocomplete="off"><input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
+                           <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
+                           <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form>
+                           <span>Combien de temps avez vous encore besoin ? <span><select id="timeNeededDropdown" style="max-width:120px;"></select></div>`;
 
                             creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                             break;
@@ -179,9 +180,12 @@ window.onload = function () {
                         notificationSound.play();
 
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                        let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;"><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
+                        let contenuDeLaBoite2 = `<div style="${cssListeDéfilante}color: #606c71;line-height: 1.5;"><p style="text-align: center;">
+                        ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
+                        ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <form autocomplete="off"> <input autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form></div>`;
+                    <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form>
+                    <span>Combien de temps avez vous encore besoin ? <span><select id="timeNeededDropdown" style="max-width:120px;"></select></div>`;
 
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                     }
@@ -215,12 +219,12 @@ window.onload = function () {
             switch (severiteLaPlusForte) {
                 case 1: case 2:
                     let secondesEcoules = TimeMe.getTimeOnCurrentPageInSeconds() + previousTime;
-                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesEcoules),"#6BAB2F"] });
+                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesEcoules), "#6BAB2F"] });
 
                     break;
                 case 3: case 4:
                     let secondesRestantes = ((tempsActivationSeverite[niveauDeSeverite.indexOf(severiteLaPlusForte)] * 60) - (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime));
-                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0),"#ed3a2d"] });
+                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0), "#ed3a2d"] });
 
                     break;
                 default:
@@ -273,14 +277,28 @@ window.onload = function () {
                 chrome.runtime.sendMessage({ mute: 1 });
             }, 1500);
             let case2boxInterval = notifier.confirm(texte).newNode;
+            let timeNeededDropdown = case2boxInterval.querySelector("#timeNeededDropdown");
+            let timeNeededPossibilities = ["1 min","2 min","5 min","10 min","20 min","30 min","45 min","1h","1h30","2h","3h","I don't know"]
+            let tempsCorrespondant = [1,2,5,10,20,30,45,60,90,120,180,false];
+
+            for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
+                timeNeededDropdown.innerHTML += `<option>${timeNeededPossibilities[i]}</option>`
+            }
 
             case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
                 console.log('Cliqué!');
                 if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
-                    if (lancerSeveriteDuDebut.some((x,i)=>{return (x==true && niveauDeSeverite[i]===2);})) {
-                        chrome.runtime.sendMessage({ immuniser: true }, function (response) {
-                        });
+                    if (lancerSeveriteDuDebut.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
+                        chrome.runtime.sendMessage({ immuniser: true }, function (response) {});
                     }
+                    if (timeNeededDropdown.options.selectedIndex !== timeNeededDropdown.options.length-1) {
+                        let valeurLancementNiveau3 = tempsCorrespondant[timeNeededDropdown.options.selectedIndex]+(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime)/60;
+                        niveauDeSeverite.push(3);
+                        tempsActivationSeverite.push(valeurLancementNiveau3);
+                        lancerSeveriteDuDebut.push(false);
+                        chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, tempsCorrespondant[timeNeededDropdown.options.selectedIndex]] }, function (response) {});
+                    }
+                    
                     chrome.runtime.sendMessage({ mute: 0 });
                     body.style.overflow = "initial";
                     case2boxInterval.parentNode.removeChild(case2boxInterval);

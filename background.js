@@ -10,6 +10,8 @@ setTimeout(() => {
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var dateOfLastSave;
     var sitesImmunises = [];  //tableau qui contient les pages webs ouvertes depuis moins de 7 minutes avec début activé
+    var groupesCaches = [[], []];  //[donneesSeverite,listeUrl] donc [[[niveau,temps,début],[niveau,temps,début]],[[url,url,url],[url,url]]]
+    var longTimeouts = [];
 
 
 
@@ -82,6 +84,10 @@ setTimeout(() => {
                 if (dateOfLastSave != getTodayInString()) {
                     commencerUnNouveauJour();
                 }
+                for (let timeoutobject of longTimeouts) {
+                    clearTimeout(timeoutobject);
+                }
+                groupesCaches = [[], []];
                 clearTimeout(timerDeRecommencement);
                 timerDeRecommencement = gererUnNouveauJour();
             }
@@ -214,7 +220,7 @@ setTimeout(() => {
                         let severiteDeCeGroupe = donneesSeverite[i].slice();
                         console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
                         if (severiteDeCeGroupe[0] !== 0) {
-                            if (urlEstImmunisee) {
+                            if (urlEstImmunisee && severiteDeCeGroupe[0]===2) {
                                 severiteDeCeGroupe[2] = false;
                             }
                             donneesAEnvoyer.push(severiteDeCeGroupe);
@@ -228,20 +234,6 @@ setTimeout(() => {
                 }
                 sendResponse({ responseMessage: donneesAEnvoyer });
 
-                // if (listesUrl[1].some(x => (sender.tab.url).includes(x)) || listesUrl[1].some(x => x == "*.*")) {           //est dans la liste blanche
-                //     sendResponse({ responseMessage: [0, 0, false] });
-                //     console.log("is in whitelist");
-                // } else if (listesUrl[0].some(x => (sender.tab.url).includes(x) || listesUrl[0].some(x => x == "*.*"))) {    //est dans la liste noire
-                //     console.log("is in blacklist");
-                //     if (donneesSeverite[2] == true && sitesImmunises.some(x => (sender.tab.url).includes(x))) {
-                //         console.log('__site immunisé!');
-                //         sendResponse({ responseMessage: donneesSeverite.map(x => x == true ? false : x) });
-                //     }
-                //     sendResponse({ responseMessage: donneesSeverite });
-                // } else {                                                              //est nul part
-                //     sendResponse({ responseMessage: [0, 0, false] });
-                //     console.log("is not in a list");
-                // }
             } else if (message.setBadge) {
                 //Original source : https://stackoverflow.com/a/32168534/7551620
                 chrome.tabs.get(sender.tab.id, function (tab) {
@@ -250,13 +242,13 @@ setTimeout(() => {
                     }
                     if (tab.index >= 0) { // tab is visible
                         chrome.browserAction.setBadgeText({ tabId: tab.id, text: message.setBadge[0] });
-                        chrome.browserAction.setBadgeBackgroundColor({color: message.setBadge[1], tabId: tab.id});
+                        chrome.browserAction.setBadgeBackgroundColor({ color: message.setBadge[1], tabId: tab.id });
                     } else { // prerendered tab, invisible yet, happens quite rarely
-                        var tabId = sender.tab.id, text = message.setBadge[0], color = message.setBadge[1] ;
+                        var tabId = sender.tab.id, text = message.setBadge[0], color = message.setBadge[1];
                         chrome.webNavigation.onCommitted.addListener(function update(details) {
                             if (details.tabId == tabId) {
                                 chrome.browserAction.setBadgeText({ tabId: tabId, text: text });
-                                chrome.browserAction.setBadgeBackgroundColor({color: color, tabId: tabId});
+                                chrome.browserAction.setBadgeBackgroundColor({ color: color, tabId: tabId });
                                 chrome.webNavigation.onCommitted.removeListener(update);
                             }
                         });
@@ -274,6 +266,10 @@ setTimeout(() => {
                 console.log('__added to sites immunisé');
                 addToSitesImmunises(sender.tab.url);
 
+            } else if (message.ajouterAUnGroupeCache) {
+                console.log('__added to groupe caché');
+                addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2]);
+
             } else if (message.mute == 1) {  // Mute sounds
 
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -282,7 +278,7 @@ setTimeout(() => {
                 });
 
             } else if (message.lauchThisLevelNow == 2) {   //Close tab
-                
+
                 chrome.tabs.remove(sender.tab.id);
 
             } else if (message.lauchThisLevelNow == 3) {   //Close tab after 10 seconds
@@ -350,6 +346,37 @@ setTimeout(() => {
         console.log('.._..sitesImmunises:', JSON.stringify(sitesImmunises));
     }
 
+    function addToHiddenGroup(url, time, optionChoisie) {
+        let rechercheur = listesUrl[0].find((x, i) => x.some(y => url.includes(y)) && donneesSeverite[i][0] === 2);
+        let checkedUrl = rechercheur.find(y => url.includes(y));
+        if (typeof checkedUrl !== 'undefined') {
+            if (!groupesCaches[1].some(x => x.some(y => checkedUrl.includes(y)))) {
+                let hiddenBlacklist = ["hiddengrouptimecompanion.hgtc", checkedUrl];
+                groupesCaches[0].push([3, time, false]);
+                groupesCaches[1].push(hiddenBlacklist);
+                donneesSeverite.push(groupesCaches[0][groupesCaches[0].length-1]);
+                listesUrl[0].push(groupesCaches[1][groupesCaches[1].length-1]);
+                listesUrl[1].push([]);
+                let hiddenGroupTimeout = setTimeout(() => {
+                    const index = groupesCaches[1].indexOf(hiddenBlacklist);
+                    if (index > -1) {
+
+                        groupesCaches[0].splice(index, 1);
+                        groupesCaches[1].splice(index, 1);
+
+                        let indexInAllGroups = (donneesSeverite.length-groupesCaches.length+index);
+                        donneesSeverite.splice(indexInAllGroups, 1);
+                        listesUrl[0].splice(indexInAllGroups, 1);
+                        listesUrl[1].splice(indexInAllGroups, 1);
+
+                    }
+                }, (optionChoisie + (optionChoisie>5? 5:2) + (optionChoisie>=45? 5:0) + (optionChoisie>=60? 20:0) ) * 60 * 1000);
+                longTimeouts.push(hiddenGroupTimeout);
+            }
+            console.log('.._..groupesCaches:', JSON.stringify(groupesCaches));
+        }
+    }
+
 
     function getHostnameFromRegex(url) {
         /* //old version
@@ -370,6 +397,9 @@ setTimeout(() => {
                 donneesSeverite = donnees.donneesSeverite;
             } else { donneesSeverite = [[0, 0, false]]; }
 
+            if (groupesCaches[0].length !== 0) {
+                donneesSeverite.push(...groupesCaches[0]);
+            }
         });
 
         chrome.storage.local.get(["urlsListeNoire", "urlsListeBlanche"], function (donnees) {
@@ -377,7 +407,14 @@ setTimeout(() => {
                 typeof donnees.urlsListeNoire !== "undefined" ? donnees.urlsListeNoire : [[]]
                 , typeof donnees.urlsListeBlanche !== "undefined" ? donnees.urlsListeBlanche : [[]]
             ];
+            if (groupesCaches[0].length !== 0) {
+                for (const listeNoire of groupesCaches[1]) {
+                    listesUrl[0].push(listeNoire);
+                    listesUrl[1].push([]);
+                }
+            }
         });
+        
 
     }
 

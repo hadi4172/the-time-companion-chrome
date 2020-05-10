@@ -194,7 +194,7 @@ window.onload = function () {
         btnAjouterGroupe.addEventListener("click", function () {
             let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :');
             if (nomDuNouveauGroupe !== null) {
-                nomDuNouveauGroupe = nomDuNouveauGroupe.replace(/<|>|"/g, "");
+                nomDuNouveauGroupe = nomDuNouveauGroupe.replace(/<|>|"|\\/g, "");
 
                 if (nomDuNouveauGroupe.replace(/ /g, "").length === 0) {
                     nomDuNouveauGroupe = "[]";
@@ -252,7 +252,7 @@ window.onload = function () {
                     update();
                     if (groupes.options.length > 1) {
                         let optionCorrespondante = groupes.querySelector(`option[value="${groupRow.textContent.replace(/ /g, "_")}"]`);
-                        if (typeof optionCorrespondante !== 'undefined') {
+                        if (optionCorrespondante !==null && typeof optionCorrespondante !== 'undefined') {
                             for (let i = 0, length = listes.length; i < length; i++) {
 
                                 //supprimer les liens des listes du groupe supprimé
