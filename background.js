@@ -5,16 +5,16 @@ chrome.runtime.onInstalled.addListener(function (object) {
 
 setTimeout(() => {
 
-    var donneesSeverite;   //avant: [niveau,temps,(bool)début] -> maintenant : [[niveau,temps,début],[niveau,temps,début],....]
-    var listesUrl = [[], []];  //avant : [tableauListeNoire,tableauListeBlanche] -> maintenant : [tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
+    var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
+    var listesUrl = [[], []];  //[tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
     var dateOfLastSave;
     var sitesImmunises = [];  //tableau qui contient les pages webs ouvertes depuis moins de 7 minutes avec début activé
-    var groupesCaches = [[], []];  //[donneesSeverite,listeUrl] donc [[[niveau,temps,début],[niveau,temps,début]],[[url,url,url],[url,url]]]
-    var longTimeouts = [];
+    var groupesCaches = [[], []];  //[donneesSeverite,listesUrlNoire] donc [[[niveau,temps,début],[niveau,temps,début]],[[url,url,url],[url,url]]]
+    var longTimeouts = [];  // références les longstimeouts qui risquent de ne pas se lancer si la personne met son ordinateur en mode veille
+    var etatUrlsAvecNiveau3 = [[], [[], [], []]]; // [[liste d'urls avec niveau 3 actif actuellement],[[liste d'urls ayant subi le niveau 3],[nombre de fois subi par url],[temps initial par url]]]
 
-
-
+    //vérifie si l'initialisation est la première de la journée ou non
     chrome.storage.local.get("date", function (arg) {
         console.log(arg.date);
         today = getTodayInString();
@@ -23,6 +23,8 @@ setTimeout(() => {
             console.log("Données de date existantes");
             if (today === dateOfLastSave) {
                 initTempsParUrl();
+                initGroupesCaches();
+                initEtatUrlsAvecNiveau3();
                 console.log("Chargé tempsparurl");
             } else {
                 dateOfLastSave = today;
@@ -35,16 +37,13 @@ setTimeout(() => {
         }
     });
 
+    //gère les situations ou l'utilisateur met son ordinateur en veille
     gererSleepMode();
+
     saveDateOfLastSave();
     showBytesInUse();
 
-
-    TimeMe.initialize({
-        currentPageName: "my-home-page", // current page
-        idleTimeoutInSeconds: 30 // seconds
-    });
-
+    //mettre à jour les informations sur les listes
     update();
 
     //initialisation de tempsParUrl
@@ -57,11 +56,41 @@ setTimeout(() => {
         });
     }
 
+    //initialisation des groupes cachés
+    function initGroupesCaches() {
+        chrome.storage.sync.get("groupesCaches", function (arg) {
+            if (typeof arg.groupesCaches !== 'undefined') {
+                groupesCaches = arg.groupesCaches;
+                let length = groupesCaches[0].length;
+                setTimeout(() => {
+                    for (let i = 0; i < length; i++) {
+                        groupesCaches[0].splice(i, 1);
+                        groupesCaches[1].splice(i, 1);
+                    }
+                }, 5 * 60 * 1000);
+            }
+
+        });
+    }
+
+    //initialisation des informations sur les urls affectés par le niveau 3 de sévérité
+    function initEtatUrlsAvecNiveau3() {
+        chrome.storage.sync.get('etatUrlsAvecNiveau3', function (arg) {
+            if (typeof arg.etatUrlsAvecNiveau3 !== 'undefined') {
+                etatUrlsAvecNiveau3 = arg.etatUrlsAvecNiveau3;
+                let length = etatUrlsAvecNiveau3[0].length;
+                setTimeout(() => {
+                    for (let i = 0; i < length; i++) {
+                        etatUrlsAvecNiveau3[0].splice(i, 1);
+                    }
+                }, 5 * 60 * 1000);
+            }
+        });
+    }
+
+    //remmet les compteurs de temps des urls à zéro quand un nouveau jour commence
     function gererUnNouveauJour() {
-        let dateOfOpen = (new Date()).getTime();
-        let dateOfTomorrow = new Date(dateOfOpen + (24 * 60 * 60 * 1000));
-        dateOfTomorrow.setHours(0); dateOfTomorrow.setMinutes(0); dateOfTomorrow.setSeconds(1); dateOfTomorrow.setMilliseconds(0);
-        let tempsRestantPourDemainEnMs = dateOfTomorrow.getTime() - dateOfOpen;
+        let tempsRestantPourDemainEnMs = calculerTempsRestantPourDemainEnMs();
         console.log('tempsRestantPourDemainEnH:', tempsRestantPourDemainEnMs / (1000 * 60 * 60));
         return setTimeout(() => {
             commencerUnNouveauJour();
@@ -73,6 +102,14 @@ setTimeout(() => {
         }, tempsRestantPourDemainEnMs);
     }
 
+    function calculerTempsRestantPourDemainEnMs() {
+        let dateOfOpen = (new Date()).getTime();
+        let dateOfTomorrow = new Date(dateOfOpen + (24 * 60 * 60 * 1000));
+        dateOfTomorrow.setHours(0); dateOfTomorrow.setMinutes(0); dateOfTomorrow.setSeconds(1); dateOfTomorrow.setMilliseconds(0);
+        return dateOfTomorrow.getTime() - dateOfOpen;
+    }
+
+    //gère les situations ou l'utilisateur met son ordinateur en veille
     function gererSleepMode() {
         let derniereFois = (new Date()).getTime();
         let timerDeRecommencement = gererUnNouveauJour();
@@ -83,11 +120,15 @@ setTimeout(() => {
                 // L'ordinateur vien de se réveiller
                 if (dateOfLastSave != getTodayInString()) {
                     commencerUnNouveauJour();
+                } else {
+                    initGroupesCaches();
+                    initEtatUrlsAvecNiveau3();
                 }
                 for (let timeoutobject of longTimeouts) {
                     clearTimeout(timeoutobject);
                 }
-                groupesCaches = [[], []];
+                longTimeouts = [];
+
                 clearTimeout(timerDeRecommencement);
                 timerDeRecommencement = gererUnNouveauJour();
             }
@@ -95,11 +136,13 @@ setTimeout(() => {
         }, 30 * 1000);
     }
 
+    //obtient la petite date d'aujourd'hui en format string pour faciliter les comparaisons
     function getTodayInString() {
         let today = new Date();
         return JSON.stringify([today.getDate(), today.getMonth() + 1, today.getFullYear()]);
     }
 
+    //sauvegarde la date de la dernière initialisation
     function saveDateOfLastSave() {
         setTimeout(() => {
             console.log("dateOfLastSave:", dateOfLastSave);
@@ -107,16 +150,20 @@ setTimeout(() => {
         }, 1000);
     }
 
+    //remmet les compteurs de temps des urls à zéro quand un nouveau jour commence
     function commencerUnNouveauJour() {
         tempsParUrl = { times: [] };
         chrome.storage.local.set(tempsParUrl);
         dateOfLastSave = getTodayInString();
         saveDateOfLastSave();
-        // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        //     chrome.tabs.sendMessage(tabs[0].id, { resetYourTime: true }, function (response) {
-        //         console.log('Sent Message to content script to reset the time');
-        //     });
-        // });
+
+        for (let timeoutobject of longTimeouts) {
+            clearTimeout(timeoutobject);
+        }
+        longTimeouts = [];
+        groupesCaches = [[], []];
+        etatUrlsAvecNiveau3 = [[], [[], []]];
+
         chrome.tabs.query({}, function (tabs) {
             for (var i = 0; i < tabs.length; i++) {
                 chrome.tabs.sendMessage(tabs[i].id, { resetYourTime: true }, function (response) {
@@ -135,12 +182,8 @@ setTimeout(() => {
                 console.log("start by onActivated");
                 (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
                 setTimeout(() => {
-                    // console.log(url, timeSpent);
-                    // storeData(url, timeSpent);
                     console.log("[TEMPS PAR URL ONACTIVATED]:", tempsParUrl.times.slice().toString());
                 });
-
-                // console.log("end by onActivated");
             }
         });
     });
@@ -163,12 +206,14 @@ setTimeout(() => {
                     // console.log("end by onUpdated");
                 }
             }
+            //un son à été joué sur la page du navigateur récement
             if (change.audible == true) {
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                     chrome.tabs.sendMessage(tabs[0].id, { keepTracking: "true" }, function (response) {
                         console.log('___tab is audible___');
                     });
                 });
+                //Le son ne joue plus
             } else if (change.audible == false) {
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                     chrome.tabs.sendMessage(tabs[0].id, { keepTracking: "false" }, function (response) {
@@ -184,12 +229,11 @@ setTimeout(() => {
         return regexURL.test(val);
     }
 
-    //detecter le temps qu'a pris un tab avant d'être fermé
-    // Message reçu du content script
+    // Gère les demandes envoyés du content script
     chrome.runtime.onMessage.addListener(
         function (message, sender, sendResponse) {
             update();
-            // console.log("start by beforeUnload");
+            // Envoie le temps correspondant à celui de l'url de la page active du content script
             if (message.request == "sendMePreviousTimeData") {
 
                 console.log("sending previous time...");
@@ -198,6 +242,7 @@ setTimeout(() => {
                 console.log('___Sent time___:', tempsParUrl.times[lookForURL(sender.tab.url)][1], sender.tab.url);
                 sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
 
+                // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
             } else if (message.request == "sendMeDonneesSeverite") {
                 console.log("listes:", JSON.stringify(listesUrl));
                 console.log("current url:", sender.tab.url)
@@ -220,8 +265,17 @@ setTimeout(() => {
                         let severiteDeCeGroupe = donneesSeverite[i].slice();
                         console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
                         if (severiteDeCeGroupe[0] !== 0) {
-                            if (urlEstImmunisee && severiteDeCeGroupe[0]===2) {
+                            if (urlEstImmunisee && severiteDeCeGroupe[0] === 2) {
                                 severiteDeCeGroupe[2] = false;
+                            } else if (severiteDeCeGroupe[0] === 3 && i < (listesUrl[0].length - groupesCaches[0].length)) {
+                                console.log("______etatUrlsAvecNiveau3:  ", JSON.stringify(etatUrlsAvecNiveau3));
+                                let index = etatUrlsAvecNiveau3[1][0].findIndex(x => sender.tab.url.includes(x));
+                                if (index > -1) {
+                                    let multiplicateurDeTempsRestant = etatUrlsAvecNiveau3[1][1][index];
+                                    severiteDeCeGroupe[1] *= (multiplicateurDeTempsRestant);
+                                    severiteDeCeGroupe[1] += etatUrlsAvecNiveau3[1][2][index];
+                                }
+                                console.log("______etatUrlsAvecNiveau3Severite:  ", JSON.stringify(severiteDeCeGroupe));
                             }
                             donneesAEnvoyer.push(severiteDeCeGroupe);
                         }
@@ -234,6 +288,7 @@ setTimeout(() => {
                 }
                 sendResponse({ responseMessage: donneesAEnvoyer });
 
+            //gère le badge de l'extension
             } else if (message.setBadge) {
                 //Original source : https://stackoverflow.com/a/32168534/7551620
                 chrome.tabs.get(sender.tab.id, function (tab) {
@@ -255,27 +310,26 @@ setTimeout(() => {
                     }
                 });
 
+            //Enlève le mute de la page active du content script
             } else if (message.mute == 0) {
 
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                     var mutedInfo = tabs[0].mutedInfo;
                     if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
                 });
-
-            } else if (message.immuniser) {
-                console.log('__added to sites immunisé');
-                addToSitesImmunises(sender.tab.url);
-
-            } else if (message.ajouterAUnGroupeCache) {
-                console.log('__added to groupe caché');
-                addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2]);
-
             } else if (message.mute == 1) {  // Mute sounds
 
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                     var mutedInfo = tabs[0].mutedInfo;
                     if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
                 });
+            } else if (message.immuniser) { //Immunise le site web contre un nouveau pop du niveau 2 au début pour 10 minutes
+                console.log('__added to sites immunisé');
+                addToSitesImmunises(sender.tab.url);
+
+            } else if (message.ajouterAUnGroupeCache) {  //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
+                console.log('__added to groupe caché');
+                addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2]);
 
             } else if (message.lauchThisLevelNow == 2) {   //Close tab
 
@@ -293,7 +347,10 @@ setTimeout(() => {
                         chrome.tabs.remove(tabs[i].id);
                     }
                 });
-            } else if (message.timeElapsed) {
+            } else if (message.gererNiveau3) {  //Gestion du processus de répétition du niveau 3 après qu'il aie pop
+                gererNiveau3(message.gererNiveau3[0], message.gererNiveau3[1], message.gererNiveau3[2]);
+
+            } else if (message.timeElapsed) {  //Enregsistre le temps écoulé sur la page web récente
                 console.log("start by runtime");
                 console.log("stored new data..!");
                 console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0])
@@ -335,6 +392,7 @@ setTimeout(() => {
         });
     }
 
+    //Immunise le site web contre un nouveau pop du niveau 2 au début pour 10 minutes
     function addToSitesImmunises(url) {
         let hostname = getHostnameFromRegex(url);
         if (!sitesImmunises.includes(hostname)) {
@@ -346,6 +404,7 @@ setTimeout(() => {
         console.log('.._..sitesImmunises:', JSON.stringify(sitesImmunises));
     }
 
+    //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
     function addToHiddenGroup(url, time, optionChoisie) {
         let rechercheur = listesUrl[0].find((x, i) => x.some(y => url.includes(y)) && donneesSeverite[i][0] === 2);
         let checkedUrl = rechercheur.find(y => url.includes(y));
@@ -354,9 +413,10 @@ setTimeout(() => {
                 let hiddenBlacklist = ["hiddengrouptimecompanion.hgtc", checkedUrl];
                 groupesCaches[0].push([3, time, false]);
                 groupesCaches[1].push(hiddenBlacklist);
-                donneesSeverite.push(groupesCaches[0][groupesCaches[0].length-1]);
-                listesUrl[0].push(groupesCaches[1][groupesCaches[1].length-1]);
+                donneesSeverite.push(groupesCaches[0][groupesCaches[0].length - 1]);
+                listesUrl[0].push(groupesCaches[1][groupesCaches[1].length - 1]);
                 listesUrl[1].push([]);
+                chrome.storage.sync.set({ groupesCaches: groupesCaches });
                 let hiddenGroupTimeout = setTimeout(() => {
                     const index = groupesCaches[1].indexOf(hiddenBlacklist);
                     if (index > -1) {
@@ -364,20 +424,50 @@ setTimeout(() => {
                         groupesCaches[0].splice(index, 1);
                         groupesCaches[1].splice(index, 1);
 
-                        let indexInAllGroups = (donneesSeverite.length-groupesCaches.length+index);
+                        let indexInAllGroups = (donneesSeverite.length - groupesCaches[0].length + index);
                         donneesSeverite.splice(indexInAllGroups, 1);
                         listesUrl[0].splice(indexInAllGroups, 1);
                         listesUrl[1].splice(indexInAllGroups, 1);
-
+                        chrome.storage.sync.set({ groupesCaches: groupesCaches });
                     }
-                }, (optionChoisie + (optionChoisie>5? 5:2) + (optionChoisie>=45? 5:0) + (optionChoisie>=60? 20:0) ) * 60 * 1000);
+                }, (optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 45 ? 5 : 0) + (optionChoisie >= 60 ? 20 : 0)) * 60 * 1000);
                 longTimeouts.push(hiddenGroupTimeout);
             }
             console.log('.._..groupesCaches:', JSON.stringify(groupesCaches));
         }
     }
 
+    //Gestion du processus de répétition du niveau 3 après qu'il aie pop
+    function gererNiveau3(duree, url, tempsInitial) {
+        let rechercheur = listesUrl[0].find((x, i) => x.some(y => url.includes(y)) && donneesSeverite[i][0] === 3 && i < (listesUrl[0].length - groupesCaches[0].length));
+        if (typeof rechercheur !== 'undefined') {
+            let checkedUrl = rechercheur.find(y => url.includes(y));
+            if (!etatUrlsAvecNiveau3[0].some(x => checkedUrl.includes(x))) {
+                etatUrlsAvecNiveau3[0].push(checkedUrl);
+                chrome.storage.sync.set({ etatUrlsAvecNiveau3: etatUrlsAvecNiveau3 });
+                let timeoutDeblocageNiveau3 = setTimeout(() => {
+                    const index = etatUrlsAvecNiveau3[0].indexOf(checkedUrl);
+                    if (index > -1) {
+                        etatUrlsAvecNiveau3[0].splice(index, 1);
+                        const index2 = etatUrlsAvecNiveau3[1][0].indexOf(checkedUrl);
+                        if (index2 > -1) {
+                            etatUrlsAvecNiveau3[1][1][index2]++;
+                        }
+                        else {
+                            etatUrlsAvecNiveau3[1][0].push(checkedUrl);
+                            etatUrlsAvecNiveau3[1][1].push(1);
+                            etatUrlsAvecNiveau3[1][2].push(tempsInitial);
+                        }
+                        chrome.storage.sync.set({ etatUrlsAvecNiveau3: etatUrlsAvecNiveau3 });
+                    }
+                }, (duree !== 0 ? duree : calculerTempsRestantPourDemainEnMs() / (1000 * 60)) * 60 * 1000);
+                longTimeouts.push(timeoutDeblocageNiveau3);
+            }
+        }
 
+    }
+
+    //récupère la partie importante de l'url
     function getHostnameFromRegex(url) {
         /* //old version
         let matches = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im);
@@ -387,10 +477,12 @@ setTimeout(() => {
         return hostname;
     }
 
+    // détecte un changement dans le stockage et met à jour les informations
     chrome.storage.onChanged.addListener(function (changes, areaName) {
         update();
     });
 
+    //mettre à jour les informations sur les listes
     function update() {
         chrome.storage.sync.get(["donneesSeverite"], function (donnees) {
             if (typeof donnees.donneesSeverite !== "undefined") {
@@ -414,14 +506,14 @@ setTimeout(() => {
                 }
             }
         });
-        
+
 
     }
 
+    //retourne l'index d'un site web dans le tableau temps par url s'il est présent dans une liste noire
     function lookForURL(url) {
         //vérifie si une partie spécifique d'un site web est dans une liste noire, si oui, enregistre cette partie spécifique, sinon enregistre tout le site
         if (typeof url !== "undefined") {
-            // let checkedUrl = listesUrl[0].find(x => url.includes(x)) !== undefined ? listesUrl[0].find(x => url.includes(x)) : getHostnameFromRegex(url);
             let rechercheur = listesUrl[0].find(x => x.some(y => url.includes(y)));
             let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostnameFromRegex(url);
             for (let i = 0; i < tempsParUrl.times.length; i++) {
@@ -459,6 +551,7 @@ setTimeout(() => {
         });
     }
 
+    //sauvegarde les informations sur le temps par url
     function storeData(url, temps, erreur = false) {
 
         console.log('Preparing to store data.........');
@@ -495,10 +588,4 @@ setTimeout(() => {
 });
 
 
-    // setInterval(() => {
-    //     // console.log(TimeMe.getTimeOnCurrentPageInSeconds());
-    //     // if (typeof url !== 'undefined') {
-    //     //     console.log(url);
-    //     // }
-    // }, 1000);
 

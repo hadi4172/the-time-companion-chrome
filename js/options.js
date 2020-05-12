@@ -1,15 +1,18 @@
 window.onload = function () {
 
+    //obtention des éléments HTML pertinents
     var listeNoire = document.querySelector("table[valeurslistenoire]");
     var listeBlanche = document.querySelector("table[valeurslisteblanche]");
     var severite = document.querySelectorAll("input[type = 'radio']");
     var groupes = document.querySelector(".dropdown-select");
-    var donneesSeverite = [];  //tableau de plusieurs dimensions contenant la sévérité par groupes. ex : [[1,10,false],[3,45,false],[2,20,true]]
+    var donneesSeverite = [];  //tableau de plusieurs dimensions contenant la sévérité par groupes. ex : [[1,10,false],[3,45,9],[2,20,true]]
     // var severiteSelectionne = document.querySelector(input[checked]);
     for (let i = 0; i < 4; i++) {
         document.querySelector(`span[n${i + 1}]`).innerHTML = (chrome.i18n.getMessage("options_niveau") + (i + 1));
         document.querySelector(`span[n${i + 1}]+span`).innerHTML = chrome.i18n.getMessage(`options_l${i + 1}_text`);
     }
+
+    //affecter le texte de la bonne langue aux éléments HTML
     document.querySelector(`#lntitre`).innerHTML = chrome.i18n.getMessage(`options_listenoire`);
     document.querySelector(`#lbtitre`).innerHTML = chrome.i18n.getMessage(`options_listeblanche`);
     document.querySelector(`a[options]`).innerHTML = chrome.i18n.getMessage(`options_options`);
@@ -31,6 +34,7 @@ window.onload = function () {
     charger();
 
 
+    //charge le texte des boutons de sévérité
     let messageEntreeTempsSeverite = [
         chrome.i18n.getMessage("options_onseveriteinput_l1"),
         chrome.i18n.getMessage("options_onseveriteinput_l2"),
@@ -38,19 +42,36 @@ window.onload = function () {
         chrome.i18n.getMessage("options_onseveriteinput_l4")
     ];
 
+    //logique des boutons de sévérité
     for (let i = 0, length = severite.length; i < length; i++) {
         severite[i].addEventListener("click", function () {
             severite[i].parentElement.querySelector("span[temps]").innerHTML = "";
             setTimeout(() => {
                 let temps = parseFloat(prompt(messageEntreeTempsSeverite[i]));
                 if (!isNaN(temps) && (temps >= 0) && (temps <= 500)) {
+                    let donneesConformes = true;
                     let debut = i < 2 ? confirm(chrome.i18n.getMessage("options_onseveriteinput_debutquestion")) : false;
-                    donneesSeverite[groupes.options.selectedIndex] = [parseInt(severite[i].id[1]), temps, debut];
-                    let textProprietes = "[" + (debut ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") + (i < 2 ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + temps + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
-                    severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
-                    chrome.storage.sync.set({  
-                        donneesSeverite: donneesSeverite
-                    });
+                    if (i === 2) {
+                        debut = parseFloat(prompt("Bloquer pendant combien de minutes ?\n[0 = Toute la journée]"));
+                        donneesConformes = !isNaN(debut) && (debut >= 0) && (debut <= 600);
+                    }
+                    if (donneesConformes) {
+                        donneesSeverite[groupes.options.selectedIndex] = [parseInt(severite[i].id[1]), temps, debut];
+                        let textProprietes = "";
+                        if (i !== 2) {
+                            textProprietes = "[" + (debut ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") + (i < 2 ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + temps + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
+                        } else {
+                            textProprietes = `[Chaque ${temps} min pour `+(debut!==0?`${debut} min`:`toute la journée`)+"]";
+                        }
+                        severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
+                        chrome.storage.sync.set({
+                            donneesSeverite: donneesSeverite
+                        });
+                    }
+                    else {
+                        alert(chrome.i18n.getMessage("options_onseveriteinput_invalid"));
+                        charger();
+                    }
                 }
                 else {
                     alert(chrome.i18n.getMessage("options_onseveriteinput_invalid"));
@@ -60,6 +81,7 @@ window.onload = function () {
         });
     }
 
+    //n'affiche que les urls du groupe séléctionné
     function affichageListeParGroupe() {
         let listes = [listeNoire, listeBlanche];
         for (let i = 0, length = listes.length; i < length; i++) {
@@ -73,15 +95,20 @@ window.onload = function () {
         }
     }
 
+    //affiche le bon bouton de sévérité par groupes
     function affichageSeveriteParGroupe() {
         let selectedIndex = groupes.options.selectedIndex;
         let radioBtnDeCeGroupe = document.querySelector(`#l${donneesSeverite[selectedIndex][0] !== 0 ? donneesSeverite[selectedIndex][0] : 1}`);
         console.log('indexRadio:', `#l${donneesSeverite[selectedIndex][0]}`);
         radioBtnDeCeGroupe.checked = "checked";
         if (donneesSeverite[selectedIndex][0] !== 0) {
-            let textProprietes = "[" + (donneesSeverite[selectedIndex][2] ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "")
-                + ((donneesSeverite[selectedIndex][0] - 1) < 2 ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres"))
-                + donneesSeverite[selectedIndex][1] + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
+            let textProprietes = "";
+            if ((donneesSeverite[selectedIndex][0] - 1) !== 2) {
+                textProprietes = "[" + (donneesSeverite[selectedIndex][2] ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") 
+                + ((donneesSeverite[selectedIndex][0] - 1)  ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + donneesSeverite[selectedIndex][1] + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
+            } else {
+                textProprietes = `[Chaque ${donneesSeverite[selectedIndex][1]} min pour `+(donneesSeverite[selectedIndex][2]!==0?`${donneesSeverite[selectedIndex][2]} min`:`toute la journée`)+"]";
+            }
             radioBtnDeCeGroupe.parentElement.querySelector("span[temps]").innerHTML = textProprietes;
         } else {
             radioBtnDeCeGroupe.parentElement.querySelector("span[temps]").innerHTML = chrome.i18n.getMessage("options_onseveriteinput_inactive");
@@ -90,8 +117,9 @@ window.onload = function () {
 
     }
 
+    //charge les groupes et les données de sévérités et donne la logique au bouton de groupes
     function charger() {
-        chrome.storage.sync.get(["groupes", "donneesSeverite"], function (arg) {  
+        chrome.storage.sync.get(["groupes", "donneesSeverite"], function (arg) {
             if (typeof arg["groupes"] !== 'undefined') {
                 groupes.innerHTML = arg["groupes"][0];
             } else {

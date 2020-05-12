@@ -219,14 +219,14 @@ h1{
 }
 
 .middle input[type="radio"]:checked+.box span[temps] {
-  transform: translateY(160px)!important;
+  transform: translateY(170px)!important;
   display: initial;
   opacity:0.5;
 }
 
 .middle .box span[temps] {
   display: none;
-  font-size: 1.15em;
+  font-size: 1em;
 }
 
 

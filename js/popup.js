@@ -1,11 +1,13 @@
 window.onload = function () {
 
+    //affecte le texte dans la bonne langue de l'élément HTML
     document.querySelector(`.titre`).innerHTML = chrome.i18n.getMessage(`popup_titre`);
     document.querySelector(`.titre2`).innerHTML = chrome.i18n.getMessage(`popup_siteslesplusconsultes`);
     document.querySelector(`a[href="options.html"]`).innerHTML = chrome.i18n.getMessage(`popup_reglages_btn`);
 
     var tempsParUrl;
 
+    //obtient les temps de chaque url du content script et les envoie au triage
     function initTempsParUrl() {
         chrome.storage.local.get("times", function (arg) {
             if (typeof arg.times !== "undefined") {
@@ -32,11 +34,13 @@ window.onload = function () {
         return arr;
     }
 
+    //retourne tableau qui contient les pourcentages des éléments à l'intérieur
     function obtenirRepartitionEnPourcentage(tableau) {
         let total = calculerTempsTotal(tableau);
         return tableau.map((x) => { return total != 0 ? ~~((x / total)*100*100)/100 : tableau })
     }
 
+    //calcule le temps total de tout les site webs
     function calculerTempsTotal(tableau){
         let total = 0;
         for (let i = 0, length = tableau.length; i < length; i++) {
@@ -45,6 +49,7 @@ window.onload = function () {
         return total;
     }
 
+    //transforme un nombre de secondes en string h:m:s
     function fancyTimeFormat(time) {
         //Original Source: https://stackoverflow.com/a/11486026/7551620
 
@@ -70,10 +75,10 @@ window.onload = function () {
 
     setTimeout(() => {
 
-        let data = [];
-        let dataUnformatted = [];
-        let labels = [];
-        let backgroundColors = ["#FE0008", "#FF9C00", "#F5FC00", "#3CF10E", "#2EF87D", "#20FFE4", "#0F88F2", "#022DFF", "#C528FF", "#FD019C"];
+        let data = [];  //temps par url formatés en string
+        let dataUnformatted = [];  //valeurs en secondes des temps par url
+        let labels = [];  //urls
+        let backgroundColors = ["#FE0008", "#FF9C00", "#F5FC00", "#3CF10E", "#2EF87D", "#20FFE4", "#0F88F2", "#022DFF", "#C528FF", "#FD019C"]; //couleurs du graphique
 
         for (let i = 0; i < tempsParUrl.length; i++) {
             labels.push(tempsParUrl[i][0]);
@@ -83,6 +88,7 @@ window.onload = function () {
 
         let website = document.querySelector("tbody");
 
+        //instanciation du graphique beignet
         new Chart(document.getElementById('myChart'), {
             type: 'doughnut',
             data: {
@@ -95,6 +101,7 @@ window.onload = function () {
             options: { legend: { display: false, position: 'bottom' } }
         });
 
+        //affichage des temps par url
         setTimeout(() => {
 
             for (let i = 0, length = labels.length > 10 ? 10 : labels.length; i < length; i++) {

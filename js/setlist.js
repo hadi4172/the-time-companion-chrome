@@ -2,8 +2,10 @@ window.onload = function () {
 
     comingSoonInitializer(document.querySelectorAll("input[type=checkbox]"));
 
+    //instanciation du notificateur
     var notifier = new AWN();
 
+    //récupérer les éléments HTML pertinents
     var listeNoire = document.querySelector("table[listenoire]");
     var listeBlanche = document.querySelector("table[listeblanche]");
     var entreeUrlLN = document.querySelector("#inputurlbl");
@@ -23,6 +25,7 @@ window.onload = function () {
         ["#return", "setlist_retour_btn"]
     ];
 
+    //remplit les éléments HTML avec leur texte dans la bonne langue
     for (let i = 0, length = elements.length; i < length; i++) {
         document.querySelector(elements[i][0]).innerHTML = chrome.i18n.getMessage(elements[i][1]);
     }
@@ -44,8 +47,8 @@ window.onload = function () {
     var btnsAjout = [btnAjoutLN, btnAjoutLB];
     var indiceSauvegarde = [{ donneesListeNoire: listeNoire.innerHTML }, { donneesListeBlanche: listeBlanche.innerHTML }];
     var uRLS = [{ urlsListeNoire: [] }, { urlsListeBlanche: [] }];  //tableaux en deux dimension contenant leurs urls par groupe
-    var listeValeursGroupes = [];
-    var saveBeforeQuit = false;
+    var listeValeursGroupes = [];  //contient les noms des groupes disponibles
+    var saveBeforeQuit = false;    //demander à l'utilisateur de sauvegarder avant de quitter
 
     window.onbeforeunload = function (e) {
         if (saveBeforeQuit) {
@@ -54,6 +57,7 @@ window.onload = function () {
     };
 
 
+    //charge les listeners des éléments HTML
     for (let i = 0, length = listes.length; i < length; i++) {
 
         charger(i);
@@ -89,22 +93,27 @@ window.onload = function () {
     });
 
 
-    function addtoL(val, liste, i) {
-        val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "");
-        let entreeExistanteDansLeGroupe = Array.from(liste.rows).some(x=>x.querySelector("td").innerHTML === val && x.getAttribute("togroup") === groupes.value);
-
-        if (entreeUrlConforme(val)&&!entreeExistanteDansLeGroupe) {
-            entrees[i].style.removeProperty("box-shadow");
-            let row = liste.insertRow(-1);
-            row.insertCell(0).appendChild(document.createTextNode(val));
-            ajoutFonctionRetirer(row, i);
-            row.setAttribute("togroup", groupes.value);
-            console.log(liste);
-        } else {
-            entrees[i].style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
+    // gère l'ajout d'urls dans les listes
+    function addtoL(liste, i, vals) {
+        vals = vals.split(" ");
+        for (let val of vals) {
+            val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "");
+            let entreeExistanteDansLeGroupe = Array.from(liste.rows).some(x=>x.querySelector("td").innerHTML === val && x.getAttribute("togroup") === groupes.value);
+    
+            if (entreeUrlConforme(val)&&!entreeExistanteDansLeGroupe) {
+                entrees[i].style.removeProperty("box-shadow");
+                let row = liste.insertRow(-1);
+                row.insertCell(0).appendChild(document.createTextNode(val));
+                ajoutFonctionRetirer(row, i);
+                row.setAttribute("togroup", groupes.value);
+                console.log(liste);
+            } else {
+                entrees[i].style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
+            }
         }
     }
 
+    //vérifie si l'url est valide
     function entreeUrlConforme(val) {
         if (val == "*.*") {
             return true;
@@ -113,6 +122,7 @@ window.onload = function () {
         return regexURL.test(val);
     }
 
+    //met à jour le tableau qui regroupe les listes noires et blanches
     function update() {
         listes = [listeNoire, listeBlanche];
     }
@@ -122,6 +132,7 @@ window.onload = function () {
     //     chrome.storage.sync.set({ donneesListeBlanche: "" });
     // }
 
+    //applique les changements 
     function apply() {
         for (let i = 0, length = listes.length; i < length; i++) {
 
@@ -144,11 +155,13 @@ window.onload = function () {
         }
     }
 
+    //sauvegarge l'innerHTML des listes noires et blanches et leur urls
     function save(i) {
         chrome.storage.sync.set(indiceSauvegarde[i]);
         chrome.storage.local.set(uRLS[i]);
     }
 
+    //avertissement pour dire que la fonctionnalité n'est pas encore disponible
     function comingSoonInitializer(objects) {
         for (let i = 0, length = objects.length; i < length; i++) {
             objects[i].addEventListener('click', function () {
@@ -158,6 +171,7 @@ window.onload = function () {
         }
     }
 
+    //charge les listes blanches et noires et obtient leur urls
     function charger(i) {
         chrome.storage.sync.get(Object.keys(indiceSauvegarde[i])[0], function (donnees) {
             if (typeof donnees[Object.keys(indiceSauvegarde[i])[0]] !== "undefined") {
@@ -177,10 +191,11 @@ window.onload = function () {
 
     }
 
+    //la logique des boutons d'ajout d'urls dans les listes
     function initEventBtnAjout(i) {
         update();
         let lengthBefore = Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
-        addtoL(entrees[i].value, listes[i], i);
+        addtoL(listes[i], i, entrees[i].value);
         entrees[i].value = "";
         let change = lengthBefore !== Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
         if (change) {
@@ -190,6 +205,7 @@ window.onload = function () {
 
     }
 
+    //la logique du bouton d'ajout de groupes
     function initEventBtnAddGroup() {
         btnAjouterGroupe.addEventListener("click", function () {
             let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :');
@@ -230,6 +246,7 @@ window.onload = function () {
 
     }
 
+    //la logique du bouton de suppression de groupes
     function initEventBtnSupprimerGroup() {
         btnSupprimerGroupe.addEventListener("click", function () {
             let contenu = `<h1 style="margin:0 0 10px 0;">Supprimer un groupe</h1><table groups style="margin:auto;"><tbody>`;
@@ -244,6 +261,7 @@ window.onload = function () {
         });
     }
 
+    //supprime un groupe
     function initSupprimerGroupe() {
         let groupsTab = document.querySelector("table[groups]").rows;
         for (let groupRow of groupsTab) {
@@ -301,6 +319,7 @@ window.onload = function () {
         }
     }
 
+    //n'affiche que les urls qui appartiennent au groupe séléctionné
     function affichageListeParGroupe() {
         for (let i = 0, length = listes.length; i < length; i++) {
             for (let row of listes[i].rows) {
@@ -313,6 +332,7 @@ window.onload = function () {
         }
     }
 
+    //charge le bouton des groupes
     function initGroups() {
         chrome.storage.sync.get("groupes", function (arg) {
             if (typeof arg.groupes !== 'undefined') {
@@ -345,14 +365,16 @@ window.onload = function () {
         });
     }
 
+    //gère la suppression des urls par liste
     function initFonctionRetirer(i) {
         for (let j = 0, trlength = listes[i].rows.length; j < trlength; j++) {
-            ajoutFonctionRetirer(listes[i].rows[j], i);
+            ajoutFonctionRetirer(listes[i].rows[j]);
             // apply(i);
         }
     }
 
-    function ajoutFonctionRetirer(row, i) {
+    //gère la suppression des urls au clic
+    function ajoutFonctionRetirer(row) {
         row.addEventListener("click", function () {
             row.parentNode.removeChild(row);
             btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";

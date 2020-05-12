@@ -1,6 +1,7 @@
+// initialise le timer d'activité sur la page web
 TimeMe.initialize({
-    currentPageName: "webpage", // current page
-    idleTimeoutInSeconds: 80 // seconds
+    currentPageName: "webpage", 
+    idleTimeoutInSeconds: 80 // secondes
 });
 
 window.onload = function () {
@@ -14,11 +15,11 @@ window.onload = function () {
 
         var niveauDeSeverite = [];   //array de nombres
         var tempsActivationSeverite = []; //array de nombre;
-        var lancerSeveriteDuDebut = [];  //array de bool
+        var informationDebutOuDuree = [];  //array de bool ou d'int
 
-        var niveauActive = false;
+        var niveauActive = false;  //est-ce que la sévérité s'est déja activée ?
 
-        var attributsModal = {
+        var attributsModal = {  //attributs du notificateur
             maxNotifications: 2,
             labels: {
                 warning: chrome.i18n.getMessage("content_attributmodal_warning"),
@@ -35,6 +36,7 @@ window.onload = function () {
             }
         }
 
+        //gestion des textes à entrer pour le niveau 2
         var texteAEntrer = [];
         const nombreDeMessagesAEntrerDisponibles = 10;
 
@@ -44,6 +46,7 @@ window.onload = function () {
 
         var notifier = new AWN(attributsModal);
 
+        //met à jour le temps des derniers accès au site web
         function updatePreviousTime() {
             chrome.runtime.sendMessage({ request: "sendMePreviousTimeData" }, function (response) {
                 console.log("[PreviousTime]=" + response.responseMessage);
@@ -51,8 +54,9 @@ window.onload = function () {
             });
         }
 
+        //demande au background script de lui envoyer les niveaux de sévérités de cette page
         function getDonneesSeverite() {
-            niveauDeSeverite = []; tempsActivationSeverite = []; lancerSeveriteDuDebut = [];
+            niveauDeSeverite = []; tempsActivationSeverite = []; informationDebutOuDuree = [];
             console.log("Entree 1 dans getDonneesSeverite()");
             chrome.runtime.sendMessage({ request: "sendMeDonneesSeverite" }, function (response) {
                 console.log("Entree 2 dans getDonneesSeverite()");
@@ -60,7 +64,7 @@ window.onload = function () {
                 for (let i = 0, length = response.responseMessage.length; i < length; i++) {
                     niveauDeSeverite.push(response.responseMessage[i][0]);
                     tempsActivationSeverite.push(response.responseMessage[i][1]);
-                    lancerSeveriteDuDebut.push(response.responseMessage[i][2]);
+                    informationDebutOuDuree.push(response.responseMessage[i][2]);
                 }
             });
             setTimeout(() => {
@@ -69,26 +73,24 @@ window.onload = function () {
         }
 
         updatePreviousTime();
-
         getDonneesSeverite();
 
-
-        // TimeMe.initialize({
-        //     currentPageName: "webpage", // current page
-        //     idleTimeoutInSeconds: 80 // seconds
-        // });
 
         setIntervalImmediately(() => {
             console.log(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime);
         }, 1000);
 
+
+        //active le son sur la page
         chrome.runtime.sendMessage({ mute: 0 });
 
+
+        // vérifie s'il y a des niveaux de sévérité avec le mode début activé et les lance
         setTimeout(() => {
 
             for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
 
-                if (lancerSeveriteDuDebut[i]) {
+                if (informationDebutOuDuree[i] === true) {
                     switch (niveauDeSeverite[i]) {
                         case 1:
                             if (document.querySelector(".awn-toast-warning") == null) {
@@ -122,11 +124,12 @@ window.onload = function () {
         }, 500);
 
 
+        // vérifie le temps écoulé et lance les niveaux de sévérité
         function verifierTemps() {
 
             console.log("niveauDeSeverite:", JSON.stringify(niveauDeSeverite));
             console.log("tempsActivationSeverite:", JSON.stringify(tempsActivationSeverite));
-            console.log("lancerSeveriteDuDebut:", JSON.stringify(lancerSeveriteDuDebut));
+            console.log("informationDebutOuDuree:", JSON.stringify(informationDebutOuDuree));
 
             if (niveauDeSeverite[0] != 0 && niveauActive === false) {
                 setIntervalImmediately(() => {
@@ -141,7 +144,7 @@ window.onload = function () {
                                     break;
                                 case 3: case 4:
                                     if ((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) >= (tempsActivationSeverite[i] * 60)) {
-                                        traitementSeverite(niveauDeSeverite[i]);
+                                        traitementSeverite(niveauDeSeverite[i], i);
                                     }
                                     break;
                                 default:
@@ -160,7 +163,8 @@ window.onload = function () {
             console.log(`Niveau[${i}]:` + niveauDeSeverite[i]);
         }
 
-        function traitementSeverite(niveau) {
+        //gère le lancement des niveaux de sévérité
+        function traitementSeverite(niveau, index = -1) {
             console.log("Entree 1 traitementSeverite(niveau)");
             let tempsEnMinutesArrondi = (Math.round((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60 * 10) / 10);
             switch (niveau) {
@@ -201,6 +205,8 @@ window.onload = function () {
                         notificationSound.src = chrome.runtime.getURL('sounds/glitch-in-the-matrix.mp3');
                         notificationSound.play();
                         chrome.runtime.sendMessage({ lauchThisLevelNow: 3 });
+                        chrome.runtime.sendMessage({ gererNiveau3: [informationDebutOuDuree[index], window.location.href, (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime)/60 ] });
+                        previousTime-=11;
                     }
                     break;
 
@@ -214,6 +220,7 @@ window.onload = function () {
 
         }
 
+        //envoie au background script les informations nécéssaires pour mettre à jour le badge de l'extension
         function updateBadge() {
             let severiteLaPlusForte = Math.max(...niveauDeSeverite);
             switch (severiteLaPlusForte) {
@@ -232,6 +239,7 @@ window.onload = function () {
             }
         }
 
+        //fonction pour bien afficher le temps à partir d'un nombre de secondes
         function fancyTimeFormat(time) {
             //Original Source: https://stackoverflow.com/a/11486026/7551620
 
@@ -257,12 +265,13 @@ window.onload = function () {
             return Math.floor(Math.random() * (max - min + 1) + min);
         }
 
+        // fonction enveloppante qui lance une fonction une première fois et reste la relancer par intervalle par la suite
         function setIntervalImmediately(func, interval) {
             func();
             return setInterval(func, interval);
         }
 
-
+        //vérifie si la page est active ou non
         function isInactive(temps) {
             for (let i = 0; i < 10000000; i++) {
                 i++;
@@ -270,6 +279,7 @@ window.onload = function () {
             return temps == TimeMe.getTimeOnPageInMilliseconds("webpage");
         }
 
+        //crée la boite du niveau 2
         function creerBoxNiveau2(texte, texteChoisi) {
             let body = document.querySelector("body");
             body.style.overflow = "hidden";
@@ -278,8 +288,8 @@ window.onload = function () {
             }, 1500);
             let case2boxInterval = notifier.confirm(texte).newNode;
             let timeNeededDropdown = case2boxInterval.querySelector("#timeNeededDropdown");
-            let timeNeededPossibilities = ["1 min","2 min","5 min","10 min","20 min","30 min","45 min","1h","1h30","2h","3h","I don't know"]
-            let tempsCorrespondant = [1,2,5,10,20,30,45,60,90,120,180,false];
+            let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min", "45 min", "1h", "1h30", "2h", "3h", "I don't know"]
+            let tempsCorrespondant = [1, 2, 5, 10, 20, 30, 45, 60, 90, 120, 180, false];
 
             for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
                 timeNeededDropdown.innerHTML += `<option>${timeNeededPossibilities[i]}</option>`
@@ -288,17 +298,18 @@ window.onload = function () {
             case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
                 console.log('Cliqué!');
                 if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
-                    if (lancerSeveriteDuDebut.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
-                        chrome.runtime.sendMessage({ immuniser: true }, function (response) {});
+                    if (informationDebutOuDuree.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
+                        chrome.runtime.sendMessage({ immuniser: true }, function (response) { });
                     }
-                    if (timeNeededDropdown.options.selectedIndex !== timeNeededDropdown.options.length-1) {
-                        let valeurLancementNiveau3 = tempsCorrespondant[timeNeededDropdown.options.selectedIndex]+(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime)/60;
+                    if (timeNeededDropdown.options.selectedIndex !== timeNeededDropdown.options.length - 1) {
+                        let optionChoisie = tempsCorrespondant[timeNeededDropdown.options.selectedIndex];
+                        let valeurLancementNiveau3 = optionChoisie + (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60;
                         niveauDeSeverite.push(3);
                         tempsActivationSeverite.push(valeurLancementNiveau3);
-                        lancerSeveriteDuDebut.push(false);
-                        chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, tempsCorrespondant[timeNeededDropdown.options.selectedIndex]] }, function (response) {});
+                        informationDebutOuDuree.push((optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 45 ? 5 : 0) + (optionChoisie >= 60 ? 20 : 0));
+                        chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, optionChoisie] }, function (response) { });
                     }
-                    
+
                     chrome.runtime.sendMessage({ mute: 0 });
                     body.style.overflow = "initial";
                     case2boxInterval.parentNode.removeChild(case2boxInterval);
@@ -313,6 +324,7 @@ window.onload = function () {
             });
         }
 
+        //envoie les données du temps au background script avant que la page ne soit fermée
         window.onbeforeunload = function (e) {
 
             if (typeof chrome.runtime !== 'undefined') {
@@ -322,6 +334,7 @@ window.onload = function () {
             return;
         }
 
+        //envoie les données du temps au background script quand l'utilisateur change de page
         document.addEventListener("visibilitychange", function () {
             if (document.hidden) {
                 chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
@@ -339,21 +352,23 @@ window.onload = function () {
             }
         });
 
+        // gère les ordres du background script
         chrome.runtime.onMessage.addListener(
             function (message, sender, sendResponse) {
-                if (message.todo == "howMuchTimeElapsed") {
+                if (message.todo == "howMuchTimeElapsed") {  //envoie combien de temps s'est écoulé sur la page
                     sendResponse({ timeElapsed: TimeMe.getTimeOnCurrentPageInSeconds() + previousTime });
                     console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
-                } else if (message.resetYourTime) {
+                } else if (message.resetYourTime) {  //recommence le temps de cette page
                     TimeMe.resetRecordedPageTime("webpage");
                     TimeMe.startTimer();
                     previousTime = 0;
-                } else if (message.keepTracking) {
+                    getDonneesSeverite();
+                } else if (message.keepTracking) {  //considère tout le temps passé sur la page comme actif quand du son est en train de jouer
                     TimeMe.setIdleDurationInSeconds(800000);
                     TimeMe.stopTimer();
                     TimeMe.startTimer();
 
-                    if (message.keepTracking == "false") {
+                    if (message.keepTracking == "false") {  //quand le son arrête de jouer, revien à l'état normal
                         TimeMe.setIdleDurationInSeconds(80);
                     }
                 }
