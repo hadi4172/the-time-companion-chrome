@@ -22,7 +22,11 @@ window.onload = function () {
         ["#lbtitre", "setlist_listeblanche"],
         ["#lntitre + p", "setlist_listenoire_description"],
         ["#lbtitre + p", "setlist_listeblanche_description"],
-        ["#return", "setlist_retour_btn"]
+        ["#return", "setlist_retour_btn"],
+        ["#remarqueplusieursajout", "setlist_plusieursurl"],
+        ["#addgroup","setlist_addgroup_btn"],
+        ["#deletegroup","setlist_deletegroup_btn"],
+        ["#textegroupeactuel","options_textegroupe"]
     ];
 
     //remplit les éléments HTML avec leur texte dans la bonne langue
@@ -104,7 +108,7 @@ window.onload = function () {
                 entrees[i].style.removeProperty("box-shadow");
                 let row = liste.insertRow(-1);
                 row.insertCell(0).appendChild(document.createTextNode(val));
-                ajoutFonctionRetirer(row, i);
+                ajoutFonctionRetirer(row);
                 row.setAttribute("togroup", groupes.value);
                 console.log(liste);
             } else {
@@ -208,7 +212,7 @@ window.onload = function () {
     //la logique du bouton d'ajout de groupes
     function initEventBtnAddGroup() {
         btnAjouterGroupe.addEventListener("click", function () {
-            let nomDuNouveauGroupe = prompt('Entrez le nom du nouveau groupe :');
+            let nomDuNouveauGroupe = prompt(chrome.i18n.getMessage("setlist_messageaddtogroup"));
             if (nomDuNouveauGroupe !== null) {
                 nomDuNouveauGroupe = nomDuNouveauGroupe.replace(/<|>|"|\\/g, "");
 
@@ -239,7 +243,7 @@ window.onload = function () {
 
 
                 } else {
-                    alert("Un groupe portant ce nom existe déja...");
+                    alert(chrome.i18n.getMessage("setlist_messagegroupnameinvalid"));
                 }
             }
         });
@@ -249,7 +253,7 @@ window.onload = function () {
     //la logique du bouton de suppression de groupes
     function initEventBtnSupprimerGroup() {
         btnSupprimerGroupe.addEventListener("click", function () {
-            let contenu = `<h1 style="margin:0 0 10px 0;">Supprimer un groupe</h1><table groups style="margin:auto;"><tbody>`;
+            let contenu = `<h1 style="margin:0 0 10px 0;">${chrome.i18n.getMessage("setlist_deletegroup_btn")}</h1><table groups style="margin:auto;"><tbody>`;
             for (let i = 0, length = groupes.options.length; i < length; i++) {
                 contenu += `<tr><td>${groupes.options[i].innerHTML}</td></tr>`;
             }
@@ -266,7 +270,7 @@ window.onload = function () {
         let groupsTab = document.querySelector("table[groups]").rows;
         for (let groupRow of groupsTab) {
             groupRow.addEventListener("click", function () {
-                if (confirm("Etes vous sur de vouloir supprimer ce groupe?\nToutes les listes qu'il contient seront supprimées")) {
+                if (confirm(chrome.i18n.getMessage("setlist_confirmdeletegroup"))) {
                     update();
                     if (groupes.options.length > 1) {
                         let optionCorrespondante = groupes.querySelector(`option[value="${groupRow.textContent.replace(/ /g, "_")}"]`);
@@ -312,7 +316,7 @@ window.onload = function () {
 
                         }
                     } else {
-                        alert("Vous n'avez qu'un seul groupe : Vous ne pouvez pas le supprimer.");
+                        alert(chrome.i18n.getMessage("setlist_cantdeletegroup"));
                     }
                 }
             });
@@ -357,7 +361,7 @@ window.onload = function () {
         });
         setTimeout(() => {
             if (groupes.options.length === 0) {
-                groupes.innerHTML += `<option value="Groupe_1">Groupe 1</option>`;
+                groupes.innerHTML += `<option value="${chrome.i18n.getMessage("options_textegroupe")}_1">${chrome.i18n.getMessage("options_textegroupe")} 1</option>`;
                 for (let i = 0, length = listes.length; i < length; i++) {
                     // apply(i);
                 }

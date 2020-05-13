@@ -15,6 +15,7 @@ window.onload = function () {
     //affecter le texte de la bonne langue aux éléments HTML
     document.querySelector(`#lntitre`).innerHTML = chrome.i18n.getMessage(`options_listenoire`);
     document.querySelector(`#lbtitre`).innerHTML = chrome.i18n.getMessage(`options_listeblanche`);
+    document.querySelector(`#textegroupeactuel`).innerHTML = chrome.i18n.getMessage(`options_textegroupe`);
     document.querySelector(`a[options]`).innerHTML = chrome.i18n.getMessage(`options_options`);
     document.querySelector(`a[horaire]`).innerHTML = chrome.i18n.getMessage(`options_horaire`);
     document.querySelector(`a[dons]`).innerHTML = chrome.i18n.getMessage(`options_dons`);
@@ -52,7 +53,7 @@ window.onload = function () {
                     let donneesConformes = true;
                     let debut = i < 2 ? confirm(chrome.i18n.getMessage("options_onseveriteinput_debutquestion")) : false;
                     if (i === 2) {
-                        debut = parseFloat(prompt("Bloquer pendant combien de minutes ?\n[0 = Toute la journée]"));
+                        debut = parseFloat(prompt(chrome.i18n.getMessage("options_onseveriteinput_l3_2")));
                         donneesConformes = !isNaN(debut) && (debut >= 0) && (debut <= 600);
                     }
                     if (donneesConformes) {
@@ -61,7 +62,7 @@ window.onload = function () {
                         if (i !== 2) {
                             textProprietes = "[" + (debut ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") + (i < 2 ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + temps + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
                         } else {
-                            textProprietes = `[Chaque ${temps} min pour `+(debut!==0?`${debut} min`:`toute la journée`)+"]";
+                            textProprietes = `[${chrome.i18n.getMessage("options_onseveriteinput_chaque")}${temps}${chrome.i18n.getMessage("options_onseveriteinput_min")} ${chrome.i18n.getMessage("options_onseveriteinput_pour")}`+(debut!==0?`${debut}${chrome.i18n.getMessage("options_onseveriteinput_min")}`:`${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`)+"]";
                         }
                         severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
                         chrome.storage.sync.set({
@@ -107,7 +108,7 @@ window.onload = function () {
                 textProprietes = "[" + (donneesSeverite[selectedIndex][2] ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") 
                 + ((donneesSeverite[selectedIndex][0] - 1)  ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + donneesSeverite[selectedIndex][1] + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
             } else {
-                textProprietes = `[Chaque ${donneesSeverite[selectedIndex][1]} min pour `+(donneesSeverite[selectedIndex][2]!==0?`${donneesSeverite[selectedIndex][2]} min`:`toute la journée`)+"]";
+                textProprietes = `[${chrome.i18n.getMessage("options_onseveriteinput_chaque")}${donneesSeverite[selectedIndex][1]}${chrome.i18n.getMessage("options_onseveriteinput_min")} ${chrome.i18n.getMessage("options_onseveriteinput_pour")}`+(donneesSeverite[selectedIndex][2]!==0?`${donneesSeverite[selectedIndex][2]}${chrome.i18n.getMessage("options_onseveriteinput_min")}`:`${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`)+"]";
             }
             radioBtnDeCeGroupe.parentElement.querySelector("span[temps]").innerHTML = textProprietes;
         } else {

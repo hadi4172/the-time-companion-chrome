@@ -8,6 +8,9 @@
     "options": {
         "message": "field text"
     },
+    "options_textegroupe": {
+        "message": "Groupe :"
+    },
     "options_onseveriteinput_l1": {
         "message": "Envoyer une notification chaque [Entrer le nombre] minutes"
     },
@@ -16,6 +19,9 @@
     },
     "options_onseveriteinput_l3": {
         "message": "Bloquer la page après [Entrer le nombre] minutes"
+    },
+    "options_onseveriteinput_l3_2": {
+        "message": "Bloquer pendant combien de minutes ?\n[0 = Toute la journée]"
     },
     "options_onseveriteinput_l4": {
         "message": "Fermer le navigateur après [Entrer le nombre] minutes"
@@ -32,8 +38,14 @@
     "options_onseveriteinput_apres": {
         "message": "après "
     },
+    "options_onseveriteinput_pour": {
+        "message": "pour "
+    },
     "options_onseveriteinput_min": {
         "message": " min"
+    },
+    "options_onseveriteinput_toutelajournee": {
+        "message": "toute la journée"
     },
     "options_onseveriteinput_invalid": {
         "message": "Entrée invalide!"
@@ -119,6 +131,27 @@
     "setlist_savelist_btn": {
         "message": "Enregistrer"
     },
+    "setlist_addgroup_btn": {
+        "message": "Ajouter un groupe"
+    },
+    "setlist_deletegroup_btn": {
+        "message": "Supprimer un groupe"
+    },
+    "setlist_messageaddtogroup": {
+        "message": "Entrez le nom du nouveau groupe"
+    },
+    "setlist_messagegroupnameinvalid": {
+        "message": "Un groupe portant ce nom existe déja..."
+    },
+    "setlist_confirmdeletegroup": {
+        "message": "Etes vous sur de vouloir supprimer ce groupe?\nToutes les listes qu'il contient seront supprimées"
+    },
+    "setlist_cantdeletegroup": {
+        "message": "Vous n'avez qu'un seul groupe : Vous ne pouvez pas le supprimer."
+    },
+    "setlist_plusieursurl": {
+        "message": "Vous pouvez ajouter plusieurs urls en même temps en les séparant par des espaces."
+    },
     "setlist_checkboxes_disabledistractionson": {
         "message": "Désactiver distractions sur "
     },
@@ -180,7 +213,37 @@
         "message": "J'ai installé cette extension pour m'améliorer dans ma vie."
     },
     "content_texteaentrer_10": {
-        "message": "J'aime me sentir productif."
+        "message": "Est-ce que c'est une bonne idée de continuer?"
+    },
+    "content_texteaentrer_11": {
+        "message": "Je suis maitre de mon avenir."
+    },
+    "content_texteaentrer_12": {
+        "message": "L'avenir se construit sur ce que je fait au quotidien."
+    },
+    "content_texteaentrer_13": {
+        "message": "La constance dans le bien est la clé de la réussite."
+    },
+    "content_texteaentrer_14": {
+        "message": "Ce que je fait actuellement est la meilleure chose à faire."
+    },
+    "content_texteaentrer_15": {
+        "message": "La perte de temps est une source de malheur."
+    },
+    "content_texteaentrer_16": {
+        "message": "Je suis conscient que mon temps est important."
+    },
+    "content_texteaentrer_17": {
+        "message": "Je suis capable de quitter ce site web s'il n'est pas important."
+    },
+    "content_texteaentrer_18": {
+        "message": "Bien gérer son temps permet d'accomplir des choses merveilleuses."
+    },
+    "content_texteaentrer_19": {
+        "message": "Je suis une personne responsable."
+    },
+    "content_texteaentrer_20": {
+        "message": "J'aime réussir ma vie."
     },
     "content_notifier_debut": {
         "message": "Vous venez d'entrer sur un site dans la liste noire."
@@ -202,6 +265,12 @@
     },
     "content_notifier_l2_p3": {
         "message": ", aujourd'hui."
+    },
+    "content_notifier_l2_p4": {
+        "message": "Combien de temps avez vous encore besoin ? "
+    },
+    "content_notifier_l2_option_idk": {
+        "message": "Je ne sais pas"
     },
     "content_notifier_l3_title": {
         "message": "Page bloquée pour votre bien"

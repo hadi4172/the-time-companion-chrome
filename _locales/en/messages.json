@@ -8,6 +8,9 @@
     "options": {
         "message": "field text"
     },
+    "options_textegroupe": {
+        "message": "Group :"
+    },
     "options_onseveriteinput_l1": {
         "message": "Send a notification every [Enter number] minutes"
     },
@@ -16,6 +19,9 @@
     },
     "options_onseveriteinput_l3": {
         "message": "Block the page after [Enter number] minutes"
+    },
+    "options_onseveriteinput_l3_2": {
+        "message": "Block for how many minutes?\n[0 = All the day]"
     },
     "options_onseveriteinput_l4": {
         "message": "Close the browser after [Enter the number] minutes."
@@ -32,8 +38,14 @@
     "options_onseveriteinput_apres": {
         "message": "after "
     },
+    "options_onseveriteinput_pour": {
+        "message": "for "
+    },
     "options_onseveriteinput_min": {
         "message": " min"
+    },
+    "options_onseveriteinput_toutelajournee": {
+        "message": "all the day"
     },
     "options_onseveriteinput_invalid": {
         "message": "Invalid input!"
@@ -119,6 +131,27 @@
     "setlist_savelist_btn": {
         "message": "Save"
     },
+    "setlist_addgroup_btn": {
+        "message": "Add a group"
+    },
+    "setlist_deletegroup_btn": {
+        "message": "Delete a group"
+    },
+    "setlist_messageaddtogroup": {
+        "message": "Enter the name of the new group"
+    },
+    "setlist_messagegroupnameinvalid": {
+        "message": "A group with that name already exists..."
+    },
+    "setlist_confirmdeletegroup": {
+        "message": "Are you sure you want to delete this group?\nAll the lists it contains will be deleted..."
+    },
+    "setlist_cantdeletegroup": {
+        "message": "You have only one group: You cannot delete it."
+    },
+    "setlist_plusieursurl": {
+        "message": "You can add several urls at the same time by separating them with spaces."
+    },
     "setlist_checkboxes_disabledistractionson": {
         "message": "Disable distractions on "
     },
@@ -180,7 +213,37 @@
         "message": "I installed this extension to improve my life."
     },
     "content_texteaentrer_10": {
-        "message": "I like to feel productive."
+        "message": "Is it a good idea to continue?"
+    },
+    "content_texteaentrer_11": {
+        "message": "I am master of my future."
+    },
+    "content_texteaentrer_12": {
+        "message": "The future is built on what I do every day."
+    },
+    "content_texteaentrer_13": {
+        "message": "Perseverance in good is the key to success."
+    },
+    "content_texteaentrer_14": {
+        "message": "What I'm doing right now is the right thing to do."
+    },
+    "content_texteaentrer_15": {
+        "message": "Waste of time is a source of unhappiness."
+    },
+    "content_texteaentrer_16": {
+        "message": "I am aware that my time is important."
+    },
+    "content_texteaentrer_17": {
+        "message": "I am able to leave this website if it is not important."
+    },
+    "content_texteaentrer_18": {
+        "message": "Good time management can make me accomplish wonderful things."
+    },
+    "content_texteaentrer_19": {
+        "message": "I'm a responsible person."
+    },
+    "content_texteaentrer_20": {
+        "message": "I like to make a success of my life."
     },
     "content_notifier_debut": {
         "message": "You've just entered a blacklisted site."
@@ -202,6 +265,12 @@
     },
     "content_notifier_l2_p3": {
         "message": ", today."
+    },
+    "content_notifier_l2_p4": {
+        "message": "How much more time do you need? "
+    },
+    "content_notifier_l2_option_idk": {
+        "message": "I don't know"
     },
     "content_notifier_l3_title": {
         "message": "Page blocked for your own good"

@@ -38,7 +38,7 @@ window.onload = function () {
 
         //gestion des textes à entrer pour le niveau 2
         var texteAEntrer = [];
-        const nombreDeMessagesAEntrerDisponibles = 10;
+        const nombreDeMessagesAEntrerDisponibles = 20;
 
         for (let i = 0; i < nombreDeMessagesAEntrerDisponibles; i++) {
             texteAEntrer.push(chrome.i18n.getMessage(`content_texteaentrer_${i + 1}`))
@@ -109,8 +109,8 @@ window.onload = function () {
                             let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                            <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                           <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form>
-                           <span>Combien de temps avez vous encore besoin ? <span><select id="timeNeededDropdown" style="max-width:120px;"></select></div>`;
+                           <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
+                           <span style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p4")}</span><select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div>`;
 
                             creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                             break;
@@ -188,8 +188,8 @@ window.onload = function () {
                         ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
                         ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 0 0;"/></form>
-                    <span>Combien de temps avez vous encore besoin ? <span><select id="timeNeededDropdown" style="max-width:120px;"></select></div>`;
+                    <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
+                    <span style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p4")}</span><select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div>`;
 
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                     }
@@ -288,7 +288,7 @@ window.onload = function () {
             }, 1500);
             let case2boxInterval = notifier.confirm(texte).newNode;
             let timeNeededDropdown = case2boxInterval.querySelector("#timeNeededDropdown");
-            let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min", "45 min", "1h", "1h30", "2h", "3h", "I don't know"]
+            let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min", "45 min", "1h", "1h30", "2h", "3h", chrome.i18n.getMessage("content_notifier_l2_option_idk")]
             let tempsCorrespondant = [1, 2, 5, 10, 20, 30, 45, 60, 90, 120, 180, false];
 
             for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
