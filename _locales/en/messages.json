@@ -11,6 +11,9 @@
     "options_textegroupe": {
         "message": "Group :"
     },
+    "options_groupe": {
+        "message": "Group"
+    },
     "options_onseveriteinput_l1": {
         "message": "Send a notification every [Enter number] minutes"
     },
@@ -66,7 +69,7 @@
         "message": "Block"
     },
     "options_l4_text": {
-        "message": "Close Chrome"
+        "message": "Close the browser"
     },
     "options_listenoire": {
         "message": "Blacklist"

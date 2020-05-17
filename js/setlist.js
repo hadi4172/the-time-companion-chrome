@@ -361,7 +361,7 @@ window.onload = function () {
         });
         setTimeout(() => {
             if (groupes.options.length === 0) {
-                groupes.innerHTML += `<option value="${chrome.i18n.getMessage("options_textegroupe")}_1">${chrome.i18n.getMessage("options_textegroupe")} 1</option>`;
+                groupes.innerHTML += `<option value="${chrome.i18n.getMessage("options_groupe")}_1">${chrome.i18n.getMessage("options_groupe")} 1</option>`;
                 for (let i = 0, length = listes.length; i < length; i++) {
                     // apply(i);
                 }

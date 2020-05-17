@@ -11,6 +11,9 @@
     "options_textegroupe": {
         "message": "Groupe :"
     },
+    "options_groupe": {
+        "message": "Groupe"
+    },
     "options_onseveriteinput_l1": {
         "message": "Envoyer une notification chaque [Entrer le nombre] minutes"
     },
@@ -66,7 +69,7 @@
         "message": "Blocage"
     },
     "options_l4_text": {
-        "message": "Fermeture de Chrome"
+        "message": "Fermeture du navigateur"
     },
     "options_listenoire": {
         "message": "Liste Noire"

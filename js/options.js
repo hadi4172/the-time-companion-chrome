@@ -125,7 +125,7 @@ window.onload = function () {
                 groupes.innerHTML = arg["groupes"][0];
             } else {
                 if (groupes.options.length === 0) {
-                    groupes.innerHTML += `<option value="Groupe_1">Groupe 1</option>`;
+                    groupes.innerHTML += `<option value="${chrome.i18n.getMessage("options_groupe")}_1">${chrome.i18n.getMessage("options_groupe")} 1</option>`;
                 }
             }
 
