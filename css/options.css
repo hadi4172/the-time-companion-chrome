@@ -10,6 +10,18 @@ html {
   overflow: auto;
 }
 
+@font-face {
+  font-family: 'advent_prosemibold';
+  src: url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot');
+  src: url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff2') format('woff2'),
+       url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff') format('woff'),
+       url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.ttf') format('truetype'),
+       url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.svg#advent_prosemibold') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .conteneurdetableau {
   background-color: rgba(231, 219, 219,0.5);
   min-width: 390px;
@@ -113,10 +125,11 @@ section[droite]{
 }
 
 h1{
-  font-size: 3em;
+  font-size: 3.7em;
+  line-height: 0.3em;
   color: #fff;
   text-shadow: 2px 2px 4px rgb(236, 236, 236); 
-  font-family: 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: advent_prosemibold;
 }
 
 .sablier{

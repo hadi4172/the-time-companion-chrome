@@ -173,14 +173,17 @@
     "content": {
         "message": "field text"
     },
+    "content_pageblocked": {
+        "message": "Page blocked by Time Companion"
+    },
     "content_attributmodal_warning": {
-        "message": "Reminder"
+        "message": "Warning!"
     },
     "content_attributmodal_alert": {
-        "message": "Warning!"
+        "message": "Are you wasting time ?"
     },
     "content_attributmodal_confirm": {
-        "message": "Warning!"
+        "message": "Are you wasting time ?"
     },
     "content_attributmodal_confirmOk": {
         "message": "Continue"
@@ -276,7 +279,7 @@
         "message": "I don't know"
     },
     "content_notifier_l3_title": {
-        "message": "Page blocked for your own good"
+        "message": "Page blocked for "
     },
     "content_notifier_l3": {
         "message": "It'll shut down in 10 seconds...."

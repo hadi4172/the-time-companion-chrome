@@ -173,14 +173,17 @@
     "content": {
         "message": "field text"
     },
+    "content_pageblocked": {
+        "message": "Page bloquée par Time Companion"
+    },
     "content_attributmodal_warning": {
-        "message": "Rappel"
+        "message": "Attention!"
     },
     "content_attributmodal_alert": {
-        "message": "Attention!"
+        "message": "Perdez vous votre temps ?"
     },
     "content_attributmodal_confirm": {
-        "message": "Attention!"
+        "message": "Perdez vous votre temps ?"
     },
     "content_attributmodal_confirmOk": {
         "message": "Continuer"
@@ -276,7 +279,7 @@
         "message": "Je ne sais pas"
     },
     "content_notifier_l3_title": {
-        "message": "Page bloquée pour votre bien"
+        "message": "Page bloquée pour "
     },
     "content_notifier_l3": {
         "message": "Elle sera fermée dans 10 secondes..."

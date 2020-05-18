@@ -12,8 +12,26 @@ window.onload = function () {
         chrome.storage.local.get("times", function (arg) {
             if (typeof arg.times !== "undefined") {
                 tempsParUrl = selectionSort(arg.times);
+                obtenirTempsDeLaPageActive();
                 console.log("[TEMPS PAR URL]:", tempsParUrl);
             }
+        });
+    }
+
+    //demande au content script de lui envoyer le temps de sa page
+    function obtenirTempsDeLaPageActive() {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
+                if (typeof response !== 'undefined') {
+                    if (typeof response.timeElapsed !== 'undefined') {
+                        let url = response.timeElapsed[1]; 
+                        let index = tempsParUrl.findIndex(x=>url.includes(x[0]));
+                        if (index !== -1) {
+                            tempsParUrl[index][1]=response.timeElapsed[0];
+                        }
+                    }
+                }
+            });
         });
     }
 
@@ -37,11 +55,11 @@ window.onload = function () {
     //retourne tableau qui contient les pourcentages des éléments à l'intérieur
     function obtenirRepartitionEnPourcentage(tableau) {
         let total = calculerTempsTotal(tableau);
-        return tableau.map((x) => { return total != 0 ? ~~((x / total)*100*100)/100 : tableau })
+        return tableau.map((x) => { return total != 0 ? ~~((x / total) * 100 * 100) / 100 : tableau })
     }
 
     //calcule le temps total de tout les site webs
-    function calculerTempsTotal(tableau){
+    function calculerTempsTotal(tableau) {
         let total = 0;
         for (let i = 0, length = tableau.length; i < length; i++) {
             total += Math.abs(tableau[i]);
@@ -96,7 +114,7 @@ window.onload = function () {
                     data: obtenirRepartitionEnPourcentage(dataUnformatted),
                     backgroundColor: backgroundColors
                 }],
-                labels: labels.map(x=>x+=" (%) ")
+                labels: labels.map(x => x += " (%) ")
             },
             options: { legend: { display: false, position: 'bottom' } }
         });
@@ -105,7 +123,7 @@ window.onload = function () {
         setTimeout(() => {
 
             for (let i = 0, length = labels.length > 10 ? 10 : labels.length; i < length; i++) {
-                if (data[i]!=="0:00") {
+                if (data[i] !== "0:00") {
                     website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
                 }
             }

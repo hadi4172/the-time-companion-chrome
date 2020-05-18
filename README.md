@@ -41,8 +41,6 @@ Nous croyons que notre extension seras bénéfique à tout le monde. Dans le sen
 
 L'extension sera composée principalement d'un script d'arrière plan (background script) et d'un script de contenu (content script). Une fois l'extension installée, l'utilisateur est redirigé vers la page d'option (option page) ou il pourra configurer les paramètres du programme, comme ajouter des groupes, ajouter des sites aux listes noires et blanches, choisir le niveau de sévérité adéquat et retirer le code sources distrayant de certaines pages web. Une fois ces informations entrées, elles seront envoyés au script d'arrière plan qui va se charger de les envoyer au script de contenu quand une nouvelle page web sera détectée. Ce dernier se chargera de lancer les données de sévérité quand l'utilisateur dépasse le temps permis sur une page présente dans une liste noire.
 
-### Défi
-
 ## Auteur
 
 * Hadi Yahia - [hadi4172](https://github.com/hadi4172)
@@ -52,16 +50,7 @@ L'extension sera composée principalement d'un script d'arrière plan (backgroun
 Ce projet est distribué sous la licence GNU General Public License v3.0 - voir le fichier [LICENSE](LICENSE) pour plus de détails
 
 ## TODO 
-* Afficher combien de temps il reste pour le block du niveau 3
-* Utiliser tableau niveau2 actif pour garder le modal si l’utilisateur raffrachit la page
-* Enregistrer les tableaux temporaires de support du niveau 2 et 3 dans le chrome local
-* Mettre le message “are you wasting time?” au lieu de attention pour les niveaux
-* Arranger le popup pour qu’il inclut le temps de la page actuelle [envoyer un message au content script? Ce dernier pourra envoyer un message au popup et au background en meme temps]
-* Arranger la police du logo
-* Changer Le titre du site quand le niveau 3 proc
-* Ajouter un flou pour l’arrière du niveau 2 et 3
 * Ajouter l’horaire
 * Faire une video de promotion
 * Activer les boutons du setlist
 * Ajouter possibilité de ne pas jouer de son lors des notif
-* Essayer de fixer la police des notifications/boites

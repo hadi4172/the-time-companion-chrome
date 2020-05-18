@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'advent_prosemibold';
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot');
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('chrome-extension://__MSG_@@extension_id__/fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff2') format('woff2'),
+         url('chrome-extension://__MSG_@@extension_id__/fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff') format('woff'),
+         url('chrome-extension://__MSG_@@extension_id__/fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.ttf') format('truetype'),
+         url('chrome-extension://__MSG_@@extension_id__/fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.svg#advent_prosemibold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+

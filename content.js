@@ -1,6 +1,6 @@
 // initialise le timer d'activité sur la page web
 TimeMe.initialize({
-    currentPageName: "webpage", 
+    currentPageName: "webpage",
     idleTimeoutInSeconds: 80 // secondes
 });
 
@@ -12,19 +12,22 @@ window.onload = function () {
     setTimeout(() => {
 
         var previousTime = 0;
+        var tempsDeBlocageLv3 = -1;
+        var titreOriginel = document.title;
 
         var niveauDeSeverite = [];   //array de nombres
         var tempsActivationSeverite = []; //array de nombre;
         var informationDebutOuDuree = [];  //array de bool ou d'int
 
         var niveauActive = false;  //est-ce que la sévérité s'est déja activée ?
+        var niveau2EstActif = false;  //est-ce que le niveau 2 est présentement actif ?
 
         var attributsModal = {  //attributs du notificateur
             maxNotifications: 2,
             labels: {
-                warning: chrome.i18n.getMessage("content_attributmodal_warning"),
-                alert: chrome.i18n.getMessage("content_attributmodal_alert"),
-                confirm: chrome.i18n.getMessage("content_attributmodal_confirm"),
+                warning: `<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_warning")}</span>`,
+                alert: `<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_alert")}</span>`,
+                confirm: `<span style="font-family:Arial;color: #606c71;">${chrome.i18n.getMessage("content_attributmodal_confirm")}</span>`,
                 confirmOk: chrome.i18n.getMessage("content_attributmodal_confirmOk"),
                 confirmCancel: chrome.i18n.getMessage("content_attributmodal_confirmCancel")
             },
@@ -67,6 +70,11 @@ window.onload = function () {
                     informationDebutOuDuree.push(response.responseMessage[i][2]);
                 }
             });
+            chrome.runtime.sendMessage({ request: "sendMeTempsDeBlocageLv3" }, function (response) {
+                if (response.tempsDeBlocageLv3 !== -1) {
+                    tempsDeBlocageLv3 = Math.ceil((response.tempsDeBlocageLv3 - Date.now()) / (1000 * 60));
+                }
+            });
             setTimeout(() => {
                 verifierTemps();
             }, 1000);
@@ -106,7 +114,7 @@ window.onload = function () {
                             notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
                             notificationSound.play();
                             let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                            let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;"><p style="text-align: center;">
+                            let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                            <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                            <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
@@ -138,12 +146,14 @@ window.onload = function () {
                         for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
                             switch (niveauDeSeverite[i]) {
                                 case 1: case 2:
-                                    if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite[i] * 60) < 1) && (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) > 1) {
+                                    if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite[i] * 60) < 1)
+                                        && (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) > 1) {
                                         traitementSeverite(niveauDeSeverite[i]);
                                     }
                                     break;
                                 case 3: case 4:
                                     if ((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) >= (tempsActivationSeverite[i] * 60)) {
+                                        if (tempsDeBlocageLv3 === -1) tempsDeBlocageLv3 = informationDebutOuDuree[i];
                                         traitementSeverite(niveauDeSeverite[i], i);
                                     }
                                     break;
@@ -184,13 +194,13 @@ window.onload = function () {
                         notificationSound.play();
 
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                        let contenuDeLaBoite2 = `<div style="${cssListeDéfilante}color: #606c71;line-height: 1.5;"><p style="text-align: center;">
+                        let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
                         ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                     <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
                     <span style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p4")}</span><select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div>`;
-
+                        niveau2EstActif = true;
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                     }
 
@@ -198,15 +208,27 @@ window.onload = function () {
 
                 case 3:
                     if (document.querySelector("#awn-popup-wrapper") == null) {
-                        let contenuDeLaBoite3 = `<div><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l3")}</p>`;
-                        let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, { labels: { confirm: chrome.i18n.getMessage("content_notifier_l3_title") }, icons: { confirm: "exclamation-triangle" } }).newNode;
+                        let contenuDeLaBoite3 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l3")}</p>`;
+                        let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, { labels: { confirm: `<span style="font-family:Arial;color: #606c71;">${chrome.i18n.getMessage("content_notifier_l3_title")}${tempsDeBlocageLv3}${chrome.i18n.getMessage("content_notifier_l2_p2")}</span>` }, icons: { confirm: "exclamation-triangle" } }).newNode;
                         let buttons = case3box.querySelector(".awn-buttons");
                         buttons.parentNode.removeChild(buttons);
+                        case3box.style.backdropFilter = "blur(2px)";
+                        let s = true;
+                        setIntervalImmediately(() => {
+                            if (s) {
+                                document.title = chrome.i18n.getMessage("content_pageblocked");
+                                s = false;
+                            } else {
+                                document.title = titreOriginel;
+                                s = true;
+                            }
+                        }, 1000 * 2.5);
+
                         notificationSound.src = chrome.runtime.getURL('sounds/glitch-in-the-matrix.mp3');
                         notificationSound.play();
                         chrome.runtime.sendMessage({ lauchThisLevelNow: 3 });
-                        chrome.runtime.sendMessage({ gererNiveau3: [informationDebutOuDuree[index], window.location.href, (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime)/60 ] });
-                        previousTime-=11;
+                        chrome.runtime.sendMessage({ gererNiveau3: [informationDebutOuDuree[index], window.location.href, (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60] });
+                        previousTime -= 11;
                     }
                     break;
 
@@ -295,6 +317,8 @@ window.onload = function () {
                 timeNeededDropdown.innerHTML += `<option>${timeNeededPossibilities[i]}</option>`
             }
 
+            case2boxInterval.style.backdropFilter = "blur(2px)";
+
             case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
                 console.log('Cliqué!');
                 if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
@@ -312,6 +336,7 @@ window.onload = function () {
 
                     chrome.runtime.sendMessage({ mute: 0 });
                     body.style.overflow = "initial";
+                    niveau2EstActif = false;
                     case2boxInterval.parentNode.removeChild(case2boxInterval);
                 } else {
                     case2boxInterval.querySelector("#entreetexte").style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
@@ -320,16 +345,22 @@ window.onload = function () {
 
             case2boxInterval.querySelector(".awn-btn-cancel").addEventListener("click", function () {
                 console.log('Cliqué Quitter!');
+                niveau2EstActif = false;
                 chrome.runtime.sendMessage({ lauchThisLevelNow: 2 });
             });
         }
 
         //envoie les données du temps au background script avant que la page ne soit fermée
         window.onbeforeunload = function (e) {
-
             if (typeof chrome.runtime !== 'undefined') {
+                document.title = titreOriginel;
+
                 chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
                 console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
+
+                if (niveau2EstActif) {
+                    chrome.runtime.sendMessage({ niveau2EstActif: window.location.href });
+                }
             }
             return;
         }
@@ -356,7 +387,7 @@ window.onload = function () {
         chrome.runtime.onMessage.addListener(
             function (message, sender, sendResponse) {
                 if (message.todo == "howMuchTimeElapsed") {  //envoie combien de temps s'est écoulé sur la page
-                    sendResponse({ timeElapsed: TimeMe.getTimeOnCurrentPageInSeconds() + previousTime });
+                    sendResponse({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
                     console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
                 } else if (message.resetYourTime) {  //recommence le temps de cette page
                     TimeMe.resetRecordedPageTime("webpage");
