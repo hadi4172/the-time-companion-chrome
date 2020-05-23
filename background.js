@@ -8,10 +8,11 @@ setTimeout(() => {
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
     var listesUrl = [[], []];  //[tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
+    var pausesHebdomadaires = [[], [], [], [], [], [], []]; //temps ou les niveaux de sévérité ne s'appliquerons pas, par jour (valeurs de temps en min après 00:00) ex : [[], [], [[234,512],[400,1200]], [], [[0,600]], [], []];
     var dateOfLastSave;
     var sitesImmunises = [];  //tableau qui contient les pages webs ouvertes depuis moins de 7 minutes avec début activé
     var groupesCaches = [[], []];  //[donneesSeverite,listesUrlNoire] donc [[[niveau,temps,début],[niveau,temps,début]],[[url,url,url],[url,url]]]
-    var longTimeouts = [];  // références les longstimeouts qui risquent de ne pas se lancer si la personne met son ordinateur en mode veille
+    var longTimeouts = [];  // références les longs timeouts qui risquent de ne pas se lancer si la personne met son ordinateur en mode veille
     var etatUrlsAvecNiveau3 = [[[], []], [[], [], []]]; // [[[liste d'urls avec niveau 3 actif actuellement],[temps de fermeture de ces urls]],[[liste d'urls ayant subi le niveau 3],[nombre de fois subi par url],[temps initial par url]]]
     var urlsAvecNiveau2Actif = [];
 
@@ -239,7 +240,7 @@ setTimeout(() => {
             if (message.request == "sendMePreviousTimeData") {
 
                 console.log("sending previous time...");
-                //assurerInitialisationTableauTemps();
+
                 let urlIsPresent = lookForURL(sender.tab.url) !== -1;
                 console.log('___Sent time___:', tempsParUrl.times[lookForURL(sender.tab.url)][1], sender.tab.url);
                 sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
@@ -255,16 +256,17 @@ setTimeout(() => {
 
                     let presentDansListeNoire = listesUrl[0][i].some(x => sender.tab.url.includes(x) || x == "*.*");
                     let presentDansListeBlanche = listesUrl[1][i].some(x => sender.tab.url.includes(x) || x == "*.*");
+                    let enPeriodeDeRepos = verifierSiPeriodeDeRepos();
                     let urlEstImmunisee = sitesImmunises.some(x => sender.tab.url.includes(x));
                     let urlAvaitUnNiveau2Actif = urlsAvecNiveau2Actif.some(x => sender.tab.url.includes(x));
 
                     if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
-                        console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}`);
+                        console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
                     } else {
                         console.log(`Groupe[${i}] N'est nul part`)
                     }
 
-                    if (presentDansListeNoire && !presentDansListeBlanche) {
+                    if (presentDansListeNoire && !presentDansListeBlanche && !enPeriodeDeRepos) {
                         let severiteDeCeGroupe = donneesSeverite[i].slice();
                         console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
                         if (severiteDeCeGroupe[0] !== 0) {
@@ -395,7 +397,7 @@ setTimeout(() => {
                         }
                     }
                     else {
-                        //assurerInitialisationTableauTemps();
+
                         console.log("bad time");
                         reject(0);
                     }
@@ -424,6 +426,16 @@ setTimeout(() => {
             let index = urlsAvecNiveau2Actif.indexOf(item);
             if (index !== -1) urlsAvecNiveau2Actif.splice(index, 1);
         }, 30 * 1000);
+    }
+
+    //vérifie si nous sommes actuellement en période de repos
+    function verifierSiPeriodeDeRepos() {
+        let maintenant = new Date();
+        let tempsEcouleDeLaJourneeEnMin = maintenant.getHours() * 60 + maintenant.getMinutes();
+        let aujourdhui = maintenant.getDay();
+        if (aujourdhui === 0) aujourdhui = 7;  //car getDay fait commencer la semaine par le dimanche, alors que pausehebdo commence par lundi
+        aujourdhui--;
+        return pausesHebdomadaires[aujourdhui].some(x => tempsEcouleDeLaJourneeEnMin >= x[0] && tempsEcouleDeLaJourneeEnMin < x[1]);
     }
 
     //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
@@ -514,13 +526,17 @@ setTimeout(() => {
 
     //mettre à jour les informations sur les listes
     function update() {
-        chrome.storage.sync.get(["donneesSeverite"], function (donnees) {
+        chrome.storage.sync.get(["donneesSeverite", "pausesHebdomadaires"], function (donnees) {
             if (typeof donnees.donneesSeverite !== "undefined") {
                 donneesSeverite = donnees.donneesSeverite;
             } else { donneesSeverite = [[0, 0, false]]; }
 
             if (groupesCaches[0].length !== 0) {
                 donneesSeverite.push(...groupesCaches[0]);
+            }
+
+            if (typeof donnees.pausesHebdomadaires !== "undefined") {
+                pausesHebdomadaires = donnees.pausesHebdomadaires;
             }
         });
 
@@ -536,7 +552,6 @@ setTimeout(() => {
                 }
             }
         });
-
 
     }
 
@@ -555,16 +570,6 @@ setTimeout(() => {
         }
         return -1;
     }
-
-    // function assurerInitialisationTableauTemps() {
-    //     if (!("times" in tempsParUrl)) {
-    //         tempsParUrl.times = [];
-    //     }
-    // }
-
-    // function regExpEscape(literal_string) {
-    //     return literal_string.replace(/[-[\]{}()+!<=:?.\/\\^$|#\s,]/g, '\\$&').replace(/\*/g,".*");
-    // }
 
     function showBytesInUse() {
         chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
@@ -587,8 +592,6 @@ setTimeout(() => {
         console.log('Preparing to store data.........');
 
         if (urlValide(url)) {
-
-            //assurerInitialisationTableauTemps();
 
             let rechercheur = listesUrl[0].find(x => x.some(y => url.includes(y)));
             let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostname(url);

@@ -14,7 +14,6 @@ html {
   font-family: 'advent_prosemibold';
   src: url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot');
   src: url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot?#iefix') format('embedded-opentype'),
-       url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff2') format('woff2'),
        url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff') format('woff'),
        url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.ttf') format('truetype'),
        url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.svg#advent_prosemibold') format('svg');
@@ -44,6 +43,7 @@ tr{
   text-align: center;
   white-space: nowrap;
 }
+
 
 .titreduconteneur {
   margin-left: 40%;

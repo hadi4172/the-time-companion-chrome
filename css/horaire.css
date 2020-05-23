@@ -1,0 +1,177 @@
+/* * {
+    border: 1px black dotted;
+} */
+
+@font-face {
+    font-family: 'advent_prosemibold';
+    src: url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot');
+    src: url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.woff') format('woff'),
+        url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.ttf') format('truetype'),
+        url('../fonts/adventpro_semibold_macroman/adventpro-semibold-webfont.svg#advent_prosemibold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-size: 3.5em;
+    /* line-height: 0; */
+    color: rgb(0, 0, 0);
+    text-shadow: 2px 2px 4px rgb(236, 236, 236);
+    font-family: advent_prosemibold;
+    margin-top: auto;
+    margin-left: 20px;
+}
+
+.conteneurdetableau {
+    /* background-color: rgba(231, 219, 219, 0.5);
+    border: 1px rgba(200, 188, 188, 0.5) solid; */
+    min-width: 98%;
+    min-height: 200px;
+    height: 90%;
+    padding-left: calc(10% - 8vh);
+    /* max-height: 100%; */
+    max-width: 28.25vw;
+    margin: 15px 0 15px 0;
+    overflow: auto;
+}
+
+table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 460px;
+}
+
+tr {
+    font-size: 1em;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 30px;
+}
+
+h2 {
+    line-height: 1px;
+    font-size: calc(8px + 1.2vw);
+    font-family: advent_prosemibold;
+    /* min-width: 120px; */
+}
+
+p {
+    text-align: center;
+}
+
+.conteneurdepositionnement {
+    height: 100%;
+    width: 90%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+i:hover{
+    color:#ca1b15;
+}
+
+tr:not(.head):hover{
+    background-color: whitesmoke;
+}
+
+th{
+    border: 0px solid black;
+    border-bottom-width: 20px;
+    border-bottom-color: transparent;
+}
+
+#petitsboutons {
+    display: flex;
+    flex-direction: row;
+    margin: 0 5% 0 5%;
+    /* text-transform: uppercase; */
+}
+
+.sablier{
+    font-size: 75%;
+  }
+
+section[gauche]{
+    width: 30vw;
+    min-width: 320px;
+}
+
+section[droite] {
+    flex: 2;
+    margin: 0 auto 0 auto;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    height: 90vh;
+}
+
+/* Début code boutons d'accès */
+/*Modifié par moi à partir d'une version de David Conner.  Source originale : https://codepen.io/davidicus/pen/emgQKJ/ */
+
+.btn {
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: 100;
+    line-height: 18px;
+    /*controle hauteur*/
+    margin: 0em;
+    padding: 0 10px 0 10px;
+    max-width: max-content;
+    /*controle largeur*/
+    position: relative;
+    text-decoration: none;
+    /* text-transform: uppercase; */
+    width: 80%;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    text-align: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.btn:hover {
+    text-decoration: none;
+}
+
+.btn-3 {
+    background: #e3403a;
+    border: 1px solid #da251f;
+    font-weight: 750;
+    letter-spacing: 1px;
+    -webkit-transition: all 150ms linear;
+    transition: all 150ms linear;
+    line-height: 25px;
+    margin: 10px auto 15px auto;
+}
+
+.btn-3:hover {
+    background: #e02c26;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 1px 1px 2px rgba(255, 255, 255, 0.2);
+    color: #ec817d;
+    text-decoration: none;
+    text-shadow: -1px -1px 0 #c2211c;
+    -webkit-transition: all 250ms linear;
+    transition: all 250ms linear;
+}
+
+.btn-3:active {
+    box-shadow: 0 0 10px 5px #ca1b15 inset;
+}
+
+
+.long-text-btn {
+    line-height: 30px;
+    padding: 5px 10px 5px 10px;
+    /* font-size: 11px; */
+
+}

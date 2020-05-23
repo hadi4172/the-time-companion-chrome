@@ -4,6 +4,8 @@ TimeMe.initialize({
     idleTimeoutInSeconds: 80 // secondes
 });
 
+disableDistractionByInjection();
+
 window.onload = function () {
 
     var notificationSound = new Audio();
@@ -102,7 +104,7 @@ window.onload = function () {
                     switch (niveauDeSeverite[i]) {
                         case 1:
                             if (document.querySelector(".awn-toast-warning") == null) {
-                                notifier.warning(chrome.i18n.getMessage("content_notifier_debut"));
+                                notifier.warning(`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_debut")}</span>`);
                                 notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
                                 notificationSound.play();
                                 chrome.runtime.sendMessage({ immuniser: true }, function (response) {
@@ -180,7 +182,7 @@ window.onload = function () {
             switch (niveau) {
                 case 1:
                     if (document.querySelector(".awn-toast-alert") == null) {
-                        notifier.alert(`${chrome.i18n.getMessage("content_notifier_l1_p1")}${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l1_p2")}`);
+                        notifier.alert(`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_l1_p1")}${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l1_p2")}</span>`);
                         notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
                         notificationSound.play();
                     }
@@ -209,7 +211,16 @@ window.onload = function () {
                 case 3:
                     if (document.querySelector("#awn-popup-wrapper") == null) {
                         let contenuDeLaBoite3 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l3")}</p>`;
-                        let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, { labels: { confirm: `<span style="font-family:Arial;color: #606c71;">${chrome.i18n.getMessage("content_notifier_l3_title")}${tempsDeBlocageLv3}${chrome.i18n.getMessage("content_notifier_l2_p2")}</span>` }, icons: { confirm: "exclamation-triangle" } }).newNode;
+                        let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, {
+                            labels:
+                            {
+                                confirm:
+                                    `<span style="font-family:Arial;color: #606c71;">
+                                    ${chrome.i18n.getMessage("content_notifier_l3_title")}${tempsDeBlocageLv3 !== 0 ? JSON.stringify(tempsDeBlocageLv3) + chrome.i18n.getMessage("content_notifier_l2_p2") : ` ${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`}
+                                    </span>`
+                            },
+                            icons: { confirm: "exclamation-triangle" }
+                        }).newNode;
                         let buttons = case3box.querySelector(".awn-buttons");
                         buttons.parentNode.removeChild(buttons);
                         case3box.style.backdropFilter = "blur(2px)";
@@ -350,6 +361,8 @@ window.onload = function () {
             });
         }
 
+
+
         //envoie les données du temps au background script avant que la page ne soit fermée
         window.onbeforeunload = function (e) {
             if (typeof chrome.runtime !== 'undefined') {
@@ -407,5 +420,148 @@ window.onload = function () {
 
 
     });
+}
+
+//injecte du code css qui enlève les distractions si l'utilisateur a coché la case de ce siteweb dans la page d'option
+function disableDistractionByInjection() {
+    let urlActuelle = window.location.href;
+    chrome.storage.sync.get('etatCheckboxesDistraction', function (arg) {
+        if (typeof arg.etatCheckboxesDistraction !== 'undefined') {
+            let etatCheckboxesDistraction = arg.etatCheckboxesDistraction;
+
+            let injectionParSite = [
+                [
+                    /.*:\/\/.*.youtube.com\/?.*/, `
+                        [page-subtype="home"] #primary {
+                            display: none !important;
+                          }
+                          /* Mobile view */
+                          body.isHomePage ytm-section-list-renderer>lazy-list {
+                            display: none !important;
+                          }
+                          ytd-guide-renderer ytd-guide-section-renderer:not(:last-child) {
+                            display: none !important;
+                          }
+                          ytd-comments, ytm-comment-section-renderer {
+                            display: none !important;
+                          }
+                          .ytp-endscreen-content, ytd-watch-next-secondary-results-renderer, [data-content-type="related"], .ytp-ce-element.ytp-ce-video, .ytp-ce-element.ytp-ce-playlist {
+                            display: none !important;
+                          }
+                          `],
+                [/.*:\/\/.*.twitter.com\/?.*/, `
+                          .Trends, [aria-label="Timeline: Trending now"], [href="/explore"], [aria-label="Timeline: Explore"] {
+                              display: none !important;
+                            }
+                            .wtf-module, [aria-label="Who to follow"] {
+                              display: none !important;
+                            }
+                            .AdaptiveMedia, [aria-label="Image"], video {
+                              display: none !important;
+                            }
+                            [role='main']#timeline .stream-container, [aria-label="Timeline: Your Home Timeline"] {
+                              visibility: hidden !important;
+                            }
+                            `],
+                [/.*:\/\/.*.facebook.com\/?.*/, `
+                          .home .newsFeedComposer #contentArea, #m_newsfeed_stream, #MComposer, #MStoriesTray, [role="main"] [role="feed"], [data-pagelet="Stories"] {
+                              display: none !important;
+                            }
+                            [aria-label="List of Groups"] ~ div [role="main"] [role="feed"] {
+                              display: initial !important;
+                            }
+                            .commentable_item, .story_body_container + footer, [role="article"] div[data-vc-ignore-dynamic] {
+                              display: none !important;
+                            }
+                            .fbChatSidebar, #BuddylistPagelet, [data-pagelet="ChatTab"], [aria-label="New message"] {
+                              display: none !important;
+                            }
+                            [aria-label="Watch"], #watch_feed, [href*="facebook.com/watch"] {
+                              display: none !important;
+                            }
+                            `],
+                [/.*:\/\/.*.reddit.com\/?.*/, `
+                          .commentarea, .CommentTree, .CommentsPage__tools {
+                              display: none !important;
+                            }
+                            iframe[name*='subreddit":""'] ~ div #siteTable {
+                              display: none !important;
+                            }
+                            .PostsList {
+                              display: none !important;
+                            }
+                            .CommunityHeader ~ .PostsList {
+                              display: unset;
+                            }
+                            a[href='/r/popular/'] {
+                              display: none !important;
+                            }
+                            a[href='/r/all/'] {
+                              display: none !important;
+                            }
+                            `],
+                [/.*:\/\/.*.wikipedia.org\/?.*/, `
+                          a, a:visited, .extiw {
+                              pointer-events:none;
+                              color : #222222 !important ;
+                          }
+                          .interlanguage-link-target, .mindfulBtn,
+                          .toclevel-1 a, .reference a, .thumbinner a
+                          , .reference-text a, .mw-cite-backlink a {
+                              pointer-events:auto;
+                          }
+                          
+                            `],
+                [/.*:\/\/.*.quora.com\/?.*/, `
+                          .question_related, .first_content_page_feed{
+                              opacity: 0;
+                          }
+                          .q-box.qu-overflowY--auto .q-box {
+                              opacity: 0 !important;
+                          }
+                          .qu-mt--small{
+                              display: none;
+                          }
+                            `],
+                [/.*:\/\/.*.linkedin.com\/?.*/, `
+                          #voyager-feed .core-rail > :not(:nth-child(1)) {
+                              visibility: hidden !important;
+                            }
+                      
+                            /*
+                            Mobile site
+                            Hide all feeds and then show company feed back
+                            */
+                            .feeds>#feed-container {
+                              display: none !important;
+                            }
+                      
+                            .company-page ~ .feeds>#feed-container {
+                              display: none !important;
+                            }
+                            #msg-overlay {
+                              display: none !important;
+                            }
+                            `]
+            ]
+            for (let i = 0, length = injectionParSite.length; i < length; i++) {
+                if (etatCheckboxesDistraction[i] === true) {
+                    if (injectionParSite[i][0].test(urlActuelle)) {
+                        injectCSS(injectionParSite[i][1]);
+                    }
+                }
+            }
+
+        }
+    });
+
+}
+
+function injectCSS(css) {
+    let style = document.createElement('style');
+    style.setAttribute('id', 'timecompanion-style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(css));
+    document.head.appendChild(style);
 }
 
