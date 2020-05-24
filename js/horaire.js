@@ -2,6 +2,14 @@ window.onload = () => {
 
     // document.querySelector("h1[commingsoon]").innerHTML=chrome.i18n.getMessage("horaire_comingsoon");
 
+    document.querySelector("p[description]").innerHTML = chrome.i18n.getMessage("horaire_description");
+    document.querySelector("#addpause").innerHTML = chrome.i18n.getMessage("horaire_addpause");
+    document.querySelector("#save").innerHTML = chrome.i18n.getMessage("horaire_save");
+    document.querySelector("#back").innerHTML = chrome.i18n.getMessage("horaire_back");
+    document.querySelector("h2[jour]").innerHTML = chrome.i18n.getMessage("horaire_jour");
+    document.querySelector("h2[debut]").innerHTML = chrome.i18n.getMessage("horaire_debut");
+    document.querySelector("h2[fin]").innerHTML = chrome.i18n.getMessage("horaire_fin");
+
     var btnAjoutPause = document.querySelector("#addpause");
     var btnEnregistrer = document.querySelector("#save");
     var tableauHoraires = document.querySelector("#tableaudhoraire");
@@ -42,14 +50,14 @@ window.onload = () => {
         `;
 
         let optionsJour = [
-            "Tous",
-            "Lundi",
-            "Mardi",
-            "Mercredi",
-            "Jeudi",
-            "Vendredi",
-            "Samedi",
-            "Dimanche"
+            chrome.i18n.getMessage("horaire_tous"),
+            chrome.i18n.getMessage("horaire_lundi"),
+            chrome.i18n.getMessage("horaire_mardi"),
+            chrome.i18n.getMessage("horaire_mercredi"),
+            chrome.i18n.getMessage("horaire_jeudi"),
+            chrome.i18n.getMessage("horaire_vendredi"),
+            chrome.i18n.getMessage("horaire_samedi"),
+            chrome.i18n.getMessage("horaire_dimanche")
         ]
 
         let selecteurDeJour = ligneHoraire.querySelector("select");

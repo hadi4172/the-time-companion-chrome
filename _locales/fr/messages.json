@@ -167,6 +167,51 @@
     "horaire": {
         "message": "field text"
     },
+    "horaire_description": {
+        "message": "Durant les périodes de repos, les niveaux de sévérité ne s'appliquerons pas"
+    },
+    "horaire_addpause": {
+        "message": "Ajouter une période de repos"
+    },
+    "horaire_save": {
+        "message": "Enregistrer"
+    },
+    "horaire_back": {
+        "message": "Retour"
+    },
+    "horaire_jour": {
+        "message": "Jour"
+    },
+    "horaire_debut": {
+        "message": "Heure de début"
+    },
+    "horaire_fin": {
+        "message": "Heure de fin"
+    },
+    "horaire_tous": {
+        "message": "Tous"
+    },
+    "horaire_lundi": {
+        "message": "Lundi"
+    },
+    "horaire_mardi": {
+        "message": "Mardi"
+    },
+    "horaire_mercredi": {
+        "message": "Mercredi"
+    },
+    "horaire_jeudi": {
+        "message": "Jeudi"
+    },
+    "horaire_vendredi": {
+        "message": "Vendredi"
+    },
+    "horaire_samedi": {
+        "message": "Samedi"
+    },
+    "horaire_dimanche": {
+        "message": "Dimanche"
+    },
     "horaire_comingsoon": {
         "message": "à venir..."
     },

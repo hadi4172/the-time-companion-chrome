@@ -167,6 +167,51 @@
     "horaire": {
         "message": "field text"
     },
+    "horaire_description": {
+        "message": "During rest periods, severity levels will not apply."
+    },
+    "horaire_addpause": {
+        "message": "Add a rest period"
+    },
+    "horaire_save": {
+        "message": "Save"
+    },
+    "horaire_back": {
+        "message": "Back"
+    },
+    "horaire_jour": {
+        "message": "Day"
+    },
+    "horaire_debut": {
+        "message": "Start time"
+    },
+    "horaire_fin": {
+        "message": "End time"
+    },
+    "horaire_tous": {
+        "message": "All"
+    },
+    "horaire_lundi": {
+        "message": "Monday"
+    },
+    "horaire_mardi": {
+        "message": "Tuesday"
+    },
+    "horaire_mercredi": {
+        "message": "Wednesday"
+    },
+    "horaire_jeudi": {
+        "message": "Thursday"
+    },
+    "horaire_vendredi": {
+        "message": "Friday"
+    },
+    "horaire_samedi": {
+        "message": "Saturday"
+    },
+    "horaire_dimanche": {
+        "message": "Sunday"
+    },
     "horaire_comingsoon": {
         "message": "Coming soon..."
     },
