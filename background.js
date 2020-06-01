@@ -16,10 +16,11 @@ setTimeout(() => {
     var etatUrlsAvecNiveau3 = [[[], []], [[], [], []]]; // [[[liste d'urls avec niveau 3 actif actuellement],[temps de fermeture de ces urls]],[[liste d'urls ayant subi le niveau 3],[nombre de fois subi par url],[temps initial par url]]]
     var urlsAvecNiveau2Actif = [];
 
+
     //vérifie si l'initialisation est la première de la journée ou non
     chrome.storage.local.get("date", function (arg) {
         console.log(arg.date);
-        today = getTodayInString();
+        let today = getTodayInString();
         if (typeof arg.date !== "undefined") {
             dateOfLastSave = arg["date"];
             console.log("Données de date existantes");
@@ -235,10 +236,10 @@ setTimeout(() => {
     // Gère les demandes envoyés du content script
     chrome.runtime.onMessage.addListener(
         function (message, sender, sendResponse) {
-            update();
+
             // Envoie le temps correspondant à celui de l'url de la page active du content script
             if (message.request == "sendMePreviousTimeData") {
-
+                update();
                 console.log("sending previous time...");
 
                 let urlIsPresent = lookForURL(sender.tab.url) !== -1;
@@ -247,8 +248,9 @@ setTimeout(() => {
 
                 // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
             } else if (message.request == "sendMeDonneesSeverite") {
+                update();
                 console.log("listes:", JSON.stringify(listesUrl));
-                console.log("current url:", sender.tab.url)
+                console.log("current url:", sender.tab.url);
                 console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (sender.tab.url).includes(y))) ? listesUrl[0].find(x => x.some(y => (sender.tab.url).includes(y))).find(z => (sender.tab.url).includes(z)) : "NO");
 
                 let donneesAEnvoyer = [];
@@ -368,7 +370,7 @@ setTimeout(() => {
             } else if (message.timeElapsed) {  //Enregsistre le temps écoulé sur la page web récente
                 console.log("start by runtime");
                 console.log("stored new data..!");
-                console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0])
+                console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0]);
                 setTimeout(() => {
                     console.log("[[SENDER URL FUTURE]] (listener) :" + sender.tab.url, message.timeElapsed[0])
                 });
@@ -387,7 +389,7 @@ setTimeout(() => {
                 chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
                     if (typeof response !== 'undefined') {
                         if (typeof response.timeElapsed[0] !== 'undefined') {
-                            console.log("TIME SPENT: ", response.timeElapsed[0])
+                            console.log("TIME SPENT: ", response.timeElapsed[0]);
                             console.log("Good time");
                             resolve(response.timeElapsed[0]);
                         }
@@ -446,9 +448,10 @@ setTimeout(() => {
             checkedUrl = getHostname(url);
         }
         // if (typeof checkedUrl !== 'undefined') {
+        let tempsDeBlocage = optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 45 ? 5 : 0) + (optionChoisie >= 60 ? 20 : 0);
         if (!groupesCaches[1].some(x => x.some(y => checkedUrl.includes(y)))) {
             let hiddenBlacklist = ["hiddengrouptimecompanion.hgtc", checkedUrl];
-            groupesCaches[0].push([3, time, false]);
+            groupesCaches[0].push([3, time, tempsDeBlocage-optionChoisie]);
             groupesCaches[1].push(hiddenBlacklist);
             donneesSeverite.push(groupesCaches[0][groupesCaches[0].length - 1]);
             listesUrl[0].push(groupesCaches[1][groupesCaches[1].length - 1]);
@@ -467,7 +470,7 @@ setTimeout(() => {
                     listesUrl[1].splice(indexInAllGroups, 1);
                     chrome.storage.local.set({ groupesCaches: groupesCaches });
                 }
-            }, (optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 45 ? 5 : 0) + (optionChoisie >= 60 ? 20 : 0)) * 60 * 1000);
+            }, tempsDeBlocage * 60 * 1000);
             longTimeouts.push(hiddenGroupTimeout);
         }
         console.log('.._..groupesCaches:', JSON.stringify(groupesCaches));
@@ -515,8 +518,7 @@ setTimeout(() => {
         let matches = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im);
         return matches && matches[1];
         */
-        let hostname = (new URL(url)).hostname.replace(/^www\./ig, '');
-        return hostname;
+        return (new URL(url)).hostname.replace(/^www\./ig, '');
     }
 
     // détecte un changement dans le stockage et met à jour les informations
@@ -546,7 +548,7 @@ setTimeout(() => {
                 , typeof donnees.urlsListeBlanche !== "undefined" ? donnees.urlsListeBlanche : [[]]
             ];
             if (groupesCaches[0].length !== 0) {
-                for (const listeNoire of groupesCaches[1]) {
+                for (let listeNoire of groupesCaches[1]) {
                     listesUrl[0].push(listeNoire);
                     listesUrl[1].push([]);
                 }
@@ -596,7 +598,7 @@ setTimeout(() => {
             let rechercheur = listesUrl[0].find(x => x.some(y => url.includes(y)));
             let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostname(url);
 
-            let trouve = false
+            let trouve = false;
             for (let i = 0; i < tempsParUrl.times.length && !trouve; i++) {
                 if (tempsParUrl.times[i][0] == checkedUrl) {
                     let tempsTraite = ((!isNaN(temps)) ? temps : 0);

@@ -29,6 +29,7 @@ window.onload = function () {
                         if (index !== -1) {
                             tempsParUrl[index][1]=response.timeElapsed[0];
                         }
+                        tempsParUrl = selectionSort(tempsParUrl);
                     }
                 }
             });

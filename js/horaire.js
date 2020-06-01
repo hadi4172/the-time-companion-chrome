@@ -58,7 +58,7 @@ window.onload = () => {
             chrome.i18n.getMessage("horaire_vendredi"),
             chrome.i18n.getMessage("horaire_samedi"),
             chrome.i18n.getMessage("horaire_dimanche")
-        ]
+        ];
 
         let selecteurDeJour = ligneHoraire.querySelector("select");
         for (let i = 0, length = optionsJour.length; i < length; i++) {
@@ -91,7 +91,7 @@ window.onload = () => {
                 for (let ligneHoraire of rows) {
                     gererPeriode(ligneHoraire);
                     let selecteurDeJour = ligneHoraire.querySelector("select");
-                    selecteurDeJour.selectedIndex = selecteurDeJour.getAttribute("dayselected");
+                    selecteurDeJour.selectedIndex = parseInt(selecteurDeJour.getAttribute("dayselected"));
                     for (let timeSelector of ligneHoraire.querySelectorAll("input")) {
                         timeSelector.value = timeSelector.getAttribute("timeselected");
                     }
@@ -170,5 +170,5 @@ window.onload = () => {
     }
 
 
-}
+};
 

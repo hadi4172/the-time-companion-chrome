@@ -49,6 +49,3 @@ L'extension sera composée principalement d'un script d'arrière plan (backgroun
 
 Ce projet est distribué sous la licence GNU General Public License v3.0 - voir le fichier [LICENSE](LICENSE) pour plus de détails
 
-## TODO 
-* Faire une video de promotion
-* Ajouter possibilité de ne pas jouer de son lors des notif

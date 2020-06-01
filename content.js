@@ -39,7 +39,7 @@ window.onload = function () {
             icons: {
                 confirm: "exclamation-circle"
             }
-        }
+        };
 
         //gestion des textes à entrer pour le niveau 2
         var texteAEntrer = [];
@@ -120,7 +120,7 @@ window.onload = function () {
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                            <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                            <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
-                           <span style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p4")}</span><select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div>`;
+                           <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
 
                             creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                             break;
@@ -201,7 +201,7 @@ window.onload = function () {
                         ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
                     <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
-                    <span style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2_p4")}</span><select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div>`;
+                    <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
                         niveau2EstActif = true;
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                     }
@@ -321,7 +321,7 @@ window.onload = function () {
             }, 1500);
             let case2boxInterval = notifier.confirm(texte).newNode;
             let timeNeededDropdown = case2boxInterval.querySelector("#timeNeededDropdown");
-            let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min", "45 min", "1h", "1h30", "2h", "3h", chrome.i18n.getMessage("content_notifier_l2_option_idk")]
+            let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min", "45 min", "1h", "1h30", "2h", "3h", chrome.i18n.getMessage("content_notifier_l2_option_idk")];
             let tempsCorrespondant = [1, 2, 5, 10, 20, 30, 45, 60, 90, 120, 180, false];
 
             for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
@@ -376,18 +376,18 @@ window.onload = function () {
                 }
             }
             return;
-        }
+        };;
 
         //envoie les données du temps au background script quand l'utilisateur change de page
         document.addEventListener("visibilitychange", function () {
             if (document.hidden) {
                 chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
-                console.log("Browser tab is hidden")
+                console.log("Browser tab is hidden");
                 console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
             }
             else {
                 setTimeout(() => {
-                    console.log("Browser tab is now visible")
+                    console.log("Browser tab is now visible");
                     updatePreviousTime();
                     getDonneesSeverite();
                     TimeMe.resetRecordedPageTime("webpage");
@@ -420,7 +420,7 @@ window.onload = function () {
 
 
     });
-}
+};
 
 //injecte du code css qui enlève les distractions si l'utilisateur a coché la case de ce siteweb dans la page d'option
 function disableDistractionByInjection() {
@@ -543,7 +543,7 @@ function disableDistractionByInjection() {
                               display: none !important;
                             }
                             `]
-            ]
+            ];
             for (let i = 0, length = injectionParSite.length; i < length; i++) {
                 if (etatCheckboxesDistraction[i] === true) {
                     if (injectionParSite[i][0].test(urlActuelle)) {

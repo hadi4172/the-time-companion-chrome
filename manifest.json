@@ -1,7 +1,7 @@
 {
 	"name": "__MSG_extName__",
 	"manifest_version": 2,
-	"version": "1.4.0",
+	"version": "1.4.3",
 	"description": "__MSG_extDescription__",
 	"default_locale": "en",
 	"icons": {
@@ -37,6 +37,7 @@
 		"sounds/*",
 		"library/AWN/style.css"
 	],
+	"content_security_policy": "script-src 'self' https://*.sharethis.com; object-src 'self'",
 	"permissions": [
 		"storage",
 		"tabs"
