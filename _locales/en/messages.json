@@ -18,7 +18,7 @@
         "message": "Send a notification every [Enter number] minutes"
     },
     "options_onseveriteinput_l2": {
-        "message": "Enter a text to continue every [Enter number] minutes."
+        "message": "Confirm to continue every [Enter number] minutes."
     },
     "options_onseveriteinput_l3": {
         "message": "Block the page after [Enter number] minutes"
@@ -63,7 +63,7 @@
         "message": "Notification"
     },
     "options_l2_text": {
-        "message": "Enter a text to continue"
+        "message": "Confirm to continue"
     },
     "options_l3_text": {
         "message": "Block"

@@ -58,11 +58,12 @@ window.onload = function () {
                     }
                     if (donneesConformes) {
                         donneesSeverite[groupes.options.selectedIndex] = [parseInt(severite[i].id[1]), temps, debut];
+                        if (i === 1) donneesSeverite[groupes.options.selectedIndex].push(confirm("Entrer aussi une phrase de productivité ?"));
                         let textProprietes = "";
                         if (i !== 2) {
                             textProprietes = "[" + (debut ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") + (i < 2 ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + temps + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
                         } else {
-                            textProprietes = `[${chrome.i18n.getMessage("options_onseveriteinput_chaque")}${temps}${chrome.i18n.getMessage("options_onseveriteinput_min")} ${chrome.i18n.getMessage("options_onseveriteinput_pour")}`+(debut!==0?`${debut}${chrome.i18n.getMessage("options_onseveriteinput_min")}`:`${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`)+"]";
+                            textProprietes = `[${chrome.i18n.getMessage("options_onseveriteinput_chaque")}${temps}${chrome.i18n.getMessage("options_onseveriteinput_min")} ${chrome.i18n.getMessage("options_onseveriteinput_pour")}` + (debut !== 0 ? `${debut}${chrome.i18n.getMessage("options_onseveriteinput_min")}` : `${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`) + "]";
                         }
                         severite[i].parentElement.querySelector("span[temps]").innerHTML = textProprietes;
                         chrome.storage.sync.set({
@@ -105,10 +106,10 @@ window.onload = function () {
         if (donneesSeverite[selectedIndex][0] !== 0) {
             let textProprietes = "";
             if ((donneesSeverite[selectedIndex][0] - 1) !== 2) {
-                textProprietes = "[" + (donneesSeverite[selectedIndex][2] ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "") 
-                + ((donneesSeverite[selectedIndex][0] - 1)  ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + donneesSeverite[selectedIndex][1] + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
+                textProprietes = "[" + (donneesSeverite[selectedIndex][2] ? chrome.i18n.getMessage("options_onseveriteinput_debut") : "")
+                    + ((donneesSeverite[selectedIndex][0] - 1) ? chrome.i18n.getMessage("options_onseveriteinput_chaque") : chrome.i18n.getMessage("options_onseveriteinput_apres")) + donneesSeverite[selectedIndex][1] + chrome.i18n.getMessage("options_onseveriteinput_min") + "]";
             } else {
-                textProprietes = `[${chrome.i18n.getMessage("options_onseveriteinput_chaque")}${donneesSeverite[selectedIndex][1]}${chrome.i18n.getMessage("options_onseveriteinput_min")} ${chrome.i18n.getMessage("options_onseveriteinput_pour")}`+(donneesSeverite[selectedIndex][2]!==0?`${donneesSeverite[selectedIndex][2]}${chrome.i18n.getMessage("options_onseveriteinput_min")}`:`${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`)+"]";
+                textProprietes = `[${chrome.i18n.getMessage("options_onseveriteinput_chaque")}${donneesSeverite[selectedIndex][1]}${chrome.i18n.getMessage("options_onseveriteinput_min")} ${chrome.i18n.getMessage("options_onseveriteinput_pour")}` + (donneesSeverite[selectedIndex][2] !== 0 ? `${donneesSeverite[selectedIndex][2]}${chrome.i18n.getMessage("options_onseveriteinput_min")}` : `${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`) + "]";
             }
             radioBtnDeCeGroupe.parentElement.querySelector("span[temps]").innerHTML = textProprietes;
         } else {

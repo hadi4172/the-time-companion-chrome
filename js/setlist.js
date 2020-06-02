@@ -159,7 +159,7 @@ window.onload = function () {
     //sauvegarge l'innerHTML des listes noires et blanches et leur urls
     function save(i) {
         chrome.storage.sync.set(indiceSauvegarde[i]);
-        chrome.storage.local.set(uRLS[i]);
+        chrome.storage.sync.set(uRLS[i]);
     }
 
     //avertissement pour dire que la fonctionnalité n'est pas encore disponible
@@ -209,7 +209,7 @@ window.onload = function () {
             }
         });
 
-        chrome.storage.local.get(Object.keys(uRLS[i])[0], function (tableau) {
+        chrome.storage.sync.get(Object.keys(uRLS[i])[0], function (tableau) {
             if (typeof tableau[Object.keys(uRLS[i])[0]] !== "undefined") {
                 uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
                 setTimeout(() => {

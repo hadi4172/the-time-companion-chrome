@@ -5,7 +5,7 @@ window.onload = function () {
     document.querySelector(`.titre2`).innerHTML = chrome.i18n.getMessage(`popup_siteslesplusconsultes`);
     document.querySelector(`a[href="options.html"]`).innerHTML = chrome.i18n.getMessage(`popup_reglages_btn`);
 
-    var tempsParUrl;
+    var tempsParUrl = [];
 
     //obtient les temps de chaque url du content script et les envoie au triage
     function initTempsParUrl() {

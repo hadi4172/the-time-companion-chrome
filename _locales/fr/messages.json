@@ -18,7 +18,7 @@
         "message": "Envoyer une notification chaque [Entrer le nombre] minutes"
     },
     "options_onseveriteinput_l2": {
-        "message": "Entrer un texte pour continuer chaque [Entrer le nombre] minutes"
+        "message": "Confirmer pour continuer chaque [Entrer le nombre] minutes"
     },
     "options_onseveriteinput_l3": {
         "message": "Bloquer la page après [Entrer le nombre] minutes"
@@ -63,7 +63,7 @@
         "message": "Notification"
     },
     "options_l2_text": {
-        "message": "Entrer un texte pour continuer"
+        "message": "Confirmer pour continuer"
     },
     "options_l3_text": {
         "message": "Blocage"
