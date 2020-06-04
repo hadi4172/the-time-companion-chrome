@@ -20,6 +20,9 @@
     "options_onseveriteinput_l2": {
         "message": "Confirm to continue every [Enter number] minutes."
     },
+    "options_onseveriteinput_l2_2": {
+        "message": "Also enter a productivity sentence?"
+    },
     "options_onseveriteinput_l3": {
         "message": "Block the page after [Enter number] minutes"
     },
@@ -46,6 +49,9 @@
     },
     "options_onseveriteinput_min": {
         "message": " min"
+    },
+    "options_onseveriteinput_plusphrase": {
+        "message": " + sentence"
     },
     "options_onseveriteinput_toutelajournee": {
         "message": "all the day"
@@ -157,6 +163,12 @@
     },
     "setlist_checkboxes_disabledistractionson": {
         "message": "Disable distractions on "
+    },
+    "setlist_checkboxes_reglages": {
+        "message": "Settings"
+    },
+    "setlist_checkboxes_nosound": {
+        "message": "Notifications without sound"
     },
     "setlist_retour_btn": {
         "message": "Back"
@@ -312,7 +324,7 @@
         "message": "You are on this site since "
     },
     "content_notifier_l2_p2": {
-        "message": " minutes"
+        "message": " minute(s)"
     },
     "content_notifier_l2_p3": {
         "message": ", today."

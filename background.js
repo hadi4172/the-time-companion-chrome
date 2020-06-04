@@ -4,6 +4,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 setTimeout(() => {
+    var currentVersion = "1.4.5"
 
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
     var listesUrl = [[], []];  //[tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
@@ -16,6 +17,23 @@ setTimeout(() => {
     var etatUrlsAvecNiveau3 = [[[], []], [[], [], []]]; // [[[liste d'urls avec niveau 3 actif actuellement],[temps de fermeture de ces urls]],[[liste d'urls ayant subi le niveau 3],[nombre de fois subi par url],[temps initial par url]]]
     var urlsAvecNiveau2Actif = [];
 
+    //vérifie la version et procède à certains arrangements selon la version de l'utilisateur
+    chrome.storage.sync.get('currentVersion', function (arg) {
+        //règle défauts version 1.4.3 
+        if (typeof arg.currentVersion === 'undefined') {
+            chrome.storage.local.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg) {
+                if (typeof arg.urlsListeNoire !== 'undefined' || typeof arg.urlsListeBlanche !== 'undefined') {
+                    chrome.storage.sync.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg2) {
+                        if (typeof arg2.urlsListeNoire === 'undefined' && typeof arg2.urlsListeBlanche === 'undefined') {
+                            chrome.storage.sync.set({ urlsListeNoire: arg.urlsListeNoire, urlsListeBlanche: arg.urlsListeNoire });
+                        }
+                    });
+                }
+            });
+        }
+
+        chrome.storage.sync.set({ currentVersion: currentVersion });
+    });
 
     //vérifie si l'initialisation est la première de la journée ou non
     chrome.storage.local.get("date", function (arg) {
@@ -54,7 +72,6 @@ setTimeout(() => {
         chrome.storage.local.get("times", function (arg) {
             if (typeof arg.times !== "undefined") {
                 tempsParUrl.times = arg.times;
-                console.log("[TEMPS PAR URL]:", tempsParUrl.times);
             }
         });
     }
@@ -183,11 +200,7 @@ setTimeout(() => {
         chrome.tabs.get(activeInfo.tabId, function (tab) {
             let url = tab.url;
             if (urlValide(url)) {
-                console.log("start by onActivated");
                 (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
-                setTimeout(() => {
-                    console.log("[TEMPS PAR URL ONACTIVATED]:", tempsParUrl.times.slice().toString());
-                });
             }
         });
     });
@@ -198,14 +211,8 @@ setTimeout(() => {
             if (change.url) {
                 let url = change.url;
                 if (urlValide(url)) {
-                    console.log(`start by onUpdated`);
                     askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
                     // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
-                    setTimeout(() => {
-                        // storeData(url, timeSpent);
-                        console.log("[TEMPS PAR URL ONUPDATED]:", tempsParUrl.times.slice().toString());
-                        // console.log(timeSpent);
-                    });
 
                     // console.log("end by onUpdated");
                 }
@@ -238,21 +245,20 @@ setTimeout(() => {
         function (message, sender, sendResponse) {
 
             // Envoie le temps correspondant à celui de l'url de la page active du content script
-            if (message.request == "sendMePreviousTimeData") {
+            if (message.sendMePreviousTimeData) {
                 update();
-                console.log("sending previous time...");
 
-                let urlIsPresent = lookForURL(sender.tab.url) !== -1;
-                console.log('___Sent time___:', tempsParUrl.times[lookForURL(sender.tab.url)][1], sender.tab.url);
-                sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(sender.tab.url)][1] : 0) });
+                let urlIsPresent = lookForURL(message.sendMePreviousTimeData) !== -1;
+                console.log('___Sent time___:', tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1], message.sendMePreviousTimeData);
+                sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1] : 0) });
 
                 // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
             } else if (message.request == "sendMeDonneesSeverite") {
                 update();
-                console.log("listes:", JSON.stringify(listesUrl));
                 console.log("current url:", sender.tab.url);
                 console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (sender.tab.url).includes(y))) ? listesUrl[0].find(x => x.some(y => (sender.tab.url).includes(y))).find(z => (sender.tab.url).includes(z)) : "NO");
 
+                let aUnNiveau3EncoreActif = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
                 let donneesAEnvoyer = [];
                 for (let i = 0, nbGroupes = listesUrl[0].length; i < nbGroupes; i++) {
 
@@ -289,6 +295,8 @@ setTimeout(() => {
                         }
                     }
                 }
+                if (aUnNiveau3EncoreActif > -1) donneesAEnvoyer.push([3, 0, Math.ceil((etatUrlsAvecNiveau3[0][1][aUnNiveau3EncoreActif] - Date.now()) / (1000 * 60))]);
+
                 console.log('::donneesAEnvoyer:', JSON.stringify(donneesAEnvoyer));
 
                 if (donneesAEnvoyer.length === 0) {
@@ -370,14 +378,8 @@ setTimeout(() => {
             } else if (message.timeElapsed) {  //Enregsistre le temps écoulé sur la page web récente
                 console.log("start by runtime");
                 console.log("stored new data..!");
-                console.log("[[SENDER URL]] (listener) :" + sender.tab.url, message.timeElapsed[0]);
-                setTimeout(() => {
-                    console.log("[[SENDER URL FUTURE]] (listener) :" + sender.tab.url, message.timeElapsed[0])
-                });
 
                 storeData(message.timeElapsed[1], message.timeElapsed[0]);
-
-                console.log("[TEMPS PAR URL TIMEELAPSED]:", tempsParUrl.times.slice().toString());
             }
         });
 
@@ -451,7 +453,7 @@ setTimeout(() => {
         let tempsDeBlocage = optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 45 ? 5 : 0) + (optionChoisie >= 60 ? 20 : 0);
         if (!groupesCaches[1].some(x => x.some(y => checkedUrl.includes(y)))) {
             let hiddenBlacklist = ["hiddengrouptimecompanion.hgtc", checkedUrl];
-            groupesCaches[0].push([3, time, tempsDeBlocage-optionChoisie]);
+            groupesCaches[0].push([3, time, tempsDeBlocage - optionChoisie]);
             groupesCaches[1].push(hiddenBlacklist);
             donneesSeverite.push(groupesCaches[0][groupesCaches[0].length - 1]);
             listesUrl[0].push(groupesCaches[1][groupesCaches[1].length - 1]);
@@ -528,7 +530,7 @@ setTimeout(() => {
 
     //mettre à jour les informations sur les listes
     function update() {
-        chrome.storage.sync.get(["donneesSeverite", "pausesHebdomadaires"], function (donnees) {
+        chrome.storage.sync.get(["donneesSeverite", "pausesHebdomadaires", "urlsListeNoire", "urlsListeBlanche"], function (donnees) {
             if (typeof donnees.donneesSeverite !== "undefined") {
                 donneesSeverite = donnees.donneesSeverite;
             } else { donneesSeverite = [[0, 0, false]]; }
@@ -540,9 +542,7 @@ setTimeout(() => {
             if (typeof donnees.pausesHebdomadaires !== "undefined") {
                 pausesHebdomadaires = donnees.pausesHebdomadaires;
             }
-        });
 
-        chrome.storage.local.get(["urlsListeNoire", "urlsListeBlanche"], function (donnees) {
             listesUrl = [
                 typeof donnees.urlsListeNoire !== "undefined" ? donnees.urlsListeNoire : [[]]
                 , typeof donnees.urlsListeBlanche !== "undefined" ? donnees.urlsListeBlanche : [[]]
@@ -553,7 +553,12 @@ setTimeout(() => {
                     listesUrl[1].push([]);
                 }
             }
+
         });
+
+        // chrome.storage.local.get(["urlsListeNoire", "urlsListeBlanche"], function (donnees) {
+
+        // });
 
     }
 
@@ -565,7 +570,7 @@ setTimeout(() => {
             let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostname(url);
             for (let i = 0; i < tempsParUrl.times.length; i++) {
                 if (tempsParUrl.times[i][0] == checkedUrl) {
-                    console.log('lookforurlResult:', url, checkedUrl);
+                    // console.log('lookforurlResult:', url, checkedUrl);
                     return i;
                 }
             }

@@ -6,10 +6,10 @@ TimeMe.initialize({
 
 disableDistractionByInjection();
 
-window.onload = function () {
+var notificationSound = new Audio();
+notificationSound.volume = 0.6;
 
-    var notificationSound = new Audio();
-    notificationSound.volume = 0.6;
+window.onload = function () {
 
     setTimeout(() => {
 
@@ -20,6 +20,7 @@ window.onload = function () {
         var niveauDeSeverite = [];   //array de nombres
         var tempsActivationSeverite = []; //array de nombre;
         var informationDebutOuDuree = [];  //array de bool ou d'int
+        var entreePhraseDeProductivite = []; //array de bool pertinent pour le niveau 2
 
         var niveauActive = false;  //est-ce que la sévérité s'est déja activée ?
         var niveau2EstActif = false;  //est-ce que le niveau 2 est présentement actif ?
@@ -53,7 +54,7 @@ window.onload = function () {
 
         //met à jour le temps des derniers accès au site web
         function updatePreviousTime() {
-            chrome.runtime.sendMessage({ request: "sendMePreviousTimeData" }, function (response) {
+            chrome.runtime.sendMessage({ sendMePreviousTimeData: window.location.href }, function (response) {
                 console.log("[PreviousTime]=" + response.responseMessage);
                 previousTime = response.responseMessage;
             });
@@ -61,7 +62,7 @@ window.onload = function () {
 
         //demande au background script de lui envoyer les niveaux de sévérités de cette page
         function getDonneesSeverite() {
-            niveauDeSeverite = []; tempsActivationSeverite = []; informationDebutOuDuree = [];
+            niveauDeSeverite = []; tempsActivationSeverite = []; informationDebutOuDuree = []; entreePhraseDeProductivite = [];
             console.log("Entree 1 dans getDonneesSeverite()");
             chrome.runtime.sendMessage({ request: "sendMeDonneesSeverite" }, function (response) {
                 console.log("Entree 2 dans getDonneesSeverite()");
@@ -70,6 +71,11 @@ window.onload = function () {
                     niveauDeSeverite.push(response.responseMessage[i][0]);
                     tempsActivationSeverite.push(response.responseMessage[i][1]);
                     informationDebutOuDuree.push(response.responseMessage[i][2]);
+                    if (response.responseMessage[i][3] === true) {
+                        entreePhraseDeProductivite.push(true);
+                    } else {
+                        entreePhraseDeProductivite.push(false);
+                    }
                 }
             });
             chrome.runtime.sendMessage({ request: "sendMeTempsDeBlocageLv3" }, function (response) {
@@ -117,9 +123,9 @@ window.onload = function () {
                             notificationSound.play();
                             let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
                             let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
-                        ${chrome.i18n.getMessage("content_notifier_debut")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
+                        ${chrome.i18n.getMessage("content_notifier_debut")}</p>${entreePhraseDeProductivite[i] ? `<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                            <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                           <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
+                           <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                            <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
 
                             creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
@@ -150,7 +156,7 @@ window.onload = function () {
                                 case 1: case 2:
                                     if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite[i] * 60) < 1)
                                         && (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) > 1) {
-                                        traitementSeverite(niveauDeSeverite[i]);
+                                        traitementSeverite(niveauDeSeverite[i], i);
                                     }
                                     break;
                                 case 3: case 4:
@@ -198,9 +204,9 @@ window.onload = function () {
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
                         let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
-                        ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
+                        ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p>${entreePhraseDeProductivite[index] ? `<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>
+                    <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                     <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
                         niveau2EstActif = true;
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
@@ -263,7 +269,13 @@ window.onload = function () {
 
                     break;
                 case 3: case 4:
-                    let secondesRestantes = ((tempsActivationSeverite[niveauDeSeverite.indexOf(severiteLaPlusForte)] * 60) - (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime));
+                    let arrayDesIndexDuNiveau = [];
+                    for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
+                        if (niveauDeSeverite[i] === severiteLaPlusForte) {
+                            arrayDesIndexDuNiveau.push(tempsActivationSeverite[i]);
+                        }
+                    }
+                    let secondesRestantes = ((Math.min(...arrayDesIndexDuNiveau) * 60) - (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime));
                     chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0), "#ed3a2d"] });
 
                     break;
@@ -332,7 +344,8 @@ window.onload = function () {
 
             case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
                 console.log('Cliqué!');
-                if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
+
+                const continuer = () => {
                     if (informationDebutOuDuree.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
                         chrome.runtime.sendMessage({ immuniser: true }, function (response) { });
                     }
@@ -349,9 +362,18 @@ window.onload = function () {
                     body.style.overflow = "initial";
                     niveau2EstActif = false;
                     case2boxInterval.parentNode.removeChild(case2boxInterval);
-                } else {
-                    case2boxInterval.querySelector("#entreetexte").style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
                 }
+
+                if (case2boxInterval.querySelector('form[autocomplete="off"]') !== null) {
+                    if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
+                        continuer();
+                    } else {
+                        case2boxInterval.querySelector("#entreetexte").style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
+                    }
+                } else {
+                    continuer();
+                }
+
             });
 
             case2boxInterval.querySelector(".awn-btn-cancel").addEventListener("click", function () {
@@ -505,7 +527,7 @@ function disableDistractionByInjection() {
                               pointer-events:none;
                               color : #222222 !important ;
                           }
-                          .interlanguage-link-target, .mindfulBtn,
+                          .interlanguage-link-target,
                           .toclevel-1 a, .reference a, .thumbinner a
                           , .reference-text a, .mw-cite-backlink a {
                               pointer-events:auto;
@@ -550,6 +572,11 @@ function disableDistractionByInjection() {
                         injectCSS(injectionParSite[i][1]);
                     }
                 }
+            }
+
+            //désactive le son des niveaux de sévérité
+            if (etatCheckboxesDistraction[injectionParSite.length]) {
+                notificationSound.volume = 0;
             }
 
         }

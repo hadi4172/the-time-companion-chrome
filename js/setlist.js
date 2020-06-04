@@ -1,6 +1,6 @@
 window.onload = function () {
 
-    initialiserCheckboxesDistraction(Array.from(document.querySelectorAll("input[type=checkbox]")));
+    initialiserCheckboxes(Array.from(document.querySelectorAll("input[type=checkbox]")));
 
     //instanciation du notificateur
     var notifier = new AWN();
@@ -27,7 +27,9 @@ window.onload = function () {
         ["#addgroup", "setlist_addgroup_btn"],
         ["#deletegroup", "setlist_deletegroup_btn"],
         ["#textegroupeactuel", "options_textegroupe"],
-        ["#desactiverdistractionsur", "setlist_checkboxes_disabledistractionson"]
+        ["#desactiverdistractionsur", "setlist_checkboxes_disabledistractionson"],
+        ["#reglages", "setlist_checkboxes_reglages"],
+        ["label[for='chr1']", "setlist_checkboxes_nosound"]
     ];
 
     //remplit les éléments HTML avec leur texte dans la bonne langue
@@ -48,7 +50,7 @@ window.onload = function () {
     var uRLS = [{ urlsListeNoire: [] }, { urlsListeBlanche: [] }];  //tableaux en deux dimension contenant leurs urls par groupe
     var listeValeursGroupes = [];  //contient les noms des groupes disponibles
     var saveBeforeQuit = false;    //demander à l'utilisateur de sauvegarder avant de quitter
-    var etatCheckboxesDistraction = [];
+    var etatCheckboxes = [];
 
     window.onbeforeunload = function (e) {
         if (saveBeforeQuit) {
@@ -153,7 +155,7 @@ window.onload = function () {
 
             save(i);
         }
-        chrome.storage.sync.set({etatCheckboxesDistraction:etatCheckboxesDistraction});
+        chrome.storage.sync.set({ etatCheckboxesDistraction: etatCheckboxes });
     }
 
     //sauvegarge l'innerHTML des listes noires et blanches et leur urls
@@ -172,30 +174,30 @@ window.onload = function () {
         }
     }
 
-    function initialiserCheckboxesDistraction(checkboxes) {
+    function initialiserCheckboxes(checkboxes) {
         chrome.storage.sync.get('etatCheckboxesDistraction', function (arg) {
             if (typeof arg.etatCheckboxesDistraction !== 'undefined') {
-                etatCheckboxesDistraction = arg.etatCheckboxesDistraction;
-                if (etatCheckboxesDistraction.length!==checkboxes.length) {
-                    etatCheckboxesDistraction = [];
+                etatCheckboxes = arg.etatCheckboxesDistraction;
+                if (etatCheckboxes.length !== checkboxes.length) {
+                    etatCheckboxes = [];
                     for (let i = 0, length = checkboxes.length; i < length; i++) {
-                        etatCheckboxesDistraction.push(false);
+                        etatCheckboxes.push(false);
                     }
                 }
             } else {
                 for (let i = 0, length = checkboxes.length; i < length; i++) {
-                    etatCheckboxesDistraction.push(false);
+                    etatCheckboxes.push(false);
                 }
             }
             for (let i = 0, length = checkboxes.length; i < length; i++) {
-                if (etatCheckboxesDistraction[i]) {
-                    checkboxes[i].setAttribute("checked", "checked"); 
+                if (etatCheckboxes[i]) {
+                    checkboxes[i].setAttribute("checked", "checked");
                 }
                 checkboxes[i].addEventListener('click', function () {
-                    etatCheckboxesDistraction[i] = !etatCheckboxesDistraction[i];
+                    etatCheckboxes[i] = !etatCheckboxes[i];
                     btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
                     saveBeforeQuit = true;
-                    console.log(`etatCheckboxesDistraction:`,JSON.stringify(etatCheckboxesDistraction));
+                    console.log(`etatCheckboxesDistraction:`, JSON.stringify(etatCheckboxes));
                 });
             }
         });

@@ -20,6 +20,9 @@
     "options_onseveriteinput_l2": {
         "message": "Confirmer pour continuer chaque [Entrer le nombre] minutes"
     },
+    "options_onseveriteinput_l2_2": {
+        "message": "Entrer aussi une phrase de productivité ?"
+    },
     "options_onseveriteinput_l3": {
         "message": "Bloquer la page après [Entrer le nombre] minutes"
     },
@@ -46,6 +49,9 @@
     },
     "options_onseveriteinput_min": {
         "message": " min"
+    },
+    "options_onseveriteinput_plusphrase": {
+        "message": " + phrase"
     },
     "options_onseveriteinput_toutelajournee": {
         "message": "toute la journée"
@@ -157,6 +163,12 @@
     },
     "setlist_checkboxes_disabledistractionson": {
         "message": "Désactiver distractions sur "
+    },
+    "setlist_checkboxes_reglages": {
+        "message": "Réglages"
+    },
+    "setlist_checkboxes_nosound": {
+        "message": "Notifications sans son"
     },
     "setlist_retour_btn": {
         "message": "Retour"
@@ -312,7 +324,7 @@
         "message": "Vous êtes sur ce site depuis "
     },
     "content_notifier_l2_p2": {
-        "message": " minutes"
+        "message": " minute(s)"
     },
     "content_notifier_l2_p3": {
         "message": ", aujourd'hui."
