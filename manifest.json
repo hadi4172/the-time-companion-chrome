@@ -1,7 +1,7 @@
 {
 	"name": "__MSG_extName__",
 	"manifest_version": 2,
-	"version": "1.4.5",
+	"version": "1.5.0",
 	"description": "__MSG_extDescription__",
 	"default_locale": "en",
 	"icons": {
@@ -40,6 +40,7 @@
 	"content_security_policy": "script-src 'self' https://*.sharethis.com; object-src 'self'",
 	"permissions": [
 		"storage",
-		"tabs"
+		"tabs",
+		"notifications"
 	]
 }

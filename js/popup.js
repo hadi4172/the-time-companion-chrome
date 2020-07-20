@@ -125,7 +125,7 @@ window.onload = function () {
 
             for (let i = 0, length = labels.length > 10 ? 10 : labels.length; i < length; i++) {
                 if (data[i] !== "0:00") {
-                    website.innerHTML += (`<tr><td><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
+                    website.innerHTML += (`<tr><td style="white-space: nowrap; max-width:180px; overflow: hidden;"><span style="color:${backgroundColors[i]};">█  </span>` + labels[i] + "</td><td> " + data[i] + "</td></tr>");
                 }
             }
             website.innerHTML += ("<tr><td style='color:dimgrey;'>------------------</td></tr>");

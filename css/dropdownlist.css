@@ -4,6 +4,8 @@
  *
  * Licensed under the MIT License:
  * http://www.opensource.org/licenses/mit-license.php
+
+ * Modified By Hadi Yahia
  */
 
 .dropdown {
@@ -22,6 +24,10 @@
   background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.06));
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .dropdown:before, .dropdown:after {
   content: '';

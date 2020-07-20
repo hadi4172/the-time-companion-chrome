@@ -129,7 +129,7 @@
         "message": "Liste blanche"
     },
     "setlist_listeblanche_description": {
-        "message": "Permet de ne pas prendre en compte une partie spécifique incluse dans la liste noire. Également très utile pour \"autoriser tout sauf:\""
+        "message": "Permet de ne pas prendre en compte une partie spécifique incluse dans la liste noire. Également très utile pour \"Ne rien autoriser sauf:\""
     },
     "setlist_inputbar_placeholder": {
         "message": "Entrez une url (ex: youtube.com)"
@@ -179,11 +179,35 @@
     "horaire": {
         "message": "field text"
     },
+    "horaire_titre": {
+        "message": "Gestion d'horaire"
+    },
     "horaire_description": {
-        "message": "Durant les périodes de repos, les niveaux de sévérité ne s'appliquerons pas"
+        "message": "Durant les périodes de repos, les niveaux de sévérité ne s'appliquerons pas. Aucune pause ne sera active pendant les 5 prochaines minutes suivant n'importe quelle modification sur cette page."
     },
     "horaire_addpause": {
         "message": "Ajouter une période de repos"
+    },
+    "horaire_limitepause": {
+        "message": "Vous ne pouvez pas ajouter plus de pauses"
+    },
+    "horaire_dateinvalide": {
+        "message": "La date que vous avez entré est invalide"
+    },
+    "horaire_periodedeblocage": {
+        "message": "Vous êtes présentement dans une période de blocage"
+    },
+    "horaire_periodedeblocageniveau": {
+        "message": "Vous êtes présentement dans une période de blocage. Vous pouvez seulement augmenter le niveau."
+    },
+    "horaire_bloquerchangements": {
+        "message": "Bloquer tous les changements jusqu'au"
+    },
+    "horaire_confirmer": {
+        "message": "Confirmer"
+    },
+    "horaire_messageconfirmation": {
+        "message": "Êtes vous sur de vouloir continuer ? Vous ne pourrez plus ajouter d'élements dans une liste blanche ni baisser un niveau de sévérité ni ajouter ou changer une période de pause."
     },
     "horaire_save": {
         "message": "Enregistrer"
@@ -339,7 +363,7 @@
         "message": "Page bloquée pour "
     },
     "content_notifier_l3": {
-        "message": "Elle sera fermée dans 10 secondes..."
+        "message": "Elle sera fermée dans 5 secondes..."
     }
 
 }

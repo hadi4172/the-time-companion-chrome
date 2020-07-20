@@ -45,6 +45,10 @@ td{
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
     text-align: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
   
   .btn:hover {

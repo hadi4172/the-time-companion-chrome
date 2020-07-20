@@ -129,7 +129,7 @@
         "message": "Whitelist"
     },
     "setlist_listeblanche_description": {
-        "message": "Allows to ignore a specific part included in the blacklist. Also very useful for \"allow everything except:\""
+        "message": "Allows to ignore a specific part included in the blacklist. Also very useful for \"allow nothing except:\""
     },
     "setlist_inputbar_placeholder": {
         "message": "Enter an url (ex: youtube.com)"
@@ -179,11 +179,35 @@
     "horaire": {
         "message": "field text"
     },
+    "horaire_titre": {
+        "message": "The Time Companion Schedule"
+    },
     "horaire_description": {
-        "message": "During rest periods, severity levels will not apply."
+        "message": "During rest periods, severity levels will not apply. No pauses will be active for the next 5 minutes following any changes on this page."
     },
     "horaire_addpause": {
         "message": "Add a rest period"
+    },
+    "horaire_limitepause": {
+        "message": "You cannot add more breaks"
+    },
+    "horaire_dateinvalide": {
+        "message": "The date you entered is invalid"
+    },
+    "horaire_periodedeblocage": {
+        "message": "You are currently in a blocking period"
+    },
+    "horaire_periodedeblocageniveau": {
+        "message": "You are currently in a blocking period. You can only increase the level."
+    },
+    "horaire_bloquerchangements": {
+        "message": "Block all changes until"
+    },
+    "horaire_confirmer": {
+        "message": "Confirm"
+    },
+    "horaire_messageconfirmation": {
+        "message": "Are you sure you want to go through with this? You will no longer be able to add items to a white list, decrease severity level or add or change a break period."
     },
     "horaire_save": {
         "message": "Save"
@@ -339,7 +363,7 @@
         "message": "Page blocked for "
     },
     "content_notifier_l3": {
-        "message": "It'll shut down in 10 seconds...."
+        "message": "It'll shut down in 5 seconds...."
     }
 
 }

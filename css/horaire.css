@@ -28,7 +28,7 @@ h1 {
     border: 1px rgba(200, 188, 188, 0.5) solid; */
     min-width: 98%;
     min-height: 200px;
-    height: 90%;
+    height: 80%;
     padding-left: calc(10% - 8vh);
     /* max-height: 100%; */
     max-width: 28.25vw;
@@ -57,6 +57,12 @@ h2 {
     /* min-width: 120px; */
 }
 
+a[disabled] {
+    pointer-events: none;
+    background: #6b6867;
+    border: 1px solid #6b6867;
+}
+
 p {
     text-align: center;
 }
@@ -75,6 +81,27 @@ i:hover{
 
 tr:not(.head):hover{
     background-color: whitesmoke;
+}
+
+#dateblocage{
+    margin-left: 10px;
+    /* margin-right: 5px; */
+}
+
+#confirmer{
+    margin: 0 20px 0 0;
+}
+
+label{
+    font: 1rem advent_prosemibold;
+    margin-top: 2px;
+}
+
+
+#conteneurdeblocage{
+    display: flex;
+    flex-direction: row;
+    float:right;
 }
 
 th{

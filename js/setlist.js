@@ -51,6 +51,7 @@ window.onload = function () {
     var listeValeursGroupes = [];  //contient les noms des groupes disponibles
     var saveBeforeQuit = false;    //demander à l'utilisateur de sauvegarder avant de quitter
     var etatCheckboxes = [];
+    var bloque = false;
 
     window.onbeforeunload = function (e) {
         if (saveBeforeQuit) {
@@ -58,6 +59,7 @@ window.onload = function () {
         };
     };
 
+    loadBlocage();
 
     //charge les listeners des éléments HTML
     for (let i = 0, length = listes.length; i < length; i++) {
@@ -106,7 +108,7 @@ window.onload = function () {
                 entrees[i].style.removeProperty("box-shadow");
                 let row = liste.insertRow(-1);
                 row.insertCell(0).appendChild(document.createTextNode(val));
-                ajoutFonctionRetirer(row);
+                ajoutFonctionRetirer(row, i);
                 row.setAttribute("togroup", groupes.value);
                 console.log(liste);
             } else {
@@ -225,16 +227,19 @@ window.onload = function () {
 
     //la logique des boutons d'ajout d'urls dans les listes
     function initEventBtnAjout(i) {
-        update();
-        let lengthBefore = Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
-        addtoL(listes[i], i, entrees[i].value);
-        entrees[i].value = "";
-        let change = lengthBefore !== Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
-        if (change) {
-            btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
-            saveBeforeQuit = true;
+        if (!(i === 1 && bloque)) {
+            update();
+            let lengthBefore = Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
+            addtoL(listes[i], i, entrees[i].value);
+            entrees[i].value = "";
+            let change = lengthBefore !== Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, "")).length;
+            if (change) {
+                btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
+                saveBeforeQuit = true;
+            }
+        } else {
+            alerteBlocage();
         }
-
     }
 
     //la logique du bouton d'ajout de groupes
@@ -258,17 +263,17 @@ window.onload = function () {
                         donneesSeverite = arg.donneesSeverite;
                         donneesSeverite.push([0, 0, false]);
                         console.log('donnesSeveriteAfterGet:', JSON.stringify(donneesSeverite));
-                    });
-                    saveBeforeQuit = true;
-                    setTimeout(() => {
-                        console.log('donnesSeveriteBeforeSet:', JSON.stringify(donneesSeverite));
-                        chrome.storage.sync.set({
-                            groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)],
-                            donneesSeverite: donneesSeverite
-                        });
-                        saveBeforeQuit = false;
-                    }, 100);
 
+                        saveBeforeQuit = true;
+                        setTimeout(() => {
+                            console.log('donnesSeveriteBeforeSet:', JSON.stringify(donneesSeverite));
+                            chrome.storage.sync.set({
+                                groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)],
+                                donneesSeverite: donneesSeverite
+                            });
+                            saveBeforeQuit = false;
+                        }, 100);
+                    });
 
                 } else {
                     alert(chrome.i18n.getMessage("setlist_messagegroupnameinvalid"));
@@ -281,15 +286,19 @@ window.onload = function () {
     //la logique du bouton de suppression de groupes
     function initEventBtnSupprimerGroup() {
         btnSupprimerGroupe.addEventListener("click", function () {
-            let contenu = `<h1 style="margin:0 0 10px 0;">${chrome.i18n.getMessage("setlist_deletegroup_btn")}</h1><table groups style="margin:auto;"><tbody>`;
-            for (let i = 0, length = groupes.options.length; i < length; i++) {
-                contenu += `<tr><td>${groupes.options[i].innerHTML}</td></tr>`;
+            if (!bloque) {
+                let contenu = `<h1 style="margin:0 0 10px 0;">${chrome.i18n.getMessage("setlist_deletegroup_btn")}</h1><table groups style="margin:auto;"><tbody>`;
+                for (let i = 0, length = groupes.options.length; i < length; i++) {
+                    contenu += `<tr><td>${groupes.options[i].innerHTML}</td></tr>`;
+                }
+                contenu += "</tbody></table>";
+                notifier.modal(contenu);
+                setTimeout(() => {
+                    initSupprimerGroupe();
+                }, 100);
+            } else {
+                alerteBlocage();
             }
-            contenu += "</tbody></table>";
-            notifier.modal(contenu);
-            setTimeout(() => {
-                initSupprimerGroupe();
-            }, 100);
         });
     }
 
@@ -304,7 +313,6 @@ window.onload = function () {
                         let optionCorrespondante = groupes.querySelector(`option[value="${groupRow.textContent.replace(/ /g, "_")}"]`);
                         if (optionCorrespondante !== null && typeof optionCorrespondante !== 'undefined') {
                             for (let i = 0, length = listes.length; i < length; i++) {
-
                                 //supprimer les liens des listes du groupe supprimé
                                 for (let j = listes[i].rows.length - 1; j >= 0; j--) {
                                     if (listes[i].rows[j].getAttribute("togroup") === optionCorrespondante.value) {
@@ -324,20 +332,21 @@ window.onload = function () {
                                 donneesSeverite.splice(optionCorrespondante.index, 1);
                                 console.log('____indexOfDeletedGroup:', optionCorrespondante.index);
                                 console.log('donnesSeveriteAfterGet:', JSON.stringify(donneesSeverite));
-                            });
-                            saveBeforeQuit = true;
-                            setTimeout(() => {
-                                optionCorrespondante.parentNode.removeChild(optionCorrespondante);
-                                groupRow.parentNode.removeChild(groupRow);
+
+                                saveBeforeQuit = true;
                                 setTimeout(() => {
-                                    console.log('donnesSeveriteBeforeSet:', JSON.stringify(donneesSeverite));
-                                    chrome.storage.sync.set({
-                                        groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)],
-                                        donneesSeverite: donneesSeverite
+                                    optionCorrespondante.parentNode.removeChild(optionCorrespondante);
+                                    groupRow.parentNode.removeChild(groupRow);
+                                    setTimeout(() => {
+                                        console.log('donnesSeveriteBeforeSet:', JSON.stringify(donneesSeverite));
+                                        chrome.storage.sync.set({
+                                            groupes: [groupes.innerHTML, Array.from(groupes.options).map(x => x.value)],
+                                            donneesSeverite: donneesSeverite
+                                        });
+                                        apply();
+                                        affichageListeParGroupe();
+                                        saveBeforeQuit = false;
                                     });
-                                    apply();
-                                    affichageListeParGroupe();
-                                    saveBeforeQuit = false;
                                 });
                             });
 
@@ -362,6 +371,21 @@ window.onload = function () {
                 }
             }
         }
+    }
+
+    function alerteBlocage() {
+        alert(chrome.i18n.getMessage("horaire_periodedeblocage"));
+    }
+
+    //charge la date du blocage
+    function loadBlocage() {
+        chrome.storage.sync.get('dateFinBlocage', function (arg) {
+            if (typeof arg.dateFinBlocage !== 'undefined') {
+                if (arg.dateFinBlocage[0] > Date.now()) {
+                    bloque = true;
+                }
+            }
+        });
     }
 
     //charge le bouton des groupes
@@ -400,17 +424,21 @@ window.onload = function () {
     //gère la suppression des urls par liste
     function initFonctionRetirer(i) {
         for (let j = 0, trlength = listes[i].rows.length; j < trlength; j++) {
-            ajoutFonctionRetirer(listes[i].rows[j]);
+            ajoutFonctionRetirer(listes[i].rows[j], i);
             // apply(i);
         }
     }
 
     //gère la suppression des urls au clic
-    function ajoutFonctionRetirer(row) {
+    function ajoutFonctionRetirer(row, i) {
         row.addEventListener("click", function () {
-            row.parentNode.removeChild(row);
-            btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
-            saveBeforeQuit = true;
+            if (!(i === 0 && bloque)) {
+                row.parentNode.removeChild(row);
+                btnEnregistrer.style.boxShadow = "0 0 10px 5px rgb(250, 135, 135)";
+                saveBeforeQuit = true;
+            } else {
+                alerteBlocage();
+            }
         });
     }
 

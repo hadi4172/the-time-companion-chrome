@@ -2,6 +2,8 @@ window.onload = () => {
 
     // document.querySelector("h1[commingsoon]").innerHTML=chrome.i18n.getMessage("horaire_comingsoon");
 
+    document.title = chrome.i18n.getMessage("horaire_titre")
+
     document.querySelector("p[description]").innerHTML = chrome.i18n.getMessage("horaire_description");
     document.querySelector("#addpause").innerHTML = chrome.i18n.getMessage("horaire_addpause");
     document.querySelector("#save").innerHTML = chrome.i18n.getMessage("horaire_save");
@@ -9,12 +11,18 @@ window.onload = () => {
     document.querySelector("h2[jour]").innerHTML = chrome.i18n.getMessage("horaire_jour");
     document.querySelector("h2[debut]").innerHTML = chrome.i18n.getMessage("horaire_debut");
     document.querySelector("h2[fin]").innerHTML = chrome.i18n.getMessage("horaire_fin");
+    document.querySelector('label[for="dateblocage"]').innerHTML = chrome.i18n.getMessage("horaire_bloquerchangements");
 
     var btnAjoutPause = document.querySelector("#addpause");
     var btnEnregistrer = document.querySelector("#save");
     var tableauHoraires = document.querySelector("#tableaudhoraire");
+    var btnConfirmerBlocage = document.querySelector("#confirmer");
+    var selecteurDeDate = document.querySelector("#dateblocage");
 
     var saveBeforeQuit = false;
+    var bloque = false;
+
+    btnConfirmerBlocage.innerHTML = chrome.i18n.getMessage("horaire_confirmer");
 
     load();
 
@@ -25,16 +33,39 @@ window.onload = () => {
     };
 
     btnEnregistrer.addEventListener("click", function () {
-        btnEnregistrer.style.removeProperty("box-shadow");
+        if (!bloque) {
+            btnEnregistrer.style.removeProperty("box-shadow");
+            save();
+        } else {
+            alert(chrome.i18n.getMessage("horaire_periodedeblocage"));
+            btnEnregistrer.setAttribute("disabled", "disabled");
+        }
         saveBeforeQuit = false;
-        save();
     });
 
+    btnConfirmerBlocage.addEventListener("click", function () {
+        if (confirm(chrome.i18n.getMessage("horaire_messageconfirmation"))) {
+            if (selecteurDeDate.value === "") {
+                alert(chrome.i18n.getMessage("horaire_dateinvalide"));  
+            } else {
+                let decoupageDeDateEntree = selecteurDeDate.value.split(/[-T:]/g);
+                decoupageDeDateEntree[1]--;   //car le mois commence à 0
+                let timestampDeLiberation = (new Date(...decoupageDeDateEntree)).getTime();
+                if (timestampDeLiberation > Date.now()) {
+                    chrome.storage.sync.set({ dateFinBlocage: [timestampDeLiberation, selecteurDeDate.value] });
+                    btnConfirmerBlocage.setAttribute("disabled", "disabled");
+                    bloque = true;
+                }
+            }
+        }
+    });
 
     btnAjoutPause.addEventListener('click', function () {
-        let ligneHoraire = document.createElement('tr');
-        ligneHoraire.innerHTML =
-            `
+        if (!bloque) {
+            if (document.querySelectorAll("select").length < 11) {
+                let ligneHoraire = document.createElement('tr');
+                ligneHoraire.innerHTML =
+                    `
         <td>
             <select></select>
         </td>
@@ -49,25 +80,32 @@ window.onload = () => {
         </td>        
         `;
 
-        let optionsJour = [
-            chrome.i18n.getMessage("horaire_tous"),
-            chrome.i18n.getMessage("horaire_lundi"),
-            chrome.i18n.getMessage("horaire_mardi"),
-            chrome.i18n.getMessage("horaire_mercredi"),
-            chrome.i18n.getMessage("horaire_jeudi"),
-            chrome.i18n.getMessage("horaire_vendredi"),
-            chrome.i18n.getMessage("horaire_samedi"),
-            chrome.i18n.getMessage("horaire_dimanche")
-        ];
+                let optionsJour = [
+                    chrome.i18n.getMessage("horaire_lundi"),
+                    chrome.i18n.getMessage("horaire_mardi"),
+                    chrome.i18n.getMessage("horaire_mercredi"),
+                    chrome.i18n.getMessage("horaire_jeudi"),
+                    chrome.i18n.getMessage("horaire_vendredi"),
+                    chrome.i18n.getMessage("horaire_samedi"),
+                    chrome.i18n.getMessage("horaire_dimanche"),
+                    chrome.i18n.getMessage("horaire_tous")
+                ];
 
-        let selecteurDeJour = ligneHoraire.querySelector("select");
-        for (let i = 0, length = optionsJour.length; i < length; i++) {
-            selecteurDeJour.innerHTML += `<option>${optionsJour[i]}</option>`;
+                let selecteurDeJour = ligneHoraire.querySelector("select");
+                for (let i = 0, length = optionsJour.length; i < length; i++) {
+                    selecteurDeJour.innerHTML += `<option>${optionsJour[i]}</option>`;
+                }
+                gererPeriode(ligneHoraire);
+
+                tableauHoraires.querySelector("tbody").appendChild(ligneHoraire);
+                changementDetecte();
+            } else {
+                alert(chrome.i18n.getMessage("horaire_limitepause"));
+            }
+        } else {
+            alert(chrome.i18n.getMessage("horaire_periodedeblocage"));
+            btnAjoutPause.setAttribute("disabled", "disabled");
         }
-        gererPeriode(ligneHoraire);
-
-        tableauHoraires.querySelector("tbody").appendChild(ligneHoraire);
-        changementDetecte();
     });
 
     function changementDetecte() {
@@ -78,13 +116,15 @@ window.onload = () => {
     function save() {
         chrome.storage.sync.set({
             pausesHebdomadaires: getData(),
-            contenuHTMLListe: tableauHoraires.innerHTML
+            contenuHTMLListe: tableauHoraires.innerHTML,
+            dernierChangementPauses: Date.now()
         });
         console.log(`pauses:`, JSON.stringify(getData()));
+        showBytesInUse();
     }
 
     function load() {
-        chrome.storage.sync.get('contenuHTMLListe', function (arg) {
+        chrome.storage.sync.get(['contenuHTMLListe', 'dateFinBlocage'], function (arg) {
             if (typeof arg.contenuHTMLListe !== 'undefined') {
                 tableauHoraires.innerHTML = arg.contenuHTMLListe;
                 let rows = Array.from(document.querySelector("tbody").querySelectorAll("tr"));
@@ -95,6 +135,13 @@ window.onload = () => {
                     for (let timeSelector of ligneHoraire.querySelectorAll("input")) {
                         timeSelector.value = timeSelector.getAttribute("timeselected");
                     }
+                }
+            }
+            if (typeof arg.dateFinBlocage !== 'undefined') {
+                if (arg.dateFinBlocage[0] > Date.now()) {
+                    selecteurDeDate.value = arg.dateFinBlocage[1];
+                    btnConfirmerBlocage.setAttribute("disabled", "disabled");
+                    bloque = true;
                 }
             }
         });
@@ -149,12 +196,12 @@ window.onload = () => {
                 [heureFin, heureDebut] = [heureDebut, heureFin];
             }
             let intervalle = [transformerEnMinute(heureDebut), transformerEnMinute(heureFin)];
-            if (jourSelectionne === 0) {
+            if (jourSelectionne === 7) {
                 for (let jour of pausesHebdomadaires) {
                     jour.push(intervalle);
                 }
             } else {
-                jourSelectionne--;
+                // jourSelectionne--;
                 pausesHebdomadaires[jourSelectionne].push(intervalle);
             }
         }
@@ -167,6 +214,21 @@ window.onload = () => {
         min += (parseInt(arr[0]) * 60);
         min += (parseInt(arr[1]));
         return min;
+    }
+
+    function showBytesInUse() {
+        chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
+            console.log("SyncBytesInUse : " + bytesInUse);
+        });
+        chrome.storage.local.getBytesInUse(null, function (bytesInUse) {
+            console.log("LocalBytesInUse : " + bytesInUse);
+        });
+        chrome.storage.sync.get(null, function (arg) {
+            console.log("Obj in Sync", arg);
+        });
+        chrome.storage.local.get(null, function (arg) {
+            console.log("Obj in Local", arg);
+        });
     }
 
 
