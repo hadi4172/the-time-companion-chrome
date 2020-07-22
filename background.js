@@ -5,6 +5,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 
 setTimeout(() => {
     var currentVersion = "1.5.0"
+    var initialisationCompletee = false;   //variable pour empecher le bug de suppression des tempsParUrl
     createNotification("Restarted", `currentVersion: ${currentVersion}`);
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
     var listesUrl = [[], []];  //[tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
@@ -51,22 +52,23 @@ setTimeout(() => {
             } else {
                 dateOfLastSave = today;
                 chrome.storage.local.set(tempsParUrl);
+                chrome.storage.local.set({ groupesCaches: [[], []] });
                 console.log("Nouveau jour");
             }
         } else {
             dateOfLastSave = today;
             console.log("Pas de données dispo pour tempsparurl");
         }
+        //gère les situations ou l'utilisateur met son ordinateur en veille
+        gererSleepMode();
+
+        saveDateOfLastSave();
+        showBytesInUse();
+
+        //mettre à jour les informations sur les listes
+        update();
+        initialisationCompletee = true;
     });
-
-    //gère les situations ou l'utilisateur met son ordinateur en veille
-    gererSleepMode();
-
-    saveDateOfLastSave();
-    showBytesInUse();
-
-    //mettre à jour les informations sur les listes
-    update();
 
     //initialisation de tempsParUrl
     function initTempsParUrl() {
@@ -108,7 +110,7 @@ setTimeout(() => {
                     }
                 }
                 if (actifActuellementAncien) {
-                    chrome.storage.local.set({etatUrlsAvecNiveau3:etatUrlsAvecNiveau3});
+                    chrome.storage.local.set({ etatUrlsAvecNiveau3: etatUrlsAvecNiveau3 });
                 }
                 let length = etatUrlsAvecNiveau3[0][0].length;
                 setTimeout(() => {
@@ -194,7 +196,8 @@ setTimeout(() => {
     function saveDateOfLastSave() {
         setTimeout(() => {
             console.log("dateOfLastSave:", dateOfLastSave);
-            chrome.storage.local.set({ date: dateOfLastSave });
+            chrome.storage.local.set({ date: getTodayInString() });
+
         }, 1000);
     }
 
@@ -202,6 +205,7 @@ setTimeout(() => {
     function commencerUnNouveauJour() {
         tempsParUrl = { times: [] };
         chrome.storage.local.set(tempsParUrl);
+        chrome.storage.local.set({ groupesCaches: [[], []] });
         dateOfLastSave = getTodayInString();
         saveDateOfLastSave();
 
@@ -224,40 +228,44 @@ setTimeout(() => {
 
     //changement du tab selectionné parmis les tabs ouverts
     chrome.tabs.onActivated.addListener(function (activeInfo) {
-        chrome.tabs.get(activeInfo.tabId, function (tab) {
-            let url = tab.url;
-            if (urlValide(url)) {
-                (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
-            }
-        });
+        if (initialisationCompletee) {
+            chrome.tabs.get(activeInfo.tabId, function (tab) {
+                let url = tab.url;
+                if (urlValide(url)) {
+                    (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
+                }
+            });
+        }
     });
 
     //changement à l'intérieur du tab actif (raffraichir ou nouveau lien)
     chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
-        if (tab.active) {
-            if (change.url) {
-                let url = change.url;
-                if (urlValide(url)) {
-                    askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
-                    // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
+        if (initialisationCompletee) {
+            if (tab.active) {
+                if (change.url) {
+                    let url = change.url;
+                    if (urlValide(url)) {
+                        askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
+                        // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
 
-                    // console.log("end by onUpdated");
+                        // console.log("end by onUpdated");
+                    }
                 }
-            }
-            //un son à été joué sur la page du navigateur récement
-            if (change.audible == true) {
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, { keepTracking: 1 }, function (response) {
-                        console.log('___tab is audible___');
+                //un son à été joué sur la page du navigateur récement
+                if (change.audible == true) {
+                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id, { keepTracking: 1 }, function (response) {
+                            console.log('___tab is audible___');
+                        });
                     });
-                });
-                //Le son ne joue plus
-            } else if (change.audible == false) {
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, { keepTracking: 0 }, function (response) {
-                        console.log('___tab is no more audible___');
+                    //Le son ne joue plus
+                } else if (change.audible == false) {
+                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id, { keepTracking: 0 }, function (response) {
+                            console.log('___tab is no more audible___');
+                        });
                     });
-                });
+                }
             }
         }
     });
@@ -270,146 +278,147 @@ setTimeout(() => {
     // Gère les demandes envoyés du content script
     chrome.runtime.onMessage.addListener(
         function (message, sender, sendResponse) {
+            if (initialisationCompletee) {
+                // Envoie le temps correspondant à celui de l'url de la page active du content script
+                if (message.sendMePreviousTimeData) {
+                    update();
 
-            // Envoie le temps correspondant à celui de l'url de la page active du content script
-            if (message.sendMePreviousTimeData) {
-                update();
+                    let urlIsPresent = lookForURL(message.sendMePreviousTimeData) !== -1;
+                    console.log('___Sent time___:', tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1], message.sendMePreviousTimeData);
+                    sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1] : 0) });
 
-                let urlIsPresent = lookForURL(message.sendMePreviousTimeData) !== -1;
-                console.log('___Sent time___:', tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1], message.sendMePreviousTimeData);
-                sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1] : 0) });
+                    // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
+                } else if (message.request == "sendMeDonneesSeverite") {
+                    update();
+                    console.log("current url:", sender.tab.url);
+                    console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (sender.tab.url).includes(y))) ? listesUrl[0].find(x => x.some(y => (sender.tab.url).includes(y))).find(z => (sender.tab.url).includes(z)) : "NO");
 
-                // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
-            } else if (message.request == "sendMeDonneesSeverite") {
-                update();
-                console.log("current url:", sender.tab.url);
-                console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (sender.tab.url).includes(y))) ? listesUrl[0].find(x => x.some(y => (sender.tab.url).includes(y))).find(z => (sender.tab.url).includes(z)) : "NO");
+                    let aUnNiveau3EncoreActif = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
+                    let donneesAEnvoyer = [];
+                    for (let i = 0, nbGroupes = listesUrl[0].length; i < nbGroupes; i++) {
 
-                let aUnNiveau3EncoreActif = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
-                let donneesAEnvoyer = [];
-                for (let i = 0, nbGroupes = listesUrl[0].length; i < nbGroupes; i++) {
+                        let presentDansListeNoire = listesUrl[0][i].some(x => sender.tab.url.includes(x) || x == "*.*");
+                        let presentDansListeBlanche = listesUrl[1][i].some(x => sender.tab.url.includes(x) || x == "*.*");
+                        let enPeriodeDeRepos = verifierSiPeriodeDeRepos();
+                        let urlEstImmunisee = sitesImmunises.some(x => sender.tab.url.includes(x));
+                        let urlAvaitUnNiveau2Actif = urlsAvecNiveau2Actif.some(x => sender.tab.url.includes(x));
+                        let sansNiveau2Temporairement = groupesCaches[1].some(x => x.some(y => getHostname(sender.tab.url).includes(y)));
 
-                    let presentDansListeNoire = listesUrl[0][i].some(x => sender.tab.url.includes(x) || x == "*.*");
-                    let presentDansListeBlanche = listesUrl[1][i].some(x => sender.tab.url.includes(x) || x == "*.*");
-                    let enPeriodeDeRepos = verifierSiPeriodeDeRepos();
-                    let urlEstImmunisee = sitesImmunises.some(x => sender.tab.url.includes(x));
-                    let urlAvaitUnNiveau2Actif = urlsAvecNiveau2Actif.some(x => sender.tab.url.includes(x));
-                    let sansNiveau2Temporairement = groupesCaches[1].some(x => x.some(y => getHostname(sender.tab.url).includes(y)));
+                        if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
+                            console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
+                        } else {
+                            console.log(`Groupe[${i}] N'est nul part`)
+                        }
 
-                    if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
-                        console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
-                    } else {
-                        console.log(`Groupe[${i}] N'est nul part`)
-                    }
-
-                    if (presentDansListeNoire && !presentDansListeBlanche && !enPeriodeDeRepos) {
-                        let severiteDeCeGroupe = donneesSeverite[i].slice();
-                        console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
-                        if (severiteDeCeGroupe[0] !== 0) {
-                            if (urlEstImmunisee && severiteDeCeGroupe[0] <= 2) {
-                                severiteDeCeGroupe[2] = false;
-                            } else if (urlAvaitUnNiveau2Actif && severiteDeCeGroupe[0] === 2) {
-                                severiteDeCeGroupe[2] = true;
-                            } else if (sansNiveau2Temporairement && severiteDeCeGroupe[0] === 2) {
-                                severiteDeCeGroupe = [1,0,false];
-                            } else if (severiteDeCeGroupe[0] === 3 && i < (listesUrl[0].length - groupesCaches[0].length)) {
-                                console.log("______etatUrlsAvecNiveau3:  ", JSON.stringify(etatUrlsAvecNiveau3));
-                                let index = etatUrlsAvecNiveau3[1][0].findIndex(x => sender.tab.url.includes(x));
-                                if (index > -1) {
-                                    severiteDeCeGroupe[1] *= etatUrlsAvecNiveau3[1][1][index];
-                                    severiteDeCeGroupe[1] += etatUrlsAvecNiveau3[1][2][index];
+                        if (presentDansListeNoire && !presentDansListeBlanche && !enPeriodeDeRepos) {
+                            let severiteDeCeGroupe = donneesSeverite[i].slice();
+                            console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
+                            if (severiteDeCeGroupe[0] !== 0) {
+                                if (urlEstImmunisee && severiteDeCeGroupe[0] <= 2) {
+                                    severiteDeCeGroupe[2] = false;
+                                } else if (urlAvaitUnNiveau2Actif && severiteDeCeGroupe[0] === 2) {
+                                    severiteDeCeGroupe[2] = true;
+                                } else if (sansNiveau2Temporairement && severiteDeCeGroupe[0] === 2) {
+                                    severiteDeCeGroupe = [1, 0, false];
+                                } else if (severiteDeCeGroupe[0] === 3 && i < (listesUrl[0].length - groupesCaches[0].length)) {
+                                    console.log("______etatUrlsAvecNiveau3:  ", JSON.stringify(etatUrlsAvecNiveau3));
+                                    let index = etatUrlsAvecNiveau3[1][0].findIndex(x => sender.tab.url.includes(x));
+                                    if (index > -1) {
+                                        severiteDeCeGroupe[1] *= etatUrlsAvecNiveau3[1][1][index];
+                                        severiteDeCeGroupe[1] += etatUrlsAvecNiveau3[1][2][index];
+                                    }
+                                    console.log("______etatUrlsAvecNiveau3Severite:  ", JSON.stringify(severiteDeCeGroupe));
                                 }
-                                console.log("______etatUrlsAvecNiveau3Severite:  ", JSON.stringify(severiteDeCeGroupe));
+                                donneesAEnvoyer.push(severiteDeCeGroupe);
                             }
-                            donneesAEnvoyer.push(severiteDeCeGroupe);
                         }
                     }
-                }
-                if (aUnNiveau3EncoreActif > -1) donneesAEnvoyer.push([3, 0, Math.ceil((etatUrlsAvecNiveau3[0][1][aUnNiveau3EncoreActif] - Date.now()) / (1000 * 60))]);
+                    if (aUnNiveau3EncoreActif > -1) donneesAEnvoyer.push([3, 0, Math.ceil((etatUrlsAvecNiveau3[0][1][aUnNiveau3EncoreActif] - Date.now()) / (1000 * 60))]);
 
-                console.log('::donneesAEnvoyer:', JSON.stringify(donneesAEnvoyer));
+                    console.log('::donneesAEnvoyer:', JSON.stringify(donneesAEnvoyer));
 
-                if (donneesAEnvoyer.length === 0) {
-                    sendResponse({ responseMessage: [[0, 0, false]] });
-                }
-                sendResponse({ responseMessage: donneesAEnvoyer });
-
-                //Envoie le temps de blocage restant pour le niveau 3
-            } else if (message.request == "sendMeTempsDeBlocageLv3") {
-                let index = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
-                sendResponse({ tempsDeBlocageLv3: index !== -1 ? etatUrlsAvecNiveau3[0][1][index] : -1 });
-
-                //gère le badge de l'extension
-            } else if (message.setBadge) {
-                //Original source : https://stackoverflow.com/a/32168534/7551620
-                chrome.tabs.get(sender.tab.id, function (tab) {
-                    if (chrome.runtime.lastError) {
-                        return; // the prerendered tab has been nuked, happens in omnibox search
+                    if (donneesAEnvoyer.length === 0) {
+                        sendResponse({ responseMessage: [[0, 0, false]] });
                     }
-                    if (tab.index >= 0) { // tab is visible
-                        chrome.browserAction.setBadgeText({ tabId: tab.id, text: message.setBadge[0] });
-                        chrome.browserAction.setBadgeBackgroundColor({ color: message.setBadge[1], tabId: tab.id });
-                    } else { // prerendered tab, invisible yet, happens quite rarely
-                        var tabId = sender.tab.id, text = message.setBadge[0], color = message.setBadge[1];
-                        chrome.webNavigation.onCommitted.addListener(function update(details) {
-                            if (details.tabId == tabId) {
-                                chrome.browserAction.setBadgeText({ tabId: tabId, text: text });
-                                chrome.browserAction.setBadgeBackgroundColor({ color: color, tabId: tabId });
-                                chrome.webNavigation.onCommitted.removeListener(update);
-                            }
-                        });
-                    }
-                });
+                    sendResponse({ responseMessage: donneesAEnvoyer });
 
-                //Enlève le mute de la page active du content script
-            } else if (message.mute == 0) {
+                    //Envoie le temps de blocage restant pour le niveau 3
+                } else if (message.request == "sendMeTempsDeBlocageLv3") {
+                    let index = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
+                    sendResponse({ tempsDeBlocageLv3: index !== -1 ? etatUrlsAvecNiveau3[0][1][index] : -1 });
 
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    var mutedInfo = tabs[0].mutedInfo;
-                    if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
-                });
-            } else if (message.mute == 1) {  // Mute sounds
+                    //gère le badge de l'extension
+                } else if (message.setBadge) {
+                    //Original source : https://stackoverflow.com/a/32168534/7551620
+                    chrome.tabs.get(sender.tab.id, function (tab) {
+                        if (chrome.runtime.lastError) {
+                            return; // the prerendered tab has been nuked, happens in omnibox search
+                        }
+                        if (tab.index >= 0) { // tab is visible
+                            chrome.browserAction.setBadgeText({ tabId: tab.id, text: message.setBadge[0] });
+                            chrome.browserAction.setBadgeBackgroundColor({ color: message.setBadge[1], tabId: tab.id });
+                        } else { // prerendered tab, invisible yet, happens quite rarely
+                            var tabId = sender.tab.id, text = message.setBadge[0], color = message.setBadge[1];
+                            chrome.webNavigation.onCommitted.addListener(function update(details) {
+                                if (details.tabId == tabId) {
+                                    chrome.browserAction.setBadgeText({ tabId: tabId, text: text });
+                                    chrome.browserAction.setBadgeBackgroundColor({ color: color, tabId: tabId });
+                                    chrome.webNavigation.onCommitted.removeListener(update);
+                                }
+                            });
+                        }
+                    });
 
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    var mutedInfo = tabs[0].mutedInfo;
-                    if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
-                });
-            } else if (message.immuniser) { //Immunise le site web contre un nouveau pop du niveau 2 au début pour 10 minutes
-                console.log('__added to sites immunisé');
-                addToSitesImmunises(sender.tab.url);
+                    //Enlève le mute de la page active du content script
+                } else if (message.mute == 0) {
 
-            } else if (message.niveau2EstActif) { //l'utilisateur a raffrachi la page alors qu'il a une boite de niveau 2 active
-                console.log('__added to UrlsAvecNiveau2Actif');
-                addToUrlsAvecNiveau2Actif(message.niveau2EstActif);
+                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                        var mutedInfo = tabs[0].mutedInfo;
+                        if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
+                    });
+                } else if (message.mute == 1) {  // Mute sounds
 
-            } else if (message.ajouterAUnGroupeCache) {  //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
-                console.log('__added to groupe caché');
-                addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2]);
+                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                        var mutedInfo = tabs[0].mutedInfo;
+                        if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
+                    });
+                } else if (message.immuniser) { //Immunise le site web contre un nouveau pop du niveau 2 au début pour 10 minutes
+                    console.log('__added to sites immunisé');
+                    addToSitesImmunises(sender.tab.url);
 
-            } else if (message.lauchThisLevelNow == 2) {   //Close tab
+                } else if (message.niveau2EstActif) { //l'utilisateur a raffrachi la page alors qu'il a une boite de niveau 2 active
+                    console.log('__added to UrlsAvecNiveau2Actif');
+                    addToUrlsAvecNiveau2Actif(message.niveau2EstActif);
 
-                chrome.tabs.remove(sender.tab.id);
+                } else if (message.ajouterAUnGroupeCache) {  //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
+                    console.log('__added to groupe caché');
+                    addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2]);
 
-            } else if (message.lauchThisLevelNow == 3) {   //Close tab after 10 seconds
-                setTimeout(() => {
+                } else if (message.lauchThisLevelNow == 2) {   //Close tab
+
                     chrome.tabs.remove(sender.tab.id);
-                }, 5 * 1000);
 
-            } else if (message.lauchThisLevelNow == 4) {   //Close chrome
-                console.log("Entered Message.launchThisNow");
-                chrome.tabs.query({}, function (tabs) {
-                    for (var i = 0; i < tabs.length; i++) {
-                        chrome.tabs.remove(tabs[i].id);
-                    }
-                });
-            } else if (message.gererNiveau3) {  //Gestion du processus de répétition du niveau 3 après qu'il aie pop
-                gererNiveau3(message.gererNiveau3[0], message.gererNiveau3[1], message.gererNiveau3[2]);
+                } else if (message.lauchThisLevelNow == 3) {   //Close tab after 10 seconds
+                    setTimeout(() => {
+                        chrome.tabs.remove(sender.tab.id);
+                    }, 5 * 1000);
 
-            } else if (message.timeElapsed) {  //Enregsistre le temps écoulé sur la page web récente
-                console.log("start by runtime");
-                console.log("stored new data..!");
+                } else if (message.lauchThisLevelNow == 4) {   //Close chrome
+                    console.log("Entered Message.launchThisNow");
+                    chrome.tabs.query({}, function (tabs) {
+                        for (var i = 0; i < tabs.length; i++) {
+                            chrome.tabs.remove(tabs[i].id);
+                        }
+                    });
+                } else if (message.gererNiveau3) {  //Gestion du processus de répétition du niveau 3 après qu'il aie pop
+                    gererNiveau3(message.gererNiveau3[0], message.gererNiveau3[1], message.gererNiveau3[2]);
 
-                storeData(message.timeElapsed[1], message.timeElapsed[0]);
+                } else if (message.timeElapsed) {  //Enregsistre le temps écoulé sur la page web récente
+                    console.log("start by runtime");
+                    console.log("stored new data..!");
+
+                    storeData(message.timeElapsed[1], message.timeElapsed[0]);
+                }
             }
         });
 
@@ -480,7 +489,7 @@ setTimeout(() => {
             checkedUrl = getHostname(url);
         }
         // if (typeof checkedUrl !== 'undefined') {
-        let tempsDeBlocage = optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 20 ? 3 : 0) ;
+        let tempsDeBlocage = optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 20 ? 3 : 0);
         if (!groupesCaches[1].some(x => x.some(y => checkedUrl.includes(y)))) {
             let hiddenBlacklist = ["hiddengrouptimecompanion.hgtc", checkedUrl];
             groupesCaches[0].push([3, time, tempsDeBlocage - optionChoisie]);
