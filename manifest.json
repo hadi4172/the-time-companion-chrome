@@ -1,7 +1,7 @@
 {
 	"name": "__MSG_extName__",
 	"manifest_version": 2,
-	"version": "1.5.0",
+	"version": "1.5.1",
 	"description": "__MSG_extDescription__",
 	"default_locale": "en",
 	"icons": {
@@ -30,7 +30,7 @@
 			"library/TimeMe/timeme.min.js",
 			"background.js"
 		],
-		"persistent": false
+		"persistent": true
 	},
 	"web_accessible_resources": [
 		"fonts/*",

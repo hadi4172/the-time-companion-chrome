@@ -119,7 +119,7 @@ window.onload = function () {
 
     //vérifie si l'url est valide
     function entreeUrlConforme(val) {
-        if (val == "*.*") {
+        if (val === "*.*" || val.includes("localhost:")) {
             return true;
         }
         var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/igm;
