@@ -245,7 +245,13 @@ setTimeout(() => {
                 if (change.url) {
                     let url = change.url;
                     if (urlValide(url)) {
-                        askForTimeSpent().then((result) => { storeData(url, result); console.log(`STORED ${url} with ${result}`); }, (error) => { storeData(url, error, true); console.log(`STORED ERROR ${url} with ${error}`); });
+                        askForTimeSpent().then((result) => { 
+                            storeData(url, result); 
+                            console.log(`STORED ${url} with ${result}`);
+                         }, (error) => { 
+                             storeData(url, error, true);
+                              console.log(`STORED ERROR ${url} with ${error}`);
+                             });
                         // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
 
                         // console.log("end by onUpdated");
@@ -307,7 +313,7 @@ setTimeout(() => {
                         if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
                             console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
                         } else {
-                            console.log(`Groupe[${i}] N'est nul part`)
+                            console.log(`Groupe[${i}] N'est nul part`);
                         }
 
                         if (presentDansListeNoire && !presentDansListeBlanche && !enPeriodeDeRepos) {
@@ -655,7 +661,9 @@ setTimeout(() => {
                             tempsParUrl.times[i][1] = tempsTraite;
                         }
                         console.log('______storing_sucess..._____');
-                    } else { console.log('____________failed to store data_________ '); }
+                    } else { 
+                        console.log('____________failed to store data_________ '); 
+                    }
                     trouve = true;
                 }
             }
