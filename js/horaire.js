@@ -2,6 +2,12 @@ window.onload = () => {
 
     // document.querySelector("h1[commingsoon]").innerHTML=chrome.i18n.getMessage("horaire_comingsoon");
 
+    //DEBUT ZONE DE TEST
+    // let stringgg = `LZ<thead> <tr class="head"> <th> <h2 jour="">Jour</h2> </th> <th> <h2 debut="">Heure de début</h2> </th> <th> <h2 fin="">Heure de fin</h2> </th> <th></th> </tr> </thead> <tbody> <tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr></tbody>LZ<thead> <tr class="head"> <th> <h2 jour="">Jour</h2> </th> <th> <h2 debut="">Heure de début</h2> </th> <th> <h2 fin="">Heure de fin</h2> </th> <th></th> </tr> </thead> <tbody> <tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr></tbody>LZ<thead> <tr class="head"> <th> <h2 jour="">Jour</h2> </th> <th> <h2 debut="">Heure de début</h2> </th> <th> <h2 fin="">Heure de fin</h2> </th> <th></th> </tr> </thead> <tbody> <tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr><tr> <td> <select><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option><option>Tous</option></select> </td> <td> <input debut="" type="time"> </td> <td> <input fin="" type="time"> </td> <td style="text-align: left;"> <i class="fa fa-trash fa-2x"></i> </td> </tr></tbody>`
+    // console.log(`stringCompressed:`,LZString.compressToUTF16(stringgg).length);
+    // console.log(`string:`,stringgg.length);
+    //FIN ZONE DE TEST
+    showBytesInUse();
     document.title = chrome.i18n.getMessage("horaire_titre")
 
     document.querySelector("p[description]").innerHTML = chrome.i18n.getMessage("horaire_description");
@@ -12,17 +18,23 @@ window.onload = () => {
     document.querySelector("h2[debut]").innerHTML = chrome.i18n.getMessage("horaire_debut");
     document.querySelector("h2[fin]").innerHTML = chrome.i18n.getMessage("horaire_fin");
     document.querySelector('label[for="dateblocage"]').innerHTML = chrome.i18n.getMessage("horaire_bloquerchangements");
+    document.querySelector('label[for="dateoverdrive"]').innerHTML = chrome.i18n.getMessage("horaire_activermodeoverdrive");
+    document.querySelector('label[for="dateoverdrive"]').setAttribute("title", chrome.i18n.getMessage("horaire_modeoverdriveinfobulle"));
 
     var btnAjoutPause = document.querySelector("#addpause");
     var btnEnregistrer = document.querySelector("#save");
     var tableauHoraires = document.querySelector("#tableaudhoraire");
     var btnConfirmerBlocage = document.querySelector("#confirmer");
+    var btnConfirmerOverdrive = document.querySelector("#confirmerOverdrive");
     var selecteurDeDate = document.querySelector("#dateblocage");
+    var selecteurDeTemps = document.querySelector("#dateoverdrive");
 
     var saveBeforeQuit = false;
     var bloque = false;
 
     btnConfirmerBlocage.innerHTML = chrome.i18n.getMessage("horaire_confirmer");
+    btnConfirmerOverdrive.innerHTML = chrome.i18n.getMessage("horaire_confirmer");
+    btnConfirmerOverdrive.setAttribute("title", chrome.i18n.getMessage("horaire_modeoverdriveinfobulle"));
 
     load();
 
@@ -46,7 +58,7 @@ window.onload = () => {
     btnConfirmerBlocage.addEventListener("click", function () {
         if (confirm(chrome.i18n.getMessage("horaire_messageconfirmation"))) {
             if (selecteurDeDate.value === "") {
-                alert(chrome.i18n.getMessage("horaire_dateinvalide"));  
+                alert(chrome.i18n.getMessage("horaire_dateinvalide"));
             } else {
                 let decoupageDeDateEntree = selecteurDeDate.value.split(/[-T:]/g);
                 decoupageDeDateEntree[1]--;   //car le mois commence à 0
@@ -60,12 +72,28 @@ window.onload = () => {
         }
     });
 
+    btnConfirmerOverdrive.addEventListener("click", function () {
+        if (prompt(chrome.i18n.getMessage("horaire_modeoverdriveconfirmation")) === chrome.i18n.getMessage("horaire_modeoverdriveOUI")) {
+            if (selecteurDeTemps.value === "") {
+                alert(chrome.i18n.getMessage("horaire_dateinvalide"));
+            } else {
+                let decoupageDeDateEntree = selecteurDeTemps.value.split(/:/g);
+                let maintenant = new Date();
+                let timestampDeLiberation = (new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate(), decoupageDeDateEntree[0], decoupageDeDateEntree[1])).getTime();
+                if (timestampDeLiberation > Date.now()) {
+                    chrome.storage.sync.set({ dateFinOverdrive: timestampDeLiberation });
+                    chrome.runtime.sendMessage({lauchThisLevelNow: 4}, function(response) {});
+                }
+            }
+        }
+    });
+
     btnAjoutPause.addEventListener('click', function () {
         if (!bloque) {
             if (document.querySelectorAll("select").length < 11) {
                 let ligneHoraire = document.createElement('tr');
                 ligneHoraire.innerHTML =
-                    `
+                    /*html*/`
         <td>
             <select></select>
         </td>
@@ -116,7 +144,7 @@ window.onload = () => {
     function save() {
         chrome.storage.sync.set({
             pausesHebdomadaires: getData(),
-            contenuHTMLListe: tableauHoraires.innerHTML,
+            contenuHTMLListe: LZString.compressToUTF16(tableauHoraires.innerHTML),
             dernierChangementPauses: Date.now()
         });
         console.log(`pauses:`, JSON.stringify(getData()));
@@ -126,7 +154,8 @@ window.onload = () => {
     function load() {
         chrome.storage.sync.get(['contenuHTMLListe', 'dateFinBlocage'], function (arg) {
             if (typeof arg.contenuHTMLListe !== 'undefined') {
-                tableauHoraires.innerHTML = arg.contenuHTMLListe;
+                tableauHoraires.innerHTML = LZString.decompressFromUTF16(arg.contenuHTMLListe);
+                // console.log(`tableauHoraires:`,LZString.decompressFromUTF16(arg.contenuHTMLListe));
                 let rows = Array.from(document.querySelector("tbody").querySelectorAll("tr"));
                 for (let ligneHoraire of rows) {
                     gererPeriode(ligneHoraire);

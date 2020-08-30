@@ -203,6 +203,18 @@
     "horaire_bloquerchangements": {
         "message": "Block all changes until"
     },
+    "horaire_activermodeoverdrive": {
+        "message": "Enable overdrive mode until"
+    },
+    "horaire_modeoverdriveinfobulle": {
+        "message": "You will not be able to open your browser until the selected time!"
+    },
+    "horaire_modeoverdriveconfirmation": {
+        "message": "Are you really sure you want to continue? You will not be able to open your browser until the selected time. Write \"YES\" to confirm."
+    },
+    "horaire_modeoverdriveOUI": {
+        "message": "YES"
+    },
     "horaire_confirmer": {
         "message": "Confirm"
     },

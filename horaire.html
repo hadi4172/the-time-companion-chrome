@@ -4,6 +4,7 @@
 <head>
     <title>Schedule</title>
     <meta charset="UTF-8">
+    <script src="library/Compression/lz-string.min.js"></script>
     <script src="js/horaire.js"></script>
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/horaire.css">
@@ -48,6 +49,11 @@
             <label for="dateblocage">BloqueRr tous les changements jusqu'au</label>
             <input type="datetime-local" id="dateblocage" name="dateblocage">
             <a id="confirmer" class="btn btn-3">COnfirmee</a>
+        </div>
+        <div id=conteneurdeblocage>
+            <label for="dateoverdrive">MoDe OverDRive jusqu'à</label>
+            <input type="time" id="dateoverdrive" name="dateoverdrive">
+            <a id="confirmerOverdrive" class="btn btn-3">COnfirmee</a>
         </div>
     </section>
     <!-- <h1 commingsoon></h1> -->

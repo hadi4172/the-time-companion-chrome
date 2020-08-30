@@ -30,9 +30,9 @@ setTimeout(() => {
     var attributsModal = {  //attributs du notificateur
         maxNotifications: 2,
         labels: {
-            warning: `<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_warning")}</span>`,
-            alert: `<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_alert")}</span>`,
-            confirm: `<span style="font-family:Arial;color: #606c71;">${chrome.i18n.getMessage("content_attributmodal_confirm")}</span>`,
+            warning: /*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_warning")}</span>`,
+            alert: /*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_alert")}</span>`,
+            confirm: /*html*/`<span style="font-family:Arial;color: #606c71;">${chrome.i18n.getMessage("content_attributmodal_confirm")}</span>`,
             confirmOk: chrome.i18n.getMessage("content_attributmodal_confirmOk"),
             confirmCancel: chrome.i18n.getMessage("content_attributmodal_confirmCancel")
         },
@@ -66,7 +66,7 @@ setTimeout(() => {
     function getDonneesSeverite() {
         niveauDeSeverite = []; tempsActivationSeverite = []; informationDebutOuDuree = []; entreePhraseDeProductivite = [];
         console.log("Entree 1 dans getDonneesSeverite()");
-        chrome.runtime.sendMessage({ request: "sendMeDonneesSeverite" }, function (response) {
+        chrome.runtime.sendMessage({ sendMeDonneesSeverite: window.location.href }, function (response) {
             console.log("Entree 2 dans getDonneesSeverite()");
             console.log("Reponse du background", response.responseMessage);
             for (let i = 0, length = response.responseMessage.length; i < length; i++) {
@@ -83,7 +83,7 @@ setTimeout(() => {
                 retirerNiveaux2();
             }
         });
-        chrome.runtime.sendMessage({ request: "sendMeTempsDeBlocageLv3" }, function (response) {
+        chrome.runtime.sendMessage({ sendMeTempsDeBlocageLv3: window.location.href }, function (response) {
             if (response.tempsDeBlocageLv3 !== -1) {
                 tempsDeBlocageLv3 = Math.ceil((response.tempsDeBlocageLv3 - Date.now()) / (1000 * 60));
             }
@@ -115,7 +115,7 @@ setTimeout(() => {
                 switch (niveauDeSeverite[i]) {
                     case 1:
                         if (document.querySelector(".awn-toast-warning") == null) {
-                            notifier.warning(`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_debut")}</span>`);
+                            notifier.warning(/*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_debut")}</span>`);
                             notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
                             notificationSound.play();
                             chrome.runtime.sendMessage({ immuniser: true }, function (response) {
@@ -127,9 +127,9 @@ setTimeout(() => {
                         notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
                         notificationSound.play();
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                        let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
-                        ${chrome.i18n.getMessage("content_notifier_debut")}</p>${entreePhraseDeProductivite[i] ? `<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                           <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
+                        let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
+                        ${chrome.i18n.getMessage("content_notifier_debut")}</p>${entreePhraseDeProductivite[i] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
+                           <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
                            <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                            <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
 
@@ -193,7 +193,7 @@ setTimeout(() => {
         switch (niveau) {
             case 1:
                 if (document.querySelector(".awn-toast-alert") == null) {
-                    notifier.alert(`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_l1_p1")}${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l1_p2")}</span>`);
+                    notifier.alert(/*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_l1_p1")}${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l1_p2")}</span>`);
                     notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
                     notificationSound.play();
                 }
@@ -207,10 +207,10 @@ setTimeout(() => {
                     notificationSound.play();
 
                     let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                    let contenuDeLaBoite2 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">
+                    let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
-                        ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p>${entreePhraseDeProductivite[index] ? `<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                    <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">${texteAEntrer[texteChoisi]}</mark></p>
+                        ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p>${entreePhraseDeProductivite[index] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
+                    <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
                     <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                     <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
                     niveau2EstActif = true;
@@ -246,7 +246,7 @@ setTimeout(() => {
                         }
                     }, 1000 * 2.5);
 
-                    notificationSound.src = chrome.runtime.getURL('sounds/glitch-in-the-matrix.mp3');
+                    notificationSound.src = chrome.runtime.getURL('sounds/piece-of-cake.mp3');
                     notificationSound.play();
                     chrome.runtime.sendMessage({ lauchThisLevelNow: 3 });
                     chrome.runtime.sendMessage({ gererNiveau3: [informationDebutOuDuree[index], window.location.href, (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60] });
@@ -267,7 +267,7 @@ setTimeout(() => {
     //envoie au background script les informations nécéssaires pour mettre à jour le badge de l'extension
     function updateBadge() {
         let severiteLaPlusForte = Math.max(...niveauDeSeverite);
-        switch (severiteLaPlusForte) {  
+        switch (severiteLaPlusForte) {
             case 1: case 2:
                 let secondesEcoules = TimeMe.getTimeOnCurrentPageInSeconds() + previousTime;
                 chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesEcoules), tabIsAudible ? "#d534eb" : "#6BAB2F"] });
@@ -341,7 +341,7 @@ setTimeout(() => {
     }
 
     //crée la boite du niveau 2
-    function creerBoxNiveau2(texte, texteChoisi) {
+    function creerBoxNiveau2(texte, texteChoisi) { 
         let body = document.querySelector("body");
         body.style.overflow = "hidden";
         setTimeout(() => {
@@ -353,7 +353,7 @@ setTimeout(() => {
         let tempsCorrespondant = [1, 2, 5, 10, 20, 30/*, 45, 60, 90, 120, 180*/, false];
 
         for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
-            timeNeededDropdown.innerHTML += `<option>${timeNeededPossibilities[i]}</option>`
+            timeNeededDropdown.innerHTML += /*html*/`<option>${timeNeededPossibilities[i]}</option>`
         }
 
         case2boxInterval.style.backdropFilter = "blur(2px)";
@@ -370,8 +370,8 @@ setTimeout(() => {
                     let valeurLancementNiveau3 = optionChoisie + (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60;
                     niveauDeSeverite.push(3);
                     tempsActivationSeverite.push(valeurLancementNiveau3);
-                    informationDebutOuDuree.push((optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 20 ? 3 : 0));
-                    chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, optionChoisie] }, function (response) { });
+                    informationDebutOuDuree.push((optionChoisie >= 5 ? 5 : 3) + (optionChoisie >= 10 ? 5 : 0) + (optionChoisie >= 20 ? 5 : 0));
+                    chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, optionChoisie, Date.now() + (optionChoisie + (informationDebutOuDuree[informationDebutOuDuree.length-1]))*60*1000 ] }, function (response) { });
                     immuniserContreNiveau2 = true;
                     retirerNiveaux2();
                 }
@@ -422,6 +422,7 @@ setTimeout(() => {
     document.addEventListener("visibilitychange", function () {
         if (document.hidden) {
             chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
+            TimeMe.stopTimer();
             console.log("Browser tab is hidden");
             console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
         }
@@ -436,6 +437,18 @@ setTimeout(() => {
         }
     });
 
+    window.onfocus = function () {
+        console.log("Browser tab is focused");
+        TimeMe.startTimer();
+    };
+    window.onblur = function () {
+        if (!document.hidden) {
+            console.log("Browser tab is unfocused but still visible");
+            TimeMe.stopTimer();
+            TimeMe.startTimer();
+        }
+    };
+
     // gère les ordres du background script
     chrome.runtime.onMessage.addListener(
         function (message, sender, sendResponse) {
@@ -444,13 +457,14 @@ setTimeout(() => {
                 console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
             } else if (message.resetYourTime) {  //recommence le temps de cette page
                 TimeMe.resetRecordedPageTime("webpage");
-                TimeMe.startTimer();
                 previousTime = 0;
                 getDonneesSeverite();
             } else if (message.keepTracking === 1) {  //considère tout le temps passé sur la page comme actif quand du son est en train de jouer
                 TimeMe.setIdleDurationInSeconds(800000);
-                TimeMe.stopTimer();
-                TimeMe.startTimer();
+                if (!document.hidden) {
+                    TimeMe.stopTimer();
+                    TimeMe.startTimer();
+                }
                 tabIsAudible = true;
             } else if (message.keepTracking === 0) {  //quand le son arrête de jouer, revien à l'état normal
                 TimeMe.setIdleDurationInSeconds(80);
@@ -471,7 +485,7 @@ function disableDistractionByInjection() {
 
             let injectionParSite = [
                 [
-                    /.*:\/\/.*.youtube.com\/?.*/, `
+                    /.*:\/\/.*.youtube.com\/?.*/, /*css*/`
                         [page-subtype="home"] #primary {
                             display: none !important;
                           }
@@ -489,7 +503,7 @@ function disableDistractionByInjection() {
                             display: none !important;
                           }
                           `],
-                [/.*:\/\/.*.twitter.com\/?.*/, `
+                [/.*:\/\/.*.twitter.com\/?.*/, /*css*/`
                           .Trends, [aria-label="Timeline: Trending now"], [href="/explore"], [aria-label="Timeline: Explore"] {
                               display: none !important;
                             }
@@ -503,7 +517,7 @@ function disableDistractionByInjection() {
                               visibility: hidden !important;
                             }
                             `],
-                [/.*:\/\/.*.facebook.com\/?.*/, `
+                [/.*:\/\/.*.facebook.com\/?.*/, /*css*/`
                           .home .newsFeedComposer #contentArea, #m_newsfeed_stream, #MComposer, #MStoriesTray, [role="main"] [role="feed"], [data-pagelet="Stories"] {
                               display: none !important;
                             }
@@ -520,7 +534,7 @@ function disableDistractionByInjection() {
                               display: none !important;
                             }
                             `],
-                [/.*:\/\/.*.reddit.com\/?.*/, `
+                [/.*:\/\/.*.reddit.com\/?.*/, /*css*/`
                           .commentarea, .CommentTree, .CommentsPage__tools {
                               display: none !important;
                             }
@@ -540,7 +554,7 @@ function disableDistractionByInjection() {
                               display: none !important;
                             }
                             `],
-                [/.*:\/\/.*.wikipedia.org\/?.*/, `
+                [/.*:\/\/.*.wikipedia.org\/?.*/, /*css*/`
                           a, a:visited, .extiw {
                               pointer-events:none;
                               color : #222222 !important ;
@@ -552,7 +566,7 @@ function disableDistractionByInjection() {
                           }
                           
                             `],
-                [/.*:\/\/.*.quora.com\/?.*/, `
+                [/.*:\/\/.*.quora.com\/?.*/, /*css*/`
                           .question_related, .first_content_page_feed{
                             display: none;;
                           }
@@ -563,7 +577,7 @@ function disableDistractionByInjection() {
                               display: none;
                           }
                             `],
-                [/.*:\/\/.*.linkedin.com\/?.*/, `
+                [/.*:\/\/.*.linkedin.com\/?.*/, /*css*/`
                           #voyager-feed .core-rail > :not(:nth-child(1)) {
                               visibility: hidden !important;
                             }

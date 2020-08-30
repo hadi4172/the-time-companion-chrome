@@ -119,7 +119,7 @@ window.onload = function () {
 
     //vérifie si l'url est valide
     function entreeUrlConforme(val) {
-        if (val === "*.*" || val.includes("localhost:")) {
+        if (val === "*.*" || val.includes("localhost")) {
             return true;
         }
         var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/igm;
@@ -141,7 +141,7 @@ window.onload = function () {
         for (let i = 0, length = listes.length; i < length; i++) {
 
             update();
-            indiceSauvegarde[i][Object.keys(indiceSauvegarde[i])[0]] = listes[i].innerHTML;
+            indiceSauvegarde[i][Object.keys(indiceSauvegarde[i])[0]] = LZString.compressToUTF16(listes[i].innerHTML);
             // let allUrls = Array.from(listes[i].rows).map(x => x.innerHTML.replace(/<\/?td>/g, ""));
             let urlsOrdonne = [];
             listeValeursGroupes = Array.from(groupes.options).map(x => x.value);
@@ -209,7 +209,7 @@ window.onload = function () {
     function charger(i) {
         chrome.storage.sync.get(Object.keys(indiceSauvegarde[i])[0], function (donnees) {
             if (typeof donnees[Object.keys(indiceSauvegarde[i])[0]] !== "undefined") {
-                listes[i].innerHTML = donnees[Object.keys(indiceSauvegarde[i])[0]];
+                listes[i].innerHTML = LZString.decompressFromUTF16(donnees[Object.keys(indiceSauvegarde[i])[0]]);
             }
         });
 

@@ -25,10 +25,10 @@ window.onload = function () {
 
     chrome.storage.sync.get(["donneesListeNoire", "donneesListeBlanche"], function (donnees) {
         if (typeof donnees["donneesListeNoire"] !== "undefined") {
-            listeNoire.innerHTML = donnees["donneesListeNoire"];
+            listeNoire.innerHTML = LZString.decompressFromUTF16(donnees["donneesListeNoire"]);
         }
         if (typeof donnees["donneesListeBlanche"] !== "undefined") {
-            listeBlanche.innerHTML = donnees["donneesListeBlanche"];
+            listeBlanche.innerHTML = LZString.decompressFromUTF16(donnees["donneesListeBlanche"]);
         }
     });
 

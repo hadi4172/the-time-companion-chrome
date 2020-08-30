@@ -4,9 +4,9 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 setTimeout(() => {
-    var currentVersion = "1.5.1"
+    var currentVersion = "1.5.7"
     var initialisationCompletee = false;   //variable pour empecher le bug de suppression des tempsParUrl
-    createNotification("Restarted", `currentVersion: ${currentVersion}`);
+    // createNotification("Restarted", `currentVersion: ${currentVersion}`);
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
     var listesUrl = [[], []];  //[tableau2dListesNoiresParGroupe,tableau2dListesBlanchesParGroupe]
     var tempsParUrl = { times: [] };  //objet qui contient les urls et le temps passé dans un tableau 2d comme ceci {times:[[URL,temps][...]...]}
@@ -22,7 +22,7 @@ setTimeout(() => {
     //vérifie la version et procède à certains arrangements selon la version de l'utilisateur
     chrome.storage.sync.get('currentVersion', function (arg) {
         //règle défauts version 1.4.3 
-        if (typeof arg.currentVersion === 'undefined') {
+        if (typeof arg.currentVersion === 'undefined' && typeof dateOfLastSave !== 'undefined') {
             chrome.storage.local.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg) {
                 if (typeof arg.urlsListeNoire !== 'undefined' || typeof arg.urlsListeBlanche !== 'undefined') {
                     chrome.storage.sync.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg2) {
@@ -30,6 +30,18 @@ setTimeout(() => {
                             chrome.storage.sync.set({ urlsListeNoire: arg.urlsListeNoire, urlsListeBlanche: arg.urlsListeNoire });
                         }
                     });
+                }
+            });
+        } else if (arg.currentVersion === "1.5.2") {
+            chrome.storage.sync.get(["donneesListeNoire", "donneesListeBlanche", "contenuHTMLListe"], function (donnees) {
+                if (typeof donnees["donneesListeNoire"] !== "undefined") {
+                    chrome.storage.sync.set({ donneesListeNoire: LZString.compressToUTF16(donnees["donneesListeNoire"]) });
+                }
+                if (typeof donnees["donneesListeBlanche"] !== "undefined") {
+                    chrome.storage.sync.set({ donneesListeBlanche: LZString.compressToUTF16(donnees["donneesListeBlanche"]) });
+                }
+                if (typeof donnees["contenuHTMLListe"] !== "undefined") {
+                    chrome.storage.sync.set({ contenuHTMLListe: LZString.compressToUTF16(donnees["contenuHTMLListe"]) });
                 }
             });
         }
@@ -70,6 +82,18 @@ setTimeout(() => {
         initialisationCompletee = true;
     });
 
+    chrome.storage.sync.get('dateFinOverdrive', function (arg) {
+        if (typeof arg.dateFinOverdrive !== 'undefined') {
+            if (arg.dateFinOverdrive > Date.now()) {
+                chrome.tabs.query({}, function (tabs) {
+                    for (var i = 0; i < tabs.length; i++) {
+                        chrome.tabs.remove(tabs[i].id);
+                    }
+                });
+            }
+        }
+    });
+
     //initialisation de tempsParUrl
     function initTempsParUrl() {
         chrome.storage.local.get("times", function (arg) {
@@ -84,13 +108,22 @@ setTimeout(() => {
         chrome.storage.local.get("groupesCaches", function (arg) {
             if (typeof arg.groupesCaches !== 'undefined') {
                 groupesCaches = arg.groupesCaches;
-                let length = groupesCaches[0].length;
-                setTimeout(() => {
-                    for (let i = 0; i < length; i++) {
-                        groupesCaches[0].splice(i, 1);
-                        groupesCaches[1].splice(i, 1);
+                // let length = groupesCaches[0].length;
+                // setTimeout(() => {
+                //     for (let i = 0; i < length; i++) {
+                //         groupesCaches[0].splice(i, 1);
+                //         groupesCaches[1].splice(i, 1);
+                //     }
+                // }, 5 * 60 * 1000);
+                setIntervalImmediately(() => {
+                    for (let i = 0; i < groupesCaches[0].length; i++) {
+                        // console.log(`groupesCaches[0][${i}][3]:`,groupesCaches[0][i][3],Date.now());
+                        if (groupesCaches[0][i][3] < Date.now()) {
+                            groupesCaches[0].splice(i, 1);
+                            groupesCaches[1].splice(i, 1);
+                        }
                     }
-                }, 5 * 60 * 1000);
+                }, 5000);
             }
 
         });
@@ -123,16 +156,16 @@ setTimeout(() => {
         });
     }
 
-    function createNotification(title, message) {
-        let options = {
-            type: "basic",
-            iconUrl: chrome.runtime.getURL("img/icon128.png"),
-            title: title,
-            message: message
-        }
-        console.log(`Notification lancée`);
-        chrome.notifications.create(Math.random().toString(), options, () => { });
-    }
+    // function createNotification(title, message) {
+    //     let options = {
+    //         type: "basic",
+    //         iconUrl: chrome.runtime.getURL("img/icon128.png"),
+    //         title: title,
+    //         message: message
+    //     }
+    //     console.log(`Notification lancée`);
+    //     chrome.notifications.create(Math.random().toString(), options, () => { });
+    // }
 
     //remmet les compteurs de temps des urls à zéro quand un nouveau jour commence
     function gererUnNouveauJour() {
@@ -140,11 +173,11 @@ setTimeout(() => {
         console.log('tempsRestantPourDemainEnH:', tempsRestantPourDemainEnMs / (1000 * 60 * 60));
         return setTimeout(() => {
             commencerUnNouveauJour();
-            createNotification("For Developper", "Les temps ont recommencés [1]");
+            // createNotification("For Developper", "Les temps ont recommencés [1]");
             console.log("Nouveau jour [1]");
             setInterval(() => {
                 commencerUnNouveauJour();
-                createNotification("For Developper", "Les temps ont recommencés [2]");
+                // createNotification("For Developper", "Les temps ont recommencés [2]");
                 console.log("Nouveau jour [2+]");
             }, (24 * 60 * 60 * 1000));
         }, tempsRestantPourDemainEnMs);
@@ -168,7 +201,7 @@ setTimeout(() => {
                 // L'ordinateur vien de se réveiller
                 if (dateOfLastSave != getTodayInString()) {
                     commencerUnNouveauJour();
-                    createNotification("For Developper", "Les temps ont recommencés [3]");
+                    // createNotification("For Developper", "Les temps ont recommencés [3]");
                     console.log(`Nouveau jour [3] \ndateOfLastSave${dateOfLastSave}\ngetTodayInString${getTodayInString()} `)
                 } else {
                     initGroupesCaches();
@@ -232,7 +265,7 @@ setTimeout(() => {
             chrome.tabs.get(activeInfo.tabId, function (tab) {
                 let url = tab.url;
                 if (urlValide(url)) {
-                    (async function () { await askForTimeSpent().then(result => storeData(url, result), error => storeData(url, error, true)); })();
+                    (async function () { await askForTimeSpent(activeInfo.tabId).then(result => storeData(url, result), error => storeData(url, error, true)); })();
                 }
             });
         }
@@ -241,43 +274,42 @@ setTimeout(() => {
     //changement à l'intérieur du tab actif (raffraichir ou nouveau lien)
     chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
         if (initialisationCompletee) {
-            if (tab.active) {
-                if (change.url) {
-                    let url = change.url;
-                    if (urlValide(url)) {
-                        askForTimeSpent().then((result) => { 
-                            storeData(url, result); 
-                            console.log(`STORED ${url} with ${result}`);
-                         }, (error) => { 
-                             storeData(url, error, true);
-                              console.log(`STORED ERROR ${url} with ${error}`);
-                             });
-                        // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
+            if (change.url) {
+                let url = change.url;
+                if (urlValide(url)) {
+                    askForTimeSpent(tabId).then((result) => {
+                        storeData(url, result);
+                        console.log(`STORED ${url} with ${result}`);
+                    }, (error) => {
+                        storeData(url, error, true);
+                        console.log(`STORED ERROR ${url} with ${error}`);
+                    });
+                    // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
 
-                        // console.log("end by onUpdated");
-                    }
+                    // console.log("end by onUpdated");
                 }
-                //un son à été joué sur la page du navigateur récement
-                if (change.audible == true) {
-                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                        chrome.tabs.sendMessage(tabs[0].id, { keepTracking: 1 }, function (response) {
-                            console.log('___tab is audible___');
-                        });
+            }
+
+            //un son à été joué sur la page du navigateur récement
+            if (change.audible == true) {
+                chrome.tabs.query({}, function (tabs) {
+                    chrome.tabs.sendMessage(tabId, { keepTracking: 1 }, function (response) {
+                        console.log('___tab is audible___');
                     });
-                    //Le son ne joue plus
-                } else if (change.audible == false) {
-                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                        chrome.tabs.sendMessage(tabs[0].id, { keepTracking: 0 }, function (response) {
-                            console.log('___tab is no more audible___');
-                        });
+                });
+                //Le son ne joue plus
+            } else if (change.audible == false) {
+                chrome.tabs.query({}, function (tabs) {
+                    chrome.tabs.sendMessage(tabId, { keepTracking: 0 }, function (response) {
+                        console.log('___tab is no more audible___');
                     });
-                }
+                });
             }
         }
     });
 
     function urlValide(val) {
-        var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/gm;
+        var regexURL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$|^localhost/gmi;
         return regexURL.test(val);
     }
 
@@ -294,21 +326,22 @@ setTimeout(() => {
                     sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1] : 0) });
 
                     // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
-                } else if (message.request == "sendMeDonneesSeverite") {
+                } else if (message.sendMeDonneesSeverite) {
+                    let url = message.sendMeDonneesSeverite;
                     update();
-                    console.log("current url:", sender.tab.url);
-                    console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (sender.tab.url).includes(y))) ? listesUrl[0].find(x => x.some(y => (sender.tab.url).includes(y))).find(z => (sender.tab.url).includes(z)) : "NO");
+                    console.log("current url:", message.sendMeDonneesSeverite);
+                    console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (url).includes(y))) ? listesUrl[0].find(x => x.some(y => (url).includes(y))).find(z => (url).includes(z)) : "NO");
 
-                    let aUnNiveau3EncoreActif = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
+                    let aUnNiveau3EncoreActif = etatUrlsAvecNiveau3[0][0].findIndex(x => url.includes(x));
                     let donneesAEnvoyer = [];
                     for (let i = 0, nbGroupes = listesUrl[0].length; i < nbGroupes; i++) {
 
-                        let presentDansListeNoire = listesUrl[0][i].some(x => sender.tab.url.includes(x) || x == "*.*");
-                        let presentDansListeBlanche = listesUrl[1][i].some(x => sender.tab.url.includes(x) || x == "*.*");
+                        let presentDansListeNoire = listesUrl[0][i].some(x => url.includes(x) || x == "*.*");
+                        let presentDansListeBlanche = listesUrl[1][i].some(x => url.includes(x) || x == "*.*");
                         let enPeriodeDeRepos = verifierSiPeriodeDeRepos();
-                        let urlEstImmunisee = sitesImmunises.some(x => sender.tab.url.includes(x));
-                        let urlAvaitUnNiveau2Actif = urlsAvecNiveau2Actif.some(x => sender.tab.url.includes(x));
-                        let sansNiveau2Temporairement = groupesCaches[1].some(x => x.some(y => getHostname(sender.tab.url).includes(y)));
+                        let urlEstImmunisee = sitesImmunises.some(x => url.includes(x));
+                        let urlAvaitUnNiveau2Actif = urlsAvecNiveau2Actif.some(x => url.includes(x));
+                        let sansNiveau2Temporairement = groupesCaches[1].some(x => x.some(y => getHostname(url).includes(y)));
 
                         if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
                             console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
@@ -328,7 +361,7 @@ setTimeout(() => {
                                     severiteDeCeGroupe = [1, 0, false];
                                 } else if (severiteDeCeGroupe[0] === 3 && i < (listesUrl[0].length - groupesCaches[0].length)) {
                                     console.log("______etatUrlsAvecNiveau3:  ", JSON.stringify(etatUrlsAvecNiveau3));
-                                    let index = etatUrlsAvecNiveau3[1][0].findIndex(x => sender.tab.url.includes(x));
+                                    let index = etatUrlsAvecNiveau3[1][0].findIndex(x => url.includes(x));
                                     if (index > -1) {
                                         severiteDeCeGroupe[1] *= etatUrlsAvecNiveau3[1][1][index];
                                         severiteDeCeGroupe[1] += etatUrlsAvecNiveau3[1][2][index];
@@ -349,8 +382,9 @@ setTimeout(() => {
                     sendResponse({ responseMessage: donneesAEnvoyer });
 
                     //Envoie le temps de blocage restant pour le niveau 3
-                } else if (message.request == "sendMeTempsDeBlocageLv3") {
-                    let index = etatUrlsAvecNiveau3[0][0].findIndex(x => sender.tab.url.includes(x));
+                } else if (message.sendMeTempsDeBlocageLv3) {
+                    let url = message.sendMeTempsDeBlocageLv3;
+                    let index = etatUrlsAvecNiveau3[0][0].findIndex(x => url.includes(x));
                     sendResponse({ tempsDeBlocageLv3: index !== -1 ? etatUrlsAvecNiveau3[0][1][index] : -1 });
 
                     //gère le badge de l'extension
@@ -378,13 +412,13 @@ setTimeout(() => {
                     //Enlève le mute de la page active du content script
                 } else if (message.mute == 0) {
 
-                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.query({ active: true }, function (tabs) {
                         var mutedInfo = tabs[0].mutedInfo;
                         if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
                     });
                 } else if (message.mute == 1) {  // Mute sounds
 
-                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.query({ active: true }, function (tabs) {
                         var mutedInfo = tabs[0].mutedInfo;
                         if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
                     });
@@ -398,13 +432,13 @@ setTimeout(() => {
 
                 } else if (message.ajouterAUnGroupeCache) {  //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
                     console.log('__added to groupe caché');
-                    addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2]);
+                    addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2], message.ajouterAUnGroupeCache[3]);
 
                 } else if (message.lauchThisLevelNow == 2) {   //Close tab
 
                     chrome.tabs.remove(sender.tab.id);
 
-                } else if (message.lauchThisLevelNow == 3) {   //Close tab after 10 seconds
+                } else if (message.lauchThisLevelNow == 3) {   //Close tab after 5 seconds
                     setTimeout(() => {
                         chrome.tabs.remove(sender.tab.id);
                     }, 5 * 1000);
@@ -430,10 +464,10 @@ setTimeout(() => {
 
 
     // Demander au content script de donner combien de temps s'est écoulé
-    function askForTimeSpent() {
+    function askForTimeSpent(tabID) {
         return new Promise((resolve, reject) => {
-            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
+            chrome.tabs.query({}, function (tabs) {
+                chrome.tabs.sendMessage(tabID, { todo: "howMuchTimeElapsed" }, function (response) {
                     if (typeof response !== 'undefined') {
                         if (typeof response.timeElapsed[0] !== 'undefined') {
                             console.log("TIME SPENT: ", response.timeElapsed[0]);
@@ -488,17 +522,17 @@ setTimeout(() => {
     }
 
     //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
-    function addToHiddenGroup(url, time, optionChoisie) {
+    function addToHiddenGroup(url, time, optionChoisie, timestamp) {
         let rechercheur = listesUrl[0].find((x, i) => x.some(y => url.includes(y) || y === "*.*") && donneesSeverite[i][0] === 2);
         let checkedUrl = rechercheur.find(y => url.includes(y));
         if (typeof checkedUrl === 'undefined') {
             checkedUrl = getHostname(url);
         }
         // if (typeof checkedUrl !== 'undefined') {
-        let tempsDeBlocage = optionChoisie + (optionChoisie > 5 ? 5 : 2) + (optionChoisie >= 20 ? 3 : 0);
+        let tempsDeBlocage = optionChoisie + (optionChoisie >= 5 ? 5 : 3) + (optionChoisie >= 10 ? 5 : 0) + (optionChoisie >= 20 ? 5 : 0);
         if (!groupesCaches[1].some(x => x.some(y => checkedUrl.includes(y)))) {
             let hiddenBlacklist = ["hiddengrouptimecompanion.hgtc", checkedUrl];
-            groupesCaches[0].push([3, time, tempsDeBlocage - optionChoisie]);
+            groupesCaches[0].push([3, time, tempsDeBlocage - optionChoisie, timestamp]);
             groupesCaches[1].push(hiddenBlacklist);
             donneesSeverite.push(groupesCaches[0][groupesCaches[0].length - 1]);
             listesUrl[0].push(groupesCaches[1][groupesCaches[1].length - 1]);
@@ -517,7 +551,7 @@ setTimeout(() => {
                     listesUrl[1].splice(indexInAllGroups, 1);
                     chrome.storage.local.set({ groupesCaches: groupesCaches });
                 }
-            }, tempsDeBlocage * 60 * 1000);
+            }, (tempsDeBlocage * 60 * 1000) - 100);
             longTimeouts.push(hiddenGroupTimeout);
         }
         console.log('.._..groupesCaches:', JSON.stringify(groupesCaches));
@@ -566,6 +600,11 @@ setTimeout(() => {
         return matches && matches[1];
         */
         return (new URL(url)).hostname.replace(/^www\./ig, '');
+    }
+
+    function setIntervalImmediately(func, interval) {
+        func();
+        return setInterval(func, interval);
     }
 
     // détecte un changement dans le stockage et met à jour les informations
@@ -661,8 +700,8 @@ setTimeout(() => {
                             tempsParUrl.times[i][1] = tempsTraite;
                         }
                         console.log('______storing_sucess..._____');
-                    } else { 
-                        console.log('____________failed to store data_________ '); 
+                    } else {
+                        console.log('____________failed to store data_________ ');
                     }
                     trouve = true;
                 }
