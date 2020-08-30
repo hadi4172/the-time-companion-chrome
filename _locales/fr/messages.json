@@ -183,7 +183,7 @@
         "message": "Gestion d'horaire"
     },
     "horaire_description": {
-        "message": "Durant les périodes de repos, les niveaux de sévérité ne s'appliquerons pas. Aucune pause ne sera active pendant les 5 prochaines minutes suivant n'importe quelle modification sur cette page."
+        "message": "Durant les périodes de repos, les niveaux de sévérité ne s'appliquerons pas. Aucune pause ne sera active pendant les 5 prochaines minutes suivant n'importe quelle modification sur les périodes de repos."
     },
     "horaire_addpause": {
         "message": "Ajouter une période de repos"

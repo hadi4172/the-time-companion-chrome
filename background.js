@@ -22,12 +22,16 @@ setTimeout(() => {
     //vérifie la version et procède à certains arrangements selon la version de l'utilisateur
     chrome.storage.sync.get('currentVersion', function (arg) {
         //règle défauts version 1.4.3 
-        if (typeof arg.currentVersion === 'undefined' && typeof dateOfLastSave !== 'undefined') {
-            chrome.storage.local.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg) {
-                if (typeof arg.urlsListeNoire !== 'undefined' || typeof arg.urlsListeBlanche !== 'undefined') {
-                    chrome.storage.sync.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg2) {
-                        if (typeof arg2.urlsListeNoire === 'undefined' && typeof arg2.urlsListeBlanche === 'undefined') {
-                            chrome.storage.sync.set({ urlsListeNoire: arg.urlsListeNoire, urlsListeBlanche: arg.urlsListeNoire });
+        if (typeof arg.currentVersion === 'undefined') {
+            chrome.storage.local.get('date', function (arg) {
+                if (typeof arg.date !== 'undefined') {
+                    chrome.storage.local.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg) {
+                        if (typeof arg.urlsListeNoire !== 'undefined' || typeof arg.urlsListeBlanche !== 'undefined') {
+                            chrome.storage.sync.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg2) {
+                                if (typeof arg2.urlsListeNoire === 'undefined' && typeof arg2.urlsListeBlanche === 'undefined') {
+                                    chrome.storage.sync.set({ urlsListeNoire: arg.urlsListeNoire, urlsListeBlanche: arg.urlsListeNoire });
+                                }
+                            });
                         }
                     });
                 }

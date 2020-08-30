@@ -183,7 +183,7 @@
         "message": "The Time Companion Schedule"
     },
     "horaire_description": {
-        "message": "During rest periods, severity levels will not apply. No pauses will be active for the next 5 minutes following any changes on this page."
+        "message": "During rest periods, severity levels will not apply. No pauses will be active for the next 5 minutes following any changes on rest periods."
     },
     "horaire_addpause": {
         "message": "Add a rest period"
