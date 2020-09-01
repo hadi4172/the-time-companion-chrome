@@ -57,7 +57,7 @@ setTimeout(() => {
     //met à jour le temps des derniers accès au site web
     function updatePreviousTime() {
         chrome.runtime.sendMessage({ sendMePreviousTimeData: window.location.href }, function (response) {
-            console.log("[PreviousTime]=" + response.responseMessage);
+            //tconsole.log("[PreviousTime]=" + response.responseMessage);
             previousTime = response.responseMessage;
         });
     }
@@ -65,10 +65,10 @@ setTimeout(() => {
     //demande au background script de lui envoyer les niveaux de sévérités de cette page
     function getDonneesSeverite() {
         niveauDeSeverite = []; tempsActivationSeverite = []; informationDebutOuDuree = []; entreePhraseDeProductivite = [];
-        console.log("Entree 1 dans getDonneesSeverite()");
+        //tconsole.log("Entree 1 dans getDonneesSeverite()");
         chrome.runtime.sendMessage({ sendMeDonneesSeverite: window.location.href }, function (response) {
-            console.log("Entree 2 dans getDonneesSeverite()");
-            console.log("Reponse du background", response.responseMessage);
+            //tconsole.log("Entree 2 dans getDonneesSeverite()");
+            //tconsole.log("Reponse du background", response.responseMessage);
             for (let i = 0, length = response.responseMessage.length; i < length; i++) {
                 niveauDeSeverite.push(response.responseMessage[i][0]);
                 tempsActivationSeverite.push(response.responseMessage[i][1]);
@@ -98,7 +98,7 @@ setTimeout(() => {
 
 
     setIntervalImmediately(() => {
-        console.log(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime);
+        //tconsole.log(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime);
     }, 1000);
 
 
@@ -148,9 +148,9 @@ setTimeout(() => {
     // vérifie le temps écoulé et lance les niveaux de sévérité
     function verifierTemps() {
 
-        console.log("niveauDeSeverite:", JSON.stringify(niveauDeSeverite));
-        console.log("tempsActivationSeverite:", JSON.stringify(tempsActivationSeverite));
-        console.log("informationDebutOuDuree:", JSON.stringify(informationDebutOuDuree));
+        //tconsole.log("niveauDeSeverite:", JSON.stringify(niveauDeSeverite));
+        //tconsole.log("tempsActivationSeverite:", JSON.stringify(tempsActivationSeverite));
+        //tconsole.log("informationDebutOuDuree:", JSON.stringify(informationDebutOuDuree));
 
         if (niveauDeSeverite[0] != 0 && niveauActive === false) {
             setIntervalImmediately(() => {
@@ -183,12 +183,12 @@ setTimeout(() => {
     }
 
     for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
-        console.log(`Niveau[${i}]:` + niveauDeSeverite[i]);
+        //tconsole.log(`Niveau[${i}]:` + niveauDeSeverite[i]);
     }
 
     //gère le lancement des niveaux de sévérité
     function traitementSeverite(niveau, index = -1) {
-        console.log("Entree 1 traitementSeverite(niveau)");
+        //tconsole.log("Entree 1 traitementSeverite(niveau)");
         let tempsEnMinutesArrondi = (Math.round((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60 * 10) / 10);
         switch (niveau) {
             case 1:
@@ -203,7 +203,7 @@ setTimeout(() => {
                 if (document.querySelector("#awn-popup-wrapper") == null) {
 
                     notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
-                    console.log('son chargé');
+                    //tconsole.log('son chargé');
                     notificationSound.play();
 
                     let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
@@ -254,7 +254,8 @@ setTimeout(() => {
                 }
                 break;
 
-            case 4: console.log("Entree 1 traitementSeverite(niveau)");
+            case 4: 
+            //tconsole.log("Entree 1 traitementSeverite(niveau)");
                 chrome.runtime.sendMessage({ lauchThisLevelNow: 4 }); break;
 
             default:
@@ -359,7 +360,7 @@ setTimeout(() => {
         case2boxInterval.style.backdropFilter = "blur(2px)";
 
         case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
-            console.log('Cliqué!');
+            //tconsole.log('Cliqué!');
 
             const continuer = () => {
                 if (informationDebutOuDuree.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
@@ -395,7 +396,7 @@ setTimeout(() => {
         });
 
         case2boxInterval.querySelector(".awn-btn-cancel").addEventListener("click", function () {
-            console.log('Cliqué Quitter!');
+            //tconsole.log('Cliqué Quitter!');
             niveau2EstActif = false;
             chrome.runtime.sendMessage({ lauchThisLevelNow: 2 });
         });
@@ -409,7 +410,7 @@ setTimeout(() => {
             document.title = titreOriginel;
 
             chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
-            console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
+            //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
 
             if (niveau2EstActif) {
                 chrome.runtime.sendMessage({ niveau2EstActif: window.location.href });
@@ -423,12 +424,12 @@ setTimeout(() => {
         if (document.hidden) {
             chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
             TimeMe.stopTimer();
-            console.log("Browser tab is hidden");
-            console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
+            //tconsole.log("Browser tab is hidden");
+            //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
         }
         else {
             setTimeout(() => {
-                console.log("Browser tab is now visible");
+                //tconsole.log("Browser tab is now visible");
                 updatePreviousTime();
                 getDonneesSeverite();
                 TimeMe.resetRecordedPageTime("webpage");
@@ -438,12 +439,12 @@ setTimeout(() => {
     });
 
     window.onfocus = function () {
-        console.log("Browser tab is focused");
+        //tconsole.log("Browser tab is focused");
         TimeMe.startTimer();
     };
     window.onblur = function () {
         if (!document.hidden) {
-            console.log("Browser tab is unfocused but still visible");
+            //tconsole.log("Browser tab is unfocused but still visible");
             TimeMe.stopTimer();
             TimeMe.startTimer();
         }
@@ -454,7 +455,7 @@ setTimeout(() => {
         function (message, sender, sendResponse) {
             if (message.todo == "howMuchTimeElapsed") {  //envoie combien de temps s'est écoulé sur la page
                 sendResponse({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
-                console.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
+                //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
             } else if (message.resetYourTime) {  //recommence le temps de cette page
                 TimeMe.resetRecordedPageTime("webpage");
                 previousTime = 0;

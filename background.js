@@ -22,7 +22,7 @@ setTimeout(() => {
     //vérifie la version et procède à certains arrangements selon la version de l'utilisateur
     chrome.storage.sync.get('currentVersion', function (arg) {
         //règle défauts version 1.4.3 
-        if (typeof arg.currentVersion === 'undefined') {
+        if (typeof arg.currentVersion === 'undefined' && currentVersion === "1.4.3") {
             chrome.storage.local.get('date', function (arg) {
                 if (typeof arg.date !== 'undefined') {
                     chrome.storage.local.get(['urlsListeNoire', 'urlsListeBlanche'], function (arg) {
@@ -55,25 +55,25 @@ setTimeout(() => {
 
     //vérifie si l'initialisation est la première de la journée ou non
     chrome.storage.local.get("date", function (arg) {
-        console.log(arg.date);
+        //tconsole.log(arg.date);
         let today = getTodayInString();
         if (typeof arg.date !== "undefined") {
             dateOfLastSave = arg["date"];
-            console.log("Données de date existantes");
+            //tconsole.log("Données de date existantes");
             if (today === dateOfLastSave) {
                 initTempsParUrl();
                 initGroupesCaches();
                 initEtatUrlsAvecNiveau3();
-                console.log("Chargé tempsparurl");
+                //tconsole.log("Chargé tempsparurl");
             } else {
                 dateOfLastSave = today;
                 chrome.storage.local.set(tempsParUrl);
                 chrome.storage.local.set({ groupesCaches: [[], []] });
-                console.log("Nouveau jour");
+                //tconsole.log("Nouveau jour");
             }
         } else {
             dateOfLastSave = today;
-            console.log("Pas de données dispo pour tempsparurl");
+            //tconsole.log("Pas de données dispo pour tempsparurl");
         }
         //gère les situations ou l'utilisateur met son ordinateur en veille
         gererSleepMode();
@@ -121,7 +121,7 @@ setTimeout(() => {
                 // }, 5 * 60 * 1000);
                 setIntervalImmediately(() => {
                     for (let i = 0; i < groupesCaches[0].length; i++) {
-                        // console.log(`groupesCaches[0][${i}][3]:`,groupesCaches[0][i][3],Date.now());
+                        ////tconsole.log(`groupesCaches[0][${i}][3]:`,groupesCaches[0][i][3],Date.now());
                         if (groupesCaches[0][i][3] < Date.now()) {
                             groupesCaches[0].splice(i, 1);
                             groupesCaches[1].splice(i, 1);
@@ -167,22 +167,22 @@ setTimeout(() => {
     //         title: title,
     //         message: message
     //     }
-    //     console.log(`Notification lancée`);
+    //    //tconsole.log(`Notification lancée`);
     //     chrome.notifications.create(Math.random().toString(), options, () => { });
     // }
 
     //remmet les compteurs de temps des urls à zéro quand un nouveau jour commence
     function gererUnNouveauJour() {
         let tempsRestantPourDemainEnMs = calculerTempsRestantPourDemainEnMs();
-        console.log('tempsRestantPourDemainEnH:', tempsRestantPourDemainEnMs / (1000 * 60 * 60));
+        //tconsole.log('tempsRestantPourDemainEnH:', tempsRestantPourDemainEnMs / (1000 * 60 * 60));
         return setTimeout(() => {
             commencerUnNouveauJour();
             // createNotification("For Developper", "Les temps ont recommencés [1]");
-            console.log("Nouveau jour [1]");
+            //tconsole.log("Nouveau jour [1]");
             setInterval(() => {
                 commencerUnNouveauJour();
                 // createNotification("For Developper", "Les temps ont recommencés [2]");
-                console.log("Nouveau jour [2+]");
+                //tconsole.log("Nouveau jour [2+]");
             }, (24 * 60 * 60 * 1000));
         }, tempsRestantPourDemainEnMs);
     }
@@ -206,7 +206,7 @@ setTimeout(() => {
                 if (dateOfLastSave != getTodayInString()) {
                     commencerUnNouveauJour();
                     // createNotification("For Developper", "Les temps ont recommencés [3]");
-                    console.log(`Nouveau jour [3] \ndateOfLastSave${dateOfLastSave}\ngetTodayInString${getTodayInString()} `)
+                    //tconsole.log(`Nouveau jour [3] \ndateOfLastSave${dateOfLastSave}\ngetTodayInString${getTodayInString()} `)
                 } else {
                     initGroupesCaches();
                     initEtatUrlsAvecNiveau3();
@@ -232,7 +232,7 @@ setTimeout(() => {
     //sauvegarde la date de la dernière initialisation
     function saveDateOfLastSave() {
         setTimeout(() => {
-            console.log("dateOfLastSave:", dateOfLastSave);
+            //tconsole.log("dateOfLastSave:", dateOfLastSave);
             chrome.storage.local.set({ date: getTodayInString() });
 
         }, 1000);
@@ -256,7 +256,7 @@ setTimeout(() => {
         chrome.tabs.query({}, function (tabs) {
             for (var i = 0; i < tabs.length; i++) {
                 chrome.tabs.sendMessage(tabs[i].id, { resetYourTime: 1 }, function (response) {
-                    console.log('Sent Message to content script to reset the time');
+                    //tconsole.log('Sent Message to content script to reset the time');
                 });
             }
         });
@@ -283,14 +283,14 @@ setTimeout(() => {
                 if (urlValide(url)) {
                     askForTimeSpent(tabId).then((result) => {
                         storeData(url, result);
-                        console.log(`STORED ${url} with ${result}`);
+                        //tconsole.log(`STORED ${url} with ${result}`);
                     }, (error) => {
                         storeData(url, error, true);
-                        console.log(`STORED ERROR ${url} with ${error}`);
+                        //tconsole.log(`STORED ERROR ${url} with ${error}`);
                     });
                     // let timeSpent = (async function(){return await askForTimeSpent().then(result => result, error => error);})();
 
-                    // console.log("end by onUpdated");
+                    ////tconsole.log("end by onUpdated");
                 }
             }
 
@@ -298,14 +298,14 @@ setTimeout(() => {
             if (change.audible == true) {
                 chrome.tabs.query({}, function (tabs) {
                     chrome.tabs.sendMessage(tabId, { keepTracking: 1 }, function (response) {
-                        console.log('___tab is audible___');
+                        //tconsole.log('___tab is audible___');
                     });
                 });
                 //Le son ne joue plus
             } else if (change.audible == false) {
                 chrome.tabs.query({}, function (tabs) {
                     chrome.tabs.sendMessage(tabId, { keepTracking: 0 }, function (response) {
-                        console.log('___tab is no more audible___');
+                        //tconsole.log('___tab is no more audible___');
                     });
                 });
             }
@@ -326,15 +326,15 @@ setTimeout(() => {
                     update();
 
                     let urlIsPresent = lookForURL(message.sendMePreviousTimeData) !== -1;
-                    console.log('___Sent time___:', tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1], message.sendMePreviousTimeData);
+                    //tconsole.log('___Sent time___:', tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1], message.sendMePreviousTimeData);
                     sendResponse({ responseMessage: (urlIsPresent ? tempsParUrl.times[lookForURL(message.sendMePreviousTimeData)][1] : 0) });
 
                     // Envoie les sévéritées correspondantes à celles de l'url de la page active du content script
                 } else if (message.sendMeDonneesSeverite) {
                     let url = message.sendMeDonneesSeverite;
                     update();
-                    console.log("current url:", message.sendMeDonneesSeverite);
-                    console.log("IsitHere?", listesUrl[0].some(x => x.some(y => (url).includes(y))) ? listesUrl[0].find(x => x.some(y => (url).includes(y))).find(z => (url).includes(z)) : "NO");
+                    //tconsole.log("current url:", message.sendMeDonneesSeverite);
+                    //tconsole.log("IsitHere?", listesUrl[0].some(x => x.some(y => (url).includes(y))) ? listesUrl[0].find(x => x.some(y => (url).includes(y))).find(z => (url).includes(z)) : "NO");
 
                     let aUnNiveau3EncoreActif = etatUrlsAvecNiveau3[0][0].findIndex(x => url.includes(x));
                     let donneesAEnvoyer = [];
@@ -348,14 +348,14 @@ setTimeout(() => {
                         let sansNiveau2Temporairement = groupesCaches[1].some(x => x.some(y => getHostname(url).includes(y)));
 
                         if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
-                            console.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
+                            //tconsole.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
                         } else {
-                            console.log(`Groupe[${i}] N'est nul part`);
+                            //tconsole.log(`Groupe[${i}] N'est nul part`);
                         }
 
                         if (presentDansListeNoire && !presentDansListeBlanche && !enPeriodeDeRepos) {
                             let severiteDeCeGroupe = donneesSeverite[i].slice();
-                            console.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
+                            //tconsole.log(`;;donneesSeverite[${i}]:`, JSON.stringify(donneesSeverite[i]));
                             if (severiteDeCeGroupe[0] !== 0) {
                                 if (urlEstImmunisee && severiteDeCeGroupe[0] <= 2) {
                                     severiteDeCeGroupe[2] = false;
@@ -364,13 +364,13 @@ setTimeout(() => {
                                 } else if (sansNiveau2Temporairement && severiteDeCeGroupe[0] === 2) {
                                     severiteDeCeGroupe = [1, 0, false];
                                 } else if (severiteDeCeGroupe[0] === 3 && i < (listesUrl[0].length - groupesCaches[0].length)) {
-                                    console.log("______etatUrlsAvecNiveau3:  ", JSON.stringify(etatUrlsAvecNiveau3));
+                                    //tconsole.log("______etatUrlsAvecNiveau3:  ", JSON.stringify(etatUrlsAvecNiveau3));
                                     let index = etatUrlsAvecNiveau3[1][0].findIndex(x => url.includes(x));
                                     if (index > -1) {
                                         severiteDeCeGroupe[1] *= etatUrlsAvecNiveau3[1][1][index];
                                         severiteDeCeGroupe[1] += etatUrlsAvecNiveau3[1][2][index];
                                     }
-                                    console.log("______etatUrlsAvecNiveau3Severite:  ", JSON.stringify(severiteDeCeGroupe));
+                                    //tconsole.log("______etatUrlsAvecNiveau3Severite:  ", JSON.stringify(severiteDeCeGroupe));
                                 }
                                 donneesAEnvoyer.push(severiteDeCeGroupe);
                             }
@@ -378,7 +378,7 @@ setTimeout(() => {
                     }
                     if (aUnNiveau3EncoreActif > -1) donneesAEnvoyer.push([3, 0, Math.ceil((etatUrlsAvecNiveau3[0][1][aUnNiveau3EncoreActif] - Date.now()) / (1000 * 60))]);
 
-                    console.log('::donneesAEnvoyer:', JSON.stringify(donneesAEnvoyer));
+                    //tconsole.log('::donneesAEnvoyer:', JSON.stringify(donneesAEnvoyer));
 
                     if (donneesAEnvoyer.length === 0) {
                         sendResponse({ responseMessage: [[0, 0, false]] });
@@ -427,15 +427,15 @@ setTimeout(() => {
                         if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
                     });
                 } else if (message.immuniser) { //Immunise le site web contre un nouveau pop du niveau 2 au début pour 10 minutes
-                    console.log('__added to sites immunisé');
+                    //tconsole.log('__added to sites immunisé');
                     addToSitesImmunises(sender.tab.url);
 
                 } else if (message.niveau2EstActif) { //l'utilisateur a raffrachi la page alors qu'il a une boite de niveau 2 active
-                    console.log('__added to UrlsAvecNiveau2Actif');
+                    //tconsole.log('__added to UrlsAvecNiveau2Actif');
                     addToUrlsAvecNiveau2Actif(message.niveau2EstActif);
 
                 } else if (message.ajouterAUnGroupeCache) {  //Créé un groupe caché pour mettre en place une sévérité de niveau 3 temporaire
-                    console.log('__added to groupe caché');
+                    //tconsole.log('__added to groupe caché');
                     addToHiddenGroup(message.ajouterAUnGroupeCache[1], message.ajouterAUnGroupeCache[0], message.ajouterAUnGroupeCache[2], message.ajouterAUnGroupeCache[3]);
 
                 } else if (message.lauchThisLevelNow == 2) {   //Close tab
@@ -448,7 +448,7 @@ setTimeout(() => {
                     }, 5 * 1000);
 
                 } else if (message.lauchThisLevelNow == 4) {   //Close chrome
-                    console.log("Entered Message.launchThisNow");
+                    //tconsole.log("Entered Message.launchThisNow");
                     chrome.tabs.query({}, function (tabs) {
                         for (var i = 0; i < tabs.length; i++) {
                             chrome.tabs.remove(tabs[i].id);
@@ -458,8 +458,8 @@ setTimeout(() => {
                     gererNiveau3(message.gererNiveau3[0], message.gererNiveau3[1], message.gererNiveau3[2]);
 
                 } else if (message.timeElapsed) {  //Enregsistre le temps écoulé sur la page web récente
-                    console.log("start by runtime");
-                    console.log("stored new data..!");
+                    //tconsole.log("start by runtime");
+                    //tconsole.log("stored new data..!");
 
                     storeData(message.timeElapsed[1], message.timeElapsed[0]);
                 }
@@ -474,23 +474,23 @@ setTimeout(() => {
                 chrome.tabs.sendMessage(tabID, { todo: "howMuchTimeElapsed" }, function (response) {
                     if (typeof response !== 'undefined') {
                         if (typeof response.timeElapsed[0] !== 'undefined') {
-                            console.log("TIME SPENT: ", response.timeElapsed[0]);
-                            console.log("Good time");
+                            //tconsole.log("TIME SPENT: ", response.timeElapsed[0]);
+                            //tconsole.log("Good time");
                             resolve(response.timeElapsed[0]);
                         }
                         else {
-                            console.log("bad time");
+                            //tconsole.log("bad time");
                             reject(0);
                         }
                     }
                     else {
 
-                        console.log("bad time");
+                        //tconsole.log("bad time");
                         reject(0);
                     }
                 });
             });
-            // console.log("datatoreturn: ", theTimeSpent)
+            ////tconsole.log("datatoreturn: ", theTimeSpent)
         });
     }
 
@@ -503,7 +503,7 @@ setTimeout(() => {
                 sitesImmunises = sitesImmunises.filter(x => x !== hostname);
             }, 10 * 60 * 1000);
         }
-        console.log('.._..sitesImmunises:', JSON.stringify(sitesImmunises));
+        //tconsole.log('.._..sitesImmunises:', JSON.stringify(sitesImmunises));
     }
 
     function addToUrlsAvecNiveau2Actif(url) {
@@ -558,7 +558,7 @@ setTimeout(() => {
             }, (tempsDeBlocage * 60 * 1000) - 100);
             longTimeouts.push(hiddenGroupTimeout);
         }
-        console.log('.._..groupesCaches:', JSON.stringify(groupesCaches));
+        //tconsole.log('.._..groupesCaches:', JSON.stringify(groupesCaches));
         // }
     }
 
@@ -603,6 +603,9 @@ setTimeout(() => {
         let matches = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im);
         return matches && matches[1];
         */
+        if (/^localhost/gmi.test(url)) {
+            return url;
+        }
         return (new URL(url)).hostname.replace(/^www\./ig, '');
     }
 
@@ -647,6 +650,17 @@ setTimeout(() => {
             }
 
         });
+        chrome.storage.sync.get('dateFinOverdrive', function (arg) {
+            if (typeof arg.dateFinOverdrive !== 'undefined') {
+                if (arg.dateFinOverdrive > Date.now()) {
+                    chrome.tabs.query({}, function (tabs) {
+                        for (var i = 0; i < tabs.length; i++) {
+                            chrome.tabs.remove(tabs[i].id);
+                        }
+                    });
+                }
+            }
+        });
 
         // chrome.storage.local.get(["urlsListeNoire", "urlsListeBlanche"], function (donnees) {
 
@@ -662,7 +676,7 @@ setTimeout(() => {
             let checkedUrl = typeof rechercheur !== "undefined" ? rechercheur.find(y => url.includes(y)) : getHostname(url);
             for (let i = 0; i < tempsParUrl.times.length; i++) {
                 if (tempsParUrl.times[i][0] == checkedUrl) {
-                    // console.log('lookforurlResult:', url, checkedUrl);
+                    ////tconsole.log('lookforurlResult:', url, checkedUrl);
                     return i;
                 }
             }
@@ -672,23 +686,23 @@ setTimeout(() => {
 
     function showBytesInUse() {
         chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
-            console.log("SyncBytesInUse : " + bytesInUse);
+            //tconsole.log("SyncBytesInUse : " + bytesInUse);
         });
         chrome.storage.local.getBytesInUse(null, function (bytesInUse) {
-            console.log("LocalBytesInUse : " + bytesInUse);
+            //tconsole.log("LocalBytesInUse : " + bytesInUse);
         });
         chrome.storage.sync.get(null, function (arg) {
-            console.log("Obj in Sync", arg);
+            //tconsole.log("Obj in Sync", arg);
         });
         chrome.storage.local.get(null, function (arg) {
-            console.log("Obj in Local", arg);
+            //tconsole.log("Obj in Local", arg);
         });
     }
 
     //sauvegarde les informations sur le temps par url
     function storeData(url, temps, erreur = false) {
 
-        console.log('Preparing to store data.........');
+        //tconsole.log('Preparing to store data.........');
 
         if (urlValide(url)) {
 
@@ -703,9 +717,9 @@ setTimeout(() => {
                         if ((!isNaN(tempsParUrl.times[i][1])) ? tempsParUrl.times[i][1] < tempsTraite : true) {
                             tempsParUrl.times[i][1] = tempsTraite;
                         }
-                        console.log('______storing_sucess..._____');
+                        //tconsole.log('______storing_sucess..._____');
                     } else {
-                        console.log('____________failed to store data_________ ');
+                        //tconsole.log('____________failed to store data_________ ');
                     }
                     trouve = true;
                 }
