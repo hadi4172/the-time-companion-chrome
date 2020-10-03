@@ -129,8 +129,8 @@ setTimeout(() => {
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
                         let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p>${entreePhraseDeProductivite[i] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                           <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
-                           <form autocomplete="off"><input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
+                           <mark class="notranslate" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
+                           <form autocomplete="off"><input class="notranslate" autocomplete="chrome-off" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                            <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
 
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
@@ -210,8 +210,8 @@ setTimeout(() => {
                     let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
                         ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p>${entreePhraseDeProductivite[index] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                    <mark style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <form autocomplete="off"> <input class="notranslate" autocomplete="new-password" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
+                    <mark class="notranslate" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
+                    <form autocomplete="off"> <input class="notranslate" autocomplete="chrome-off" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                     <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
                     niveau2EstActif = true;
                     creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
@@ -569,10 +569,10 @@ function disableDistractionByInjection() {
                             `],
                 [/.*:\/\/.*.quora.com\/?.*/, /*css*/`
                           .question_related, .first_content_page_feed{
-                            display: none;;
+                            display: none;
                           }
                           .q-box.qu-overflowY--auto .q-box {
-                            display: none; !important;
+                            display: none !important;
                           }
                           .qu-mt--small, .qu-mb--large{
                               display: none;

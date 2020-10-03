@@ -1,5 +1,8 @@
 window.onload = function () {
 
+    //instanciation du notificateur
+    var notifier = new AWN();
+
     //obtention des éléments HTML pertinents
     var listeNoire = document.querySelector("table[valeurslistenoire]");
     var listeBlanche = document.querySelector("table[valeurslisteblanche]");
@@ -19,7 +22,7 @@ window.onload = function () {
     document.querySelector(`a[options]`).innerHTML = chrome.i18n.getMessage(`options_options`);
     document.querySelector(`a[horaire]`).innerHTML = chrome.i18n.getMessage(`options_horaire`);
     document.querySelector(`a[dons]`).innerHTML = chrome.i18n.getMessage(`options_dons`);
-    document.querySelector(`a[contact]`).innerHTML = chrome.i18n.getMessage(`options_contact`);
+    document.querySelector(`a[credits]`).innerHTML = chrome.i18n.getMessage(`options_credits`);
     document.querySelector(`a[bug]`).innerHTML = chrome.i18n.getMessage(`options_reportbug`);
     document.querySelector(`a[suggerer]`).innerHTML = chrome.i18n.getMessage(`options_suggestfeature`);
 
@@ -36,6 +39,7 @@ window.onload = function () {
 
     loadBlocage();
     charger();
+    lancerModalDeSoutien();
 
 
     //charge le texte des boutons de sévérité
@@ -132,6 +136,99 @@ window.onload = function () {
             if (typeof arg.dateFinBlocage !== 'undefined') {
                 if (arg.dateFinBlocage[0] > Date.now()) {
                     bloque = true;
+                }
+            }
+        });
+    }
+
+    //demande de l'aide à l'utilisateur après certains jours d'utilisation. (Expliquer ce qu'on peut améliorer, Dons, étoiles store, Partager sur les réseaux sociaux)
+    function lancerModalDeSoutien() {
+        chrome.storage.sync.get(['firstOpeningTimestamp','helpModalWasActivated'], function (arg) {
+            let helpModalWasNeverActivated = typeof arg.helpModalWasActivated === 'undefined';
+            if (typeof arg.firstOpeningTimestamp !== 'undefined' && ( helpModalWasNeverActivated || arg.helpModalWasActivated !== true )) {
+                if ((arg.firstOpeningTimestamp + 1000*60*60*24*(helpModalWasNeverActivated?10:3)) < (new Date()).setHours(6,0,0,0)) {
+                    chrome.storage.sync.set({helpModalWasActivated: true});
+                    let contenu = /*html*/`
+                    <div style="margin:0 auto; text-align: center;">
+                        <p>
+                            ${chrome.i18n.getMessage("options_modal_first")}
+                        <p>
+                        <fieldset class="starability-slot" style="margin:0 auto;">
+                            <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" checked aria-label="No rating." />
+                            <input type="radio" id="first-rate1" name="rating" value="1" />
+                            <label for="first-rate1" title="Terrible">1 star</label>
+                            <input type="radio" id="first-rate2" name="rating" value="2" />
+                            <label for="first-rate2" title="Not good">2 stars</label>
+                            <input type="radio" id="first-rate3" name="rating" value="3" />
+                            <label for="first-rate3" title="Average">3 stars</label>
+                            <input type="radio" id="first-rate4" name="rating" value="4" />
+                            <label for="first-rate4" title="Very good">4 stars</label>
+                            <input type="radio" id="first-rate5" name="rating" value="5" />
+                            <label for="first-rate5" title="Amazing">5 stars</label>
+                        </fieldset>
+                    <div>
+                `;
+                    let modalBox = notifier.modal(contenu).newNode.querySelector(".awn-popup-body");
+                    let stars = modalBox.querySelectorAll("input");
+                    for (let star of stars) {
+                        star.addEventListener('click', ()=>{
+                            if (star.value > 3) {
+                                modalBox.innerHTML = /*html*/`
+                                <div style="text-align:center;">
+                                    ${chrome.i18n.getMessage("options_modal_good")}
+                                <div>
+                                <div class="modalbuttons" style="width:fit-content; display: flex; flex-direction: column; flex-wrap:wrap; height: 100px">
+                                    <a href="https://www.paypal.me/hadiyahia" target="_blank" class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_donate")}</a>
+                                    <a href="https://chrome.google.com/webstore/detail/time-companion/jjnbbklfpecnjcfehhebmfmibicklgdo" target="_blank" class="btn btn-3 long-text-btn" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_rate")}</a>
+                                    <a id=modalsharebutton class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_share")}</a>
+                                    <a id=modalafterbutton class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_after")}</a>
+                                    <a id=modalclosebutton class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_close")}</a>
+                                <div>
+                                `;
+                                modalBox.querySelector("#modalsharebutton").addEventListener('click', ()=>{
+                                    document.querySelector('div[data-network=sharethis]').click();
+                                });
+                                modalBox.querySelector("#modalafterbutton").addEventListener('click', ()=>{
+                                    chrome.storage.sync.set({
+                                        firstOpeningTimestamp: Date.now(), 
+                                        helpModalWasActivated: false
+                                    });
+                                    document.querySelector('#awn-popup-wrapper').click();
+                                });
+                                modalBox.querySelector("#modalclosebutton").addEventListener('click', ()=>{
+                                    document.querySelector('#awn-popup-wrapper').click();
+                                });
+                            } else {
+                                console.log(`star.value:`,star.value);
+                                modalBox.innerHTML = /*html*/`
+                                <div style="text-align:center;">
+                                    ${chrome.i18n.getMessage("options_modal_bad")}
+                                <div>
+                                <div>
+                                <span class="modalbuttons" style="width:fit-content; display: flex; flex-direction: column; flex-wrap:wrap; height: 50px; margin: 0 0 0 20px;">
+                                    <a id=modalyesbutton href="mailto:hadiyahia@hotmail.com" class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_yes")}</a>
+                                    <a id=modalafterbutton class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_after")}</a>
+                                    <a id=modalclosebutton class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_no")}</a>
+                                <span>
+                                <div>
+                                `;
+                                modalBox.querySelector("#modalafterbutton").addEventListener('click', ()=>{
+                                    chrome.storage.sync.set({
+                                        firstOpeningTimestamp: Date.now(), 
+                                        helpModalWasActivated: false
+                                    });
+                                    document.querySelector('#awn-popup-wrapper').click();
+                                });
+                                modalBox.querySelector("#modalclosebutton").addEventListener('click', ()=>{
+                                    document.querySelector('#awn-popup-wrapper').click();
+                                });
+                                modalBox.querySelector("#modalyesbutton").addEventListener('click', ()=>{
+                                    document.querySelector('#awn-popup-wrapper').click();
+                                });
+                            }
+                        });
+                    }
+
                 }
             }
         });

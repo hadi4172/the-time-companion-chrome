@@ -95,11 +95,44 @@
     "options_contact": {
         "message": "Contact"
     },
+    "options_credits": {
+        "message": "Credits"
+    },
     "options_reportbug": {
         "message": "Reporter un bug"
     },
     "options_suggestfeature": {
         "message": "Suggérer une amélioration"
+    },
+    "options_modal_first": {
+        "message": "Vous utilisez notre extension depuis quelques jours maintenant. Comment évaluez-vous votre expérience ?"
+    },
+    "options_modal_good": {
+        "message": "Je suis très heureux que vous ayez trouvé cette extension utile ! Pouvez-vous nous soutenir de l'une de ces façons pour nous encourager dans les développements ?"
+    },
+    "options_modal_bad": {
+        "message": "Pouvez-vous nous aider en nous disant ce qui vous rendra plus satisfait de notre extension ?"
+    },
+    "options_modal_after": {
+        "message": "Plus tard"
+    },
+    "options_modal_yes": {
+        "message": "Oui"
+    },
+    "options_modal_no": {
+        "message": "Non"
+    },
+    "options_modal_close": {
+        "message": "Fermer"
+    },
+    "options_modal_donate": {
+        "message": "Faire un don"
+    },
+    "options_modal_rate": {
+        "message": "Noter sur le store"
+    },
+    "options_modal_share": {
+        "message": "Partager"
     },
     "popup": {
         "message": "field text"
@@ -262,6 +295,30 @@
     },
     "horaire_comingsoon": {
         "message": "à venir..."
+    },
+    "credits_titre": {
+        "message": "Credits"
+    },
+    "credits_donateurs": {
+        "message": "Donateurs"
+    },
+    "credits_code": {
+        "message": "Code"
+    },
+    "credits_autre": {
+        "message": "Autre"
+    },
+    "credits_mercidons": {
+        "message": "Merci à nos donateurs"
+    },
+    "credits_mercicode": {
+        "message": "Merci aux développeurs de"
+    },
+    "credits_merciautre": {
+        "message": "Merci à"
+    },
+    "credits_ajoutezvotrenomici": {
+        "message": "Ajoutez votre nom ici ❤️"
     },
     "content": {
         "message": "field text"

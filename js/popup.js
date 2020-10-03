@@ -24,10 +24,10 @@ window.onload = function () {
             chrome.tabs.sendMessage(tabs[0].id, { todo: "howMuchTimeElapsed" }, function (response) {
                 if (typeof response !== 'undefined') {
                     if (typeof response.timeElapsed !== 'undefined') {
-                        let url = response.timeElapsed[1]; 
-                        let index = tempsParUrl.findIndex(x=>url.includes(x[0]));
+                        let url = response.timeElapsed[1];
+                        let index = tempsParUrl.findIndex(x => url.includes(x[0]));
                         if (index !== -1) {
-                            tempsParUrl[index][1]=response.timeElapsed[0];
+                            tempsParUrl[index][1] = response.timeElapsed[0];
                         }
                         tempsParUrl = selectionSort(tempsParUrl);
                     }
@@ -117,7 +117,10 @@ window.onload = function () {
                 }],
                 labels: labels.map(x => x += " (%) ")
             },
-            options: { legend: { display: false, position: 'bottom' } }
+            options: {
+                legend: { display: false, position: 'bottom' },
+                responsive: false
+            }
         });
 
         //affichage des temps par url

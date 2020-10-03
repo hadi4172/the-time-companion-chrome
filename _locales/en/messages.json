@@ -95,11 +95,44 @@
     "options_contact": {
         "message": "Contact"
     },
+    "options_credits": {
+        "message": "Credits"
+    },
     "options_reportbug": {
         "message": "Report a bug"
     },
     "options_suggestfeature": {
         "message": "Suggest a new feature"
+    },
+    "options_modal_first": {
+        "message": "You have been using our extension for a few days now. How do you rate your experience?"
+    },
+    "options_modal_good": {
+        "message": "I'm very glad you found this extension useful! Can you support us in any of these ways to encourage us in the developments?"
+    },
+    "options_modal_bad": {
+        "message": "Can you help us by telling us what will make you more satisfied with our extension?"
+    },
+    "options_modal_after": {
+        "message": "After"
+    },
+    "options_modal_yes": {
+        "message": "Yes"
+    },
+    "options_modal_no": {
+        "message": "No"
+    },
+    "options_modal_close": {
+        "message": "Close"
+    },
+    "options_modal_donate": {
+        "message": "Donate"
+    },
+    "options_modal_rate": {
+        "message": "Rate on the store"
+    },
+    "options_modal_share": {
+        "message": "Share"
     },
     "popup": {
         "message": "field text"
@@ -262,6 +295,30 @@
     },
     "horaire_comingsoon": {
         "message": "Coming soon..."
+    },
+    "credits_titre": {
+        "message": "Credits"
+    },
+    "credits_donateurs": {
+        "message": "Donors"
+    },
+    "credits_code": {
+        "message": "Code"
+    },
+    "credits_autre": {
+        "message": "Other"
+    },
+    "credits_mercidons": {
+        "message": "Thanks to our donors"
+    },
+    "credits_mercicode": {
+        "message": "Thanks to developers of"
+    },
+    "credits_merciautre": {
+        "message": "Thanks to"
+    },
+    "credits_ajoutezvotrenomici": {
+        "message": "Add your name here ❤️"
     },
     "content": {
         "message": "field text"
