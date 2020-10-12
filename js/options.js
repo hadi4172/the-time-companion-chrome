@@ -40,6 +40,7 @@ window.onload = function () {
     loadBlocage();
     charger();
     lancerModalDeSoutien();
+    loadChart();
 
 
     //charge le texte des boutons de sévérité
@@ -141,13 +142,163 @@ window.onload = function () {
         });
     }
 
+    //Création du graphique des données hebdomadaires
+    function loadChart() {
+        const round2Dec = (num) => {
+            return Math.round((num + Number.EPSILON) * 100) / 100
+        };
+        chrome.storage.local.get('archiveTempsParUrl', function (arg) {
+            let colorPatterns = ["#114C47", "#0EB8D7", "#E3EEA8", "#97C749", "#33332F", "#3F4D49", "#5F7265", "#91B48C", "#D4CA9B", "#FBEDAD",
+                "#284153", "#23939E", "#ADC17E", "#FFFDEE", "#F3CF86", "#23527D", "#64A2C0", "#C8DBD1", "#DAE5B3", "#A6A727",
+                "#49534F", "#749A93", "#8DCDBE", "#F4F3D2", "#E56737", "#2A3B33", "#578D84", "#9FC5B2", "#D0D8DA", "#F5F2F4",
+                "#C2ECF4", "#53C094", "#14410E", "#A41B1A", "#693C2E", "#3A6E5B"];
+            let archiveTempsParUrl = [[], [], [], [], [], [], []];
+            if (typeof arg.archiveTempsParUrl !== 'undefined') {
+                archiveTempsParUrl = arg.archiveTempsParUrl;
+            }
+            let archiveTempsParUrlTries = archiveTempsParUrl.map(x => x.length !== 0 ? selectionSort(x[0]) : x);  //TODO Commenter tous ces lignes
+            let archiveTempsParUrlTriesAvecHeures = archiveTempsParUrlTries.map(x => x.length !== 0 ? x.map(y => [y[0], round2Dec(y[1] / (60 * 60))]) : x)
+            let urlsParJours = archiveTempsParUrlTriesAvecHeures.map(y => y.length !== 0 ? y.map(x => x[0]).slice(0, 6) : y);
+            let urlsParJoursAvecAutres = urlsParJours.map(y => y.length !== 0 ? y.slice(0, 5).concat(y.length === 6 ? ["Others"] : []) : y);
+            let tempsParUrlParJours = archiveTempsParUrlTriesAvecHeures.map(y => y.length !== 0 ? y.map(x => x[1]) : y);
+            let tempsParUrlParJoursAvecAutres = tempsParUrlParJours.map(y => y.length !== 0 ? y.slice(0, 5).concat((y.slice(5).reduce((a, b) => a + b, 0)) !== 0 ? [y.slice(5).reduce((a, b) => a + b, 0)] : []) : y);
+            let couleursParUrl = [...new Set(urlsParJoursAvecAutres.flat())].map((x, i) => x = [x, colorPatterns[i]]);
+
+            console.log(`archiveTempsParUrl:`, archiveTempsParUrl);
+            // console.log(`archiveTempsParUrlTries:`, archiveTempsParUrlTries);
+            // console.log(`archiveTempsParUrlTriesAvecHeures:`, archiveTempsParUrlTriesAvecHeures);
+            // console.log(`urlsParJours:`, urlsParJours);
+            // console.log(`urlsParJoursAvecAutres:`, urlsParJoursAvecAutres);
+            // console.log(`tempsParUrlParJours:`, tempsParUrlParJours);
+            // console.log(`tempsParUrlParJoursAvecAutres:`, tempsParUrlParJoursAvecAutres);
+            // console.log(`couleursParUrl:`, couleursParUrl);
+
+            let dataset = [];
+            const loadDataArray = (pos, val) => {
+                let arr = [];
+                arr[pos] = val;
+                for (let i = 0, length = arr.length - 1; i < length; i++) {
+                    arr[i] = null;
+                }
+                return arr
+            };
+
+            for (let i = 0, length = urlsParJoursAvecAutres.length; i < length; i++) {
+                for (let j = 0, length2 = urlsParJoursAvecAutres[i].length; j < length2; j++) {
+                    if (tempsParUrlParJoursAvecAutres[i][j] !== 0) {
+                        dataset.push({
+                            label: urlsParJoursAvecAutres[i][j],
+                            backgroundColor: couleursParUrl.find(x => x[0] === urlsParJoursAvecAutres[i][j])[1],
+                            data: loadDataArray(urlsParJoursAvecAutres.length - 1 - i, tempsParUrlParJoursAvecAutres[i][j])
+                        });
+                    }
+                }
+            }
+
+            console.log(`dataset:`, dataset);
+
+
+            new Chart(document.getElementById('myChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['6 Days Ago', '5 Days Ago', '4 Days Ago', '3 Days Ago', '2 Days Ago', 'Yesterday', 'Today'], //TODO Ajouter les langues
+                    datasets: dataset
+                    // [{
+                    //     label: 'Employee',
+                    //     backgroundColor: "#caf270",
+                    //     data: [12, 59, 5, 56, 58, 12, 59, 87, 45],
+                    // }, {
+                    //     label: 'Government',
+                    //     backgroundColor: "#008d93",
+                    //     data: [12, 59, 5, 56],
+                    // }, {
+                    //     label: 'Political parties',
+                    //     backgroundColor: "#2e5468",
+                    //     data: [12, 59, 5, 56, 58, 12, 59, 12, 74],
+                    // }]
+                    ,
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Browsing time in hours per day'
+                    },
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                            gridLines: {
+                                display: false,
+                            }
+                        }],
+                        yAxes: [{
+                            stacked: true,
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Hours'    //TODO Ajouter les langues
+                            },
+                            type: 'linear',
+                        }]
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                        itemSort: function (a, b) {
+                            return b.datasetIndex - a.datasetIndex
+                        },
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                let index = tooltipItem.index;
+                                let datasetIndex = tooltipItem.datasetIndex;
+                                let label = data.datasets[tooltipItem.datasetIndex].label || '';
+                                let value = data.datasets[datasetIndex].data[index];
+                                if (label) {
+                                    label += ' : ';
+                                }
+                                if (value === null) {
+                                    // label += "-";
+                                    return null;
+                                } else {
+                                    label += tooltipItem.yLabel;
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    legend: { display: false, position: 'bottom' },
+                    aspectRatio: 1,
+                }
+            });
+
+        });
+    }
+
+    function selectionSort(arr) {
+        var minIdx, temp,
+            len = arr.length;
+        for (var i = 0; i < len; i++) {
+            minIdx = i;
+            for (var j = i + 1; j < len; j++) {
+                if (arr[j][1] > arr[minIdx][1]) {
+                    minIdx = j;
+                }
+            }
+            temp = arr[i];
+            arr[i] = arr[minIdx];
+            arr[minIdx] = temp;
+        }
+        return arr;
+    }
+
     //demande de l'aide à l'utilisateur après certains jours d'utilisation. (Expliquer ce qu'on peut améliorer, Dons, étoiles store, Partager sur les réseaux sociaux)
     function lancerModalDeSoutien() {
-        chrome.storage.sync.get(['firstOpeningTimestamp','helpModalWasActivated'], function (arg) {
+        chrome.storage.sync.get(['firstOpeningTimestamp', 'helpModalWasActivated'], function (arg) {
             let helpModalWasNeverActivated = typeof arg.helpModalWasActivated === 'undefined';
-            if (typeof arg.firstOpeningTimestamp !== 'undefined' && ( helpModalWasNeverActivated || arg.helpModalWasActivated !== true )) {
-                if ((arg.firstOpeningTimestamp + 1000*60*60*24*(helpModalWasNeverActivated?10:3)) < (new Date()).setHours(6,0,0,0)) {
-                    chrome.storage.sync.set({helpModalWasActivated: true});
+            if (typeof arg.firstOpeningTimestamp !== 'undefined' && (helpModalWasNeverActivated || arg.helpModalWasActivated !== true)) {
+                if ((arg.firstOpeningTimestamp + 1000 * 60 * 60 * 24 * (helpModalWasNeverActivated ? 10 : 3)) < (new Date()).setHours(6, 0, 0, 0)) {
+                    chrome.storage.sync.set({ helpModalWasActivated: true });
                     let contenu = /*html*/`
                     <div style="margin:0 auto; text-align: center;">
                         <p>
@@ -171,7 +322,7 @@ window.onload = function () {
                     let modalBox = notifier.modal(contenu).newNode.querySelector(".awn-popup-body");
                     let stars = modalBox.querySelectorAll("input");
                     for (let star of stars) {
-                        star.addEventListener('click', ()=>{
+                        star.addEventListener('click', () => {
                             if (star.value > 3) {
                                 modalBox.innerHTML = /*html*/`
                                 <div style="text-align:center;">
@@ -185,21 +336,21 @@ window.onload = function () {
                                     <a id=modalclosebutton class="btn btn-3" style="box-shadow:0 0 0 0 black; text-transform: none; flex: 1;">${chrome.i18n.getMessage("options_modal_close")}</a>
                                 <div>
                                 `;
-                                modalBox.querySelector("#modalsharebutton").addEventListener('click', ()=>{
+                                modalBox.querySelector("#modalsharebutton").addEventListener('click', () => {
                                     document.querySelector('div[data-network=sharethis]').click();
                                 });
-                                modalBox.querySelector("#modalafterbutton").addEventListener('click', ()=>{
+                                modalBox.querySelector("#modalafterbutton").addEventListener('click', () => {
                                     chrome.storage.sync.set({
-                                        firstOpeningTimestamp: Date.now(), 
+                                        firstOpeningTimestamp: Date.now(),
                                         helpModalWasActivated: false
                                     });
                                     document.querySelector('#awn-popup-wrapper').click();
                                 });
-                                modalBox.querySelector("#modalclosebutton").addEventListener('click', ()=>{
+                                modalBox.querySelector("#modalclosebutton").addEventListener('click', () => {
                                     document.querySelector('#awn-popup-wrapper').click();
                                 });
                             } else {
-                                console.log(`star.value:`,star.value);
+                                console.log(`star.value:`, star.value);
                                 modalBox.innerHTML = /*html*/`
                                 <div style="text-align:center;">
                                     ${chrome.i18n.getMessage("options_modal_bad")}
@@ -212,17 +363,17 @@ window.onload = function () {
                                 <span>
                                 <div>
                                 `;
-                                modalBox.querySelector("#modalafterbutton").addEventListener('click', ()=>{
+                                modalBox.querySelector("#modalafterbutton").addEventListener('click', () => {
                                     chrome.storage.sync.set({
-                                        firstOpeningTimestamp: Date.now(), 
+                                        firstOpeningTimestamp: Date.now(),
                                         helpModalWasActivated: false
                                     });
                                     document.querySelector('#awn-popup-wrapper').click();
                                 });
-                                modalBox.querySelector("#modalclosebutton").addEventListener('click', ()=>{
+                                modalBox.querySelector("#modalclosebutton").addEventListener('click', () => {
                                     document.querySelector('#awn-popup-wrapper').click();
                                 });
-                                modalBox.querySelector("#modalyesbutton").addEventListener('click', ()=>{
+                                modalBox.querySelector("#modalyesbutton").addEventListener('click', () => {
                                     document.querySelector('#awn-popup-wrapper').click();
                                 });
                             }

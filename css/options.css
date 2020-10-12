@@ -44,6 +44,15 @@ tr{
   white-space: nowrap;
 }
 
+#myChart{
+  background-color: rgba(231, 219, 219,0.55);
+  border-radius: 10px;
+  border: 1px rgb(177, 177, 177) solid;
+}
+
+.chart-container{
+  margin: 20px 10px;
+}
 
 .titreduconteneur {
   margin-left: 40%;

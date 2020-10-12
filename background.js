@@ -19,6 +19,8 @@ setTimeout(() => {
     var etatUrlsAvecNiveau3 = [[[], []], [[], [], []]]; // [[[liste d'urls avec niveau 3 actif actuellement],[temps de fermeture de ces urls]],[[liste d'urls ayant subi le niveau 3],[nombre de fois subi par url],[temps initial par url]]]
     var urlsAvecNiveau2Actif = [];
 
+    var archiveTempsParUrl = [[], [], [], [], [], [], []];  //conserve les temps par url pour la semaine complète sous cette forme [[tempsParUrlJ1,dateJ1],[tempsParUrlJ2,dateJ2],...];
+
     //vérifie la version et procède à certains arrangements selon la version de l'utilisateur
     chrome.storage.sync.get('currentVersion', function (arg) {
         //règle défauts version 1.4.3 
@@ -54,7 +56,7 @@ setTimeout(() => {
     });
 
     //vérifie si l'initialisation est la première de la journée ou non
-    chrome.storage.local.get("date", function (arg) {
+    chrome.storage.local.get(["date", "archiveTempsParUrl"], function (arg) {
         //tconsole.log(arg.date);
         let today = getTodayInString();
         if (typeof arg.date !== "undefined") {
@@ -77,9 +79,15 @@ setTimeout(() => {
         }
         chrome.storage.sync.get('firstOpeningTimestamp', function (arg) {
             if (typeof arg.firstOpeningTimestamp === 'undefined') {
-                chrome.storage.sync.set({firstOpeningTimestamp: Date.now()});
+                chrome.storage.sync.set({ firstOpeningTimestamp: Date.now() });
             }
         });
+
+        //charge l'archive des temps par url
+        if (typeof arg.archiveTempsParUrl !== 'undefined') {
+            archiveTempsParUrl = arg.archiveTempsParUrl;
+        }
+
         //gère les situations ou l'utilisateur met son ordinateur en veille
         gererSleepMode();
 
@@ -232,6 +240,44 @@ setTimeout(() => {
     function getTodayInString() {
         let today = new Date();
         return JSON.stringify([today.getDate(), today.getMonth() + 1, today.getFullYear()]);
+    }
+
+    function getTodayInDays() {
+        return ~~(convertUTCDateToLocalDate(new Date()) / (1000 * 60 * 60 * 24));
+    }
+
+    //source : https://stackoverflow.com/a/18330682/7551620
+    function convertUTCDateToLocalDate(date) {
+        let newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
+        let offset = date.getTimezoneOffset() / 60;
+        let hours = date.getHours();
+
+        newDate.setHours(hours - offset);
+
+        return newDate;
+    }
+
+    function ajouterATempsParUrlArchive(tempsParUrl) {
+        let aujourdhui = getTodayInDays();
+        if (archiveTempsParUrl[0].length === 0) {
+            archiveTempsParUrl[0] = [tempsParUrl, aujourdhui];
+        } else {
+            let differenceDeJours = aujourdhui - archiveTempsParUrl[0][1];
+            if (differenceDeJours > 6) {
+                archiveTempsParUrl = [[tempsParUrl, aujourdhui], [], [], [], [], [], []];
+            } else if (differenceDeJours === 0) {
+                archiveTempsParUrl[0] = [tempsParUrl, aujourdhui];
+            } else {
+                for (let i = 0; i < differenceDeJours; i++) {
+                    for (let j = archiveTempsParUrl.length - 1; j > 0; j--) {
+                        archiveTempsParUrl[j] = archiveTempsParUrl[j - 1];
+                    }
+                }
+                archiveTempsParUrl[0] = [tempsParUrl, aujourdhui];
+            }
+        }
+        // tconsole.log(`archiveTempsParUrl:`,JSON.stringify(archiveTempsParUrl));
+        chrome.storage.local.set({ archiveTempsParUrl: archiveTempsParUrl });
     }
 
     //sauvegarde la date de la dernière initialisation
@@ -733,6 +779,7 @@ setTimeout(() => {
                 tempsParUrl.times.push([checkedUrl, temps]);
             }
             chrome.storage.local.set(tempsParUrl);
+            ajouterATempsParUrlArchive(tempsParUrl.times);
 
             showBytesInUse();
         }
