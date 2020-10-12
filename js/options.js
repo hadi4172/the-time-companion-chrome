@@ -144,25 +144,24 @@ window.onload = function () {
 
     //Création du graphique des données hebdomadaires
     function loadChart() {
-        const round2Dec = (num) => {
-            return Math.round((num + Number.EPSILON) * 100) / 100
-        };
         chrome.storage.local.get('archiveTempsParUrl', function (arg) {
-            let colorPatterns = ["#114C47", "#0EB8D7", "#E3EEA8", "#97C749", "#33332F", "#3F4D49", "#5F7265", "#91B48C", "#D4CA9B", "#FBEDAD",
-                "#284153", "#23939E", "#ADC17E", "#FFFDEE", "#F3CF86", "#23527D", "#64A2C0", "#C8DBD1", "#DAE5B3", "#A6A727",
-                "#49534F", "#749A93", "#8DCDBE", "#F4F3D2", "#E56737", "#2A3B33", "#578D84", "#9FC5B2", "#D0D8DA", "#F5F2F4",
-                "#C2ECF4", "#53C094", "#14410E", "#A41B1A", "#693C2E", "#3A6E5B"];
+            let colorPatterns = ["#24656D", "#69CC41", "#FAE140", "#F16624", "#B72A28", "whitesmoke", "#1B4B71", "#089EDB", "#93D8E3", "#D3E0D9",
+                "#D28876", "#1D2E57", "#77A0C5", "#FAFBF8", "#CE9D8F", "#9C402F", "#EBA63F", "#D8C051", "#839B79", "#395D67",
+                "#1B556E", "#993938", "#D89E83", "#EDDAC3", "#8AC09D", "#4C6D8E", "#C23240", "#FCF7C8", "#C9D9B5", "#91B5A0",
+                "#3E696F", "#4C622C", "#1D3435", "#718733", "#CED050", "#BBB743"];
             let archiveTempsParUrl = [[], [], [], [], [], [], []];
             if (typeof arg.archiveTempsParUrl !== 'undefined') {
                 archiveTempsParUrl = arg.archiveTempsParUrl;
             }
-            let archiveTempsParUrlTries = archiveTempsParUrl.map(x => x.length !== 0 ? selectionSort(x[0]) : x);  //TODO Commenter tous ces lignes
-            let archiveTempsParUrlTriesAvecHeures = archiveTempsParUrlTries.map(x => x.length !== 0 ? x.map(y => [y[0], round2Dec(y[1] / (60 * 60))]) : x)
+
+            //voir ça ressemble à quoi avec les console.log plus bas
+            let archiveTempsParUrlTries = archiveTempsParUrl.map(x => x.length !== 0 ? selectionSort(x[0]) : x);
+            let archiveTempsParUrlTriesAvecHeures = archiveTempsParUrlTries.map(x => x.length !== 0 ? x.map(y => [y[0], /*round2Dec(*/y[1] / (60 * 60)/*)*/]) : x)
             let urlsParJours = archiveTempsParUrlTriesAvecHeures.map(y => y.length !== 0 ? y.map(x => x[0]).slice(0, 6) : y);
-            let urlsParJoursAvecAutres = urlsParJours.map(y => y.length !== 0 ? y.slice(0, 5).concat(y.length === 6 ? ["Others"] : []) : y);
+            let urlsParJoursAvecAutres = urlsParJours.map(y => y.length !== 0 ? y.slice(0, 5).concat(y.length === 6 ? [`${chrome.i18n.getMessage("options_chart_autres")}`] : []) : y);
             let tempsParUrlParJours = archiveTempsParUrlTriesAvecHeures.map(y => y.length !== 0 ? y.map(x => x[1]) : y);
             let tempsParUrlParJoursAvecAutres = tempsParUrlParJours.map(y => y.length !== 0 ? y.slice(0, 5).concat((y.slice(5).reduce((a, b) => a + b, 0)) !== 0 ? [y.slice(5).reduce((a, b) => a + b, 0)] : []) : y);
-            let couleursParUrl = [...new Set(urlsParJoursAvecAutres.flat())].map((x, i) => x = [x, colorPatterns[i]]);
+            let couleursParUrl = [...new Set(urlsParJoursAvecAutres.flat())].map((x, i) => [x, colorPatterns[i]]);
 
             console.log(`archiveTempsParUrl:`, archiveTempsParUrl);
             // console.log(`archiveTempsParUrlTries:`, archiveTempsParUrlTries);
@@ -183,6 +182,27 @@ window.onload = function () {
                 return arr
             };
 
+            //transforme un nombre de secondes en string h:m:s
+            const fancyTimeFormat = (time) => {
+                //Original Source: https://stackoverflow.com/a/11486026/7551620
+
+                // Hours, minutes and seconds
+                let hrs = ~~(time / 3600);
+                let mins = ~~((time % 3600) / 60);
+                let secs = ~~time % 60;
+
+                // Output like "1:01" or "4:03:59" or "123:03:59"
+                let ret = "";
+
+                if (hrs > 0) {
+                    ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+                }
+
+                ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+                ret += "" + secs;
+                return ret;
+            };
+
             for (let i = 0, length = urlsParJoursAvecAutres.length; i < length; i++) {
                 for (let j = 0, length2 = urlsParJoursAvecAutres[i].length; j < length2; j++) {
                     if (tempsParUrlParJoursAvecAutres[i][j] !== 0) {
@@ -201,13 +221,20 @@ window.onload = function () {
             new Chart(document.getElementById('myChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['6 Days Ago', '5 Days Ago', '4 Days Ago', '3 Days Ago', '2 Days Ago', 'Yesterday', 'Today'], //TODO Ajouter les langues
+                    labels: [`6 ${chrome.i18n.getMessage("options_chart_joursplustot")}`,
+                    `5 ${chrome.i18n.getMessage("options_chart_joursplustot")}`,
+                    `4 ${chrome.i18n.getMessage("options_chart_joursplustot")}`,
+                    `3 ${chrome.i18n.getMessage("options_chart_joursplustot")}`,
+                    `2 ${chrome.i18n.getMessage("options_chart_joursplustot")}`,
+                    `${chrome.i18n.getMessage("options_chart_hier")}`,
+                    `${chrome.i18n.getMessage("options_chart_ajd")}`],
                     datasets: dataset
                     // [{
                     //     label: 'Employee',
                     //     backgroundColor: "#caf270",
                     //     data: [12, 59, 5, 56, 58, 12, 59, 87, 45],
                     // }, {
+
                     //     label: 'Government',
                     //     backgroundColor: "#008d93",
                     //     data: [12, 59, 5, 56],
@@ -221,7 +248,7 @@ window.onload = function () {
                 options: {
                     title: {
                         display: true,
-                        text: 'Browsing time in hours per day'
+                        text: chrome.i18n.getMessage("options_chart_tempsdenavigationenh")
                     },
                     scales: {
                         xAxes: [{
@@ -237,7 +264,7 @@ window.onload = function () {
                             },
                             scaleLabel: {
                                 display: true,
-                                labelString: 'Hours'    //TODO Ajouter les langues
+                                labelString: chrome.i18n.getMessage("options_chart_heures")
                             },
                             type: 'linear',
                         }]
@@ -255,13 +282,13 @@ window.onload = function () {
                                 let label = data.datasets[tooltipItem.datasetIndex].label || '';
                                 let value = data.datasets[datasetIndex].data[index];
                                 if (label) {
-                                    label += ' : ';
+                                    label += '：';
                                 }
                                 if (value === null) {
                                     // label += "-";
                                     return null;
                                 } else {
-                                    label += tooltipItem.yLabel;
+                                    label += fancyTimeFormat(parseFloat(tooltipItem.yLabel)*60*60);
                                 }
                                 return label;
                             }
@@ -297,6 +324,7 @@ window.onload = function () {
         chrome.storage.sync.get(['firstOpeningTimestamp', 'helpModalWasActivated'], function (arg) {
             let helpModalWasNeverActivated = typeof arg.helpModalWasActivated === 'undefined';
             if (typeof arg.firstOpeningTimestamp !== 'undefined' && (helpModalWasNeverActivated || arg.helpModalWasActivated !== true)) {
+                console.log(`remainingTimeForModal:`,((arg.firstOpeningTimestamp + 1000 * 60 * 60 * 24 * (helpModalWasNeverActivated ? 10 : 3))-(new Date()).setHours(6, 0, 0, 0))/(1000*60*60*24));
                 if ((arg.firstOpeningTimestamp + 1000 * 60 * 60 * 24 * (helpModalWasNeverActivated ? 10 : 3)) < (new Date()).setHours(6, 0, 0, 0)) {
                     chrome.storage.sync.set({ helpModalWasActivated: true });
                     let contenu = /*html*/`

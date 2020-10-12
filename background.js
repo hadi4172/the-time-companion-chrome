@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 setTimeout(() => {
-    var currentVersion = "1.6.0"
+    var currentVersion = "1.7.0"
     var initialisationCompletee = false;   //variable pour empecher le bug de suppression des tempsParUrl
     // createNotification("Restarted", `currentVersion: ${currentVersion}`);
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
@@ -467,15 +467,15 @@ setTimeout(() => {
                     //Enlève le mute de la page active du content script
                 } else if (message.mute == 0) {
 
-                    chrome.tabs.query({ active: true }, function (tabs) {
-                        var mutedInfo = tabs[0].mutedInfo;
-                        if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": false });
+                    chrome.tabs.query({}, function (tabs) {
+                        var mutedInfo = sender.tab.mutedInfo; 
+                        if (mutedInfo) chrome.tabs.update(sender.tab.id, { "muted": false });
                     });
                 } else if (message.mute == 1) {  // Mute sounds
 
-                    chrome.tabs.query({ active: true }, function (tabs) {
-                        var mutedInfo = tabs[0].mutedInfo;
-                        if (mutedInfo) chrome.tabs.update(tabs[0].id, { "muted": true });
+                    chrome.tabs.query({}, function (tabs) {
+                        var mutedInfo = sender.tab.mutedInfo;
+                        if (mutedInfo) chrome.tabs.update(sender.tab.id, { "muted": true });
                     });
                 } else if (message.immuniser) { //Immunise le site web contre un nouveau pop du niveau 2 au début pour 10 minutes
                     //tconsole.log('__added to sites immunisé');

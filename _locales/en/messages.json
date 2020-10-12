@@ -134,6 +134,24 @@
     "options_modal_share": {
         "message": "Share"
     },
+    "options_chart_ajd": {
+        "message": "Today"
+    },
+    "options_chart_hier": {
+        "message": "Yesterday"
+    },
+    "options_chart_joursplustot": {
+        "message": "Days Ago"
+    },
+    "options_chart_tempsdenavigationenh": {
+        "message": "Browsing time in hours per day"
+    },
+    "options_chart_heures": {
+        "message": "Hours"
+    },
+    "options_chart_autres": {
+        "message": "Others"
+    },
     "popup": {
         "message": "field text"
     },

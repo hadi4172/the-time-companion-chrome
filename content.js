@@ -254,8 +254,8 @@ setTimeout(() => {
                 }
                 break;
 
-            case 4: 
-            //tconsole.log("Entree 1 traitementSeverite(niveau)");
+            case 4:
+                //tconsole.log("Entree 1 traitementSeverite(niveau)");
                 chrome.runtime.sendMessage({ lauchThisLevelNow: 4 }); break;
 
             default:
@@ -342,16 +342,34 @@ setTimeout(() => {
     }
 
     //crée la boite du niveau 2
-    function creerBoxNiveau2(texte, texteChoisi) { 
+    function creerBoxNiveau2(texte, texteChoisi) {
         let body = document.querySelector("body");
         body.style.overflow = "hidden";
         setTimeout(() => {
             chrome.runtime.sendMessage({ mute: 1 });
+            TimeMe.setIdleDurationInSeconds(80);
         }, 1500);
         let case2boxInterval = notifier.confirm(texte).newNode;
         let timeNeededDropdown = case2boxInterval.querySelector("#timeNeededDropdown");
         let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min"/*, "45 min", "1h", "1h30", "2h", "3h"*/, chrome.i18n.getMessage("content_notifier_l2_option_idk")];
         let tempsCorrespondant = [1, 2, 5, 10, 20, 30/*, 45, 60, 90, 120, 180*/, false];
+
+        //source : https://stackoverflow.com/a/18194993/7551620
+        (function shuffle(obj1, obj2) {
+            var index = obj1.length;
+            var rnd, tmp1, tmp2;
+          
+            while (index) {
+              rnd = Math.floor(Math.random() * index);
+              index -= 1;
+              tmp1 = obj1[index];
+              tmp2 = obj2[index];
+              obj1[index] = obj1[rnd];
+              obj2[index] = obj2[rnd];
+              obj1[rnd] = tmp1;
+              obj2[rnd] = tmp2;
+            }
+          })(timeNeededPossibilities, tempsCorrespondant);
 
         for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
             timeNeededDropdown.innerHTML += /*html*/`<option>${timeNeededPossibilities[i]}</option>`
@@ -366,18 +384,20 @@ setTimeout(() => {
                 if (informationDebutOuDuree.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
                     chrome.runtime.sendMessage({ immuniser: true }, function (response) { });
                 }
-                if (timeNeededDropdown.options.selectedIndex !== timeNeededDropdown.options.length - 1) {
+
+                if (timeNeededDropdown.value !== chrome.i18n.getMessage("content_notifier_l2_option_idk")) {
                     let optionChoisie = tempsCorrespondant[timeNeededDropdown.options.selectedIndex];
                     let valeurLancementNiveau3 = optionChoisie + (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60;
                     niveauDeSeverite.push(3);
                     tempsActivationSeverite.push(valeurLancementNiveau3);
                     informationDebutOuDuree.push((optionChoisie >= 5 ? 5 : 3) + (optionChoisie >= 10 ? 5 : 0) + (optionChoisie >= 20 ? 5 : 0));
-                    chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, optionChoisie, Date.now() + (optionChoisie + (informationDebutOuDuree[informationDebutOuDuree.length-1]))*60*1000 ] }, function (response) { });
+                    chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, optionChoisie, Date.now() + (optionChoisie + (informationDebutOuDuree[informationDebutOuDuree.length - 1])) * 60 * 1000] }, function (response) { });
                     immuniserContreNiveau2 = true;
                     retirerNiveaux2();
                 }
 
                 chrome.runtime.sendMessage({ mute: 0 });
+                if (tabIsAudible) TimeMe.setIdleDurationInSeconds(800000);
                 body.style.overflow = "initial";
                 niveau2EstActif = false;
                 case2boxInterval.parentNode.removeChild(case2boxInterval);
@@ -430,10 +450,12 @@ setTimeout(() => {
         else {
             setTimeout(() => {
                 //tconsole.log("Browser tab is now visible");
-                updatePreviousTime();
-                getDonneesSeverite();
-                TimeMe.resetRecordedPageTime("webpage");
-                TimeMe.startTimer();
+                if (!document.hidden) {     //reverification apres la seconde passée
+                    updatePreviousTime();
+                    getDonneesSeverite();
+                    TimeMe.resetRecordedPageTime("webpage");
+                    TimeMe.startTimer();
+                }
             }, 1000);
         }
     });
