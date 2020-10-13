@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 setTimeout(() => {
-    var currentVersion = "1.7.0"
+    var currentVersion = "1.7.1"
     var initialisationCompletee = false;   //variable pour empecher le bug de suppression des tempsParUrl
     // createNotification("Restarted", `currentVersion: ${currentVersion}`);
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
@@ -246,15 +246,8 @@ setTimeout(() => {
         return ~~(convertUTCDateToLocalDate(new Date()) / (1000 * 60 * 60 * 24));
     }
 
-    //source : https://stackoverflow.com/a/18330682/7551620
     function convertUTCDateToLocalDate(date) {
-        let newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
-        let offset = date.getTimezoneOffset() / 60;
-        let hours = date.getHours();
-
-        newDate.setHours(hours - offset);
-
-        return newDate;
+        return new Date(date.getTime() - date.getTimezoneOffset()*60*1000);   
     }
 
     function ajouterATempsParUrlArchive(tempsParUrl) {
@@ -779,7 +772,7 @@ setTimeout(() => {
                 tempsParUrl.times.push([checkedUrl, temps]);
             }
             chrome.storage.local.set(tempsParUrl);
-            ajouterATempsParUrlArchive(tempsParUrl.times);
+            ajouterATempsParUrlArchive(JSON.parse(JSON.stringify(tempsParUrl.times)));
 
             showBytesInUse();
         }
