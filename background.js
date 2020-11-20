@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 setTimeout(() => {
-    var currentVersion = "1.7.1"
+    var currentVersion = "1.7.2"
     var initialisationCompletee = false;   //variable pour empecher le bug de suppression des tempsParUrl
     // createNotification("Restarted", `currentVersion: ${currentVersion}`);
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
@@ -391,11 +391,11 @@ setTimeout(() => {
                         let urlAvaitUnNiveau2Actif = urlsAvecNiveau2Actif.some(x => url.includes(x));
                         let sansNiveau2Temporairement = groupesCaches[1].some(x => x.some(y => getHostname(url).includes(y)));
 
-                        if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
-                            //tconsole.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
-                        } else {
-                            //tconsole.log(`Groupe[${i}] N'est nul part`);
-                        }
+                        // if (presentDansListeNoire || presentDansListeBlanche || urlEstImmunisee) {
+                        //     //tconsole.log(`Groupe[${i}]\nIsInBlackList:${presentDansListeNoire}\nIsInWhiteList:${presentDansListeBlanche}\nIsImmunised:${urlEstImmunisee}\nIsInRepos:${enPeriodeDeRepos}`);
+                        // } else {
+                        //     //tconsole.log(`Groupe[${i}] N'est nul part`);
+                        // }
 
                         if (presentDansListeNoire && !presentDansListeBlanche && !enPeriodeDeRepos) {
                             let severiteDeCeGroupe = donneesSeverite[i].slice();

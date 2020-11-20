@@ -145,10 +145,10 @@ window.onload = function () {
     //Création du graphique des données hebdomadaires
     function loadChart() {
         chrome.storage.local.get('archiveTempsParUrl', function (arg) {
-            let colorPatterns = ["#24656D", "#69CC41", "#FAE140", "#F16624", "#B72A28", "whitesmoke", "#1B4B71", "#089EDB", "#93D8E3", "#D3E0D9",
-                "#D28876", "#1D2E57", "#77A0C5", "#FAFBF8", "#CE9D8F", "#9C402F", "#EBA63F", "#D8C051", "#839B79", "#395D67",
-                "#1B556E", "#993938", "#D89E83", "#EDDAC3", "#8AC09D", "#4C6D8E", "#C23240", "#FCF7C8", "#C9D9B5", "#91B5A0",
-                "#3E696F", "#4C622C", "#1D3435", "#718733", "#CED050", "#BBB743"];
+            let colorPatterns = ["#24656D", "#69CC41", "#FAE140", "#F16624", "#B72A28", "darkgray", "#1B4B71", "#089EDB", "#93D8E3", "#D3E0D9",
+                "#328876", "#1D2E57", "#77A0C5", "#FAFBF8", "#CE9D8F", "#9C402F", "#EBA63F", "#D8C051", "#A39B79", "#B95D67",
+                "#8B556E", "#993938", "#D89E83", "#2DDAC3", "#BAC09D", "#4C6D8E", "#C23240", "#6CF7C8", "#E9D9B5", "#7CB5A0",
+                "#3E696F", "#4C622C", "#AA3435", "#618733", "#CED050", "#BBB743"];
             let archiveTempsParUrl = [[], [], [], [], [], [], []];
             if (typeof arg.archiveTempsParUrl !== 'undefined') {
                 archiveTempsParUrl = arg.archiveTempsParUrl;

@@ -130,7 +130,8 @@ setTimeout(() => {
                         let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
                         ${chrome.i18n.getMessage("content_notifier_debut")}</p>${entreePhraseDeProductivite[i] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                            <mark class="notranslate" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
-                           <form autocomplete="off"><input class="notranslate" autocomplete="chrome-off" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
+                           <form>
+                           <input type="text" name="${Math.random()}" class="notranslate" id=entreetexte style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                            <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
 
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
@@ -211,7 +212,8 @@ setTimeout(() => {
                         ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
                         ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p>${entreePhraseDeProductivite[index] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
                     <mark class="notranslate" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <form autocomplete="off"> <input class="notranslate" autocomplete="chrome-off" id=entreetexte type="text" style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
+                    <form> 
+                    <input type="text" name="${Math.random()}" class="notranslate" id=entreetexte style="min-width:97%; margin:10px 0 10px 0;"/></form>`: ""}
                     <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
                     niveau2EstActif = true;
                     creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
@@ -403,11 +405,20 @@ setTimeout(() => {
                 case2boxInterval.parentNode.removeChild(case2boxInterval);
             }
 
-            if (case2boxInterval.querySelector('form[autocomplete="off"]') !== null) {
-                if (case2boxInterval.querySelector("#entreetexte").value == texteAEntrer[texteChoisi]) {
+            if (case2boxInterval.querySelector('form') !== null) {
+                let textInput = case2boxInterval.querySelector("#entreetexte");
+                // textInput.addEventListener('focus', function () {
+                //     textInput.removeAttribute("name");
+                //     console.log("foccus");
+                // });
+                // textInput.addEventListener("blur", function () {
+                //     textInput.setAttribute("name", "ghaba");
+                //     console.log("bllur");
+                // });
+                if (textInput.value == texteAEntrer[texteChoisi]) {
                     continuer();
                 } else {
-                    case2boxInterval.querySelector("#entreetexte").style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
+                    textInput.style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
                 }
             } else {
                 continuer();
