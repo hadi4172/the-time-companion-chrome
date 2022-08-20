@@ -215,7 +215,7 @@ function startScript() {
                                     
                                 <fieldset style="max-height: 100px; overflow-y: auto; line-height:80%; margin: revert!important;padding: revert!important; border: 2px rgb(192, 192, 192) solid;"
                                             id=timecompanion-todolist>
-                                    <legend style="font-weight: bold;font-family:Arial;border: 1px lightgrey solid;padding: 5px;background-color: whitesmoke;" 
+                                    <legend style="font-weight: bold;font-family:Arial;border: 1px lightgrey solid;padding: 5px;background-color: whitesmoke;font-size: 14px;text-transform: revert;" 
                                             id=timecompanion-todolist-legend >
                                         ${chrome.i18n.getMessage("content_notifier_l2_t1")} &ensp;
                                         <a href="${chrome.runtime.getURL("todolist/index.html")}" target="_blank" style="color: #6ead33;">
@@ -370,7 +370,7 @@ function startScript() {
                                     
                                 <fieldset style="max-height: 100px; overflow-y: auto; line-height:80%; margin: revert!important;padding: revert!important; border: 2px rgb(192, 192, 192) solid;" 
                                             id=timecompanion-todolist>
-                                    <legend style="font-weight: bold;font-family:Arial;border: 1px lightgrey solid;padding: 5px;background-color: whitesmoke;" 
+                                    <legend style="font-weight: bold;font-family:Arial;border: 1px lightgrey solid;padding: 5px;background-color: whitesmoke;font-size: 14px;text-transform: revert;" 
                                             id=timecompanion-todolist-legend >
                                         ${chrome.i18n.getMessage("content_notifier_l2_t1")} &ensp;
                                         <a href="${chrome.runtime.getURL("todolist/index.html")}" target="_blank" style="color: #6ead33;">

@@ -21,6 +21,13 @@ html {
   font-style: normal;
 }
 
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 .conteneurdetableau {
   background-color: rgba(231, 219, 219,0.5);
   min-width: 390px;

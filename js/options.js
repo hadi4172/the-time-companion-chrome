@@ -215,11 +215,6 @@ window.onload = function () {
         });
     }
 
-    // arrondir a deux décimales
-    function round2Dec(num) {
-        return Math.round((num + Number.EPSILON) * 100) / 100;
-    }
-
 
     //Création du graphique des données hebdomadaires
     function loadChart() {
@@ -274,7 +269,7 @@ window.onload = function () {
                 colorPatterns[i],
             ]);
 
-            // console.log(`archiveTempsParUrl:`, archiveTempsParUrl);
+            console.log(`archiveTempsParUrl:`, archiveTempsParUrl);
             // console.log(`archiveTempsParUrlTries:`, archiveTempsParUrlTries);
             // console.log(`archiveTempsParUrlTriesAvecHeures:`, archiveTempsParUrlTriesAvecHeures);
             // console.log(`urlsParJours:`, urlsParJours);
@@ -313,6 +308,21 @@ window.onload = function () {
                 ret += "" + secs;
                 return ret;
             };
+
+            //transforme un nombre de secondes en string hhmmin
+            const fancyTimeFormat2 = time => {
+                //Original Source: https://stackoverflow.com/a/11486026/7551620
+                let hrs = ~~(time / 3600);
+                let mins = ~~((time % 3600) / 60);
+                let secs = ~~time % 60;
+                
+                let ret = "";
+
+                if (hrs > 0) ret += "" + hrs + "h ";
+                if (mins > 0) ret += "" + mins + "min";
+                
+                return ret;
+            }
 
             for (let i = 0, length = urlsParJoursAvecAutres.length; i < length; i++) {
                 for (let j = 0, length2 = urlsParJoursAvecAutres[i].length; j < length2; j++) {
@@ -366,8 +376,8 @@ window.onload = function () {
                     for (let i = 0, length = combinedData.length; i < length; i++) {
                         html += /*html*/
                         `<div style="max-width: 4.2vw; overflow: hidden; margin-right: 3px;"
-                            title="${combinedData[i].label} (${Math.round(combinedData[i].data * 60)} min)">
-                            <span style="color:${combinedData[i].backgroundColor};">█</span>&nbsp;${combinedData[i].label}: ${round2Dec(combinedData[i].data)}
+                            title="${combinedData[i].label} (${Math.floor(combinedData[i].data * 60)} min)">
+                            <span style="color:${combinedData[i].backgroundColor};">█</span>&nbsp;${combinedData[i].label}: ${fancyTimeFormat2(combinedData[i].data * 60 * 60)}
                         </div>`;
                     }
                     return html;

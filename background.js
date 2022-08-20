@@ -264,6 +264,9 @@ setTimeout(() => {
                 for (let i = 0; i < differenceDeJours; i++) {
                     for (let j = archiveTempsParUrl.length - 1; j > 0; j--) {
                         archiveTempsParUrl[j] = archiveTempsParUrl[j - 1];
+                        if (j == 1) {
+                            archiveTempsParUrl[j - 1] = [];
+                        }
                     }
                 }
                 archiveTempsParUrl[0] = [tempsParUrl, aujourdhui];
