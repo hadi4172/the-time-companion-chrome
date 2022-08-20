@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 setTimeout(() => {
-    var currentVersion = "2.0.1"
+    var currentVersion = "2.0.2";
     var initialisationCompletee = false;   //variable pour empecher le bug de suppression des tempsParUrl
     // createNotification("Restarted", `currentVersion: ${currentVersion}`);
     var donneesSeverite;   //[[niveau,temps,début],[niveau,temps,début],....]
