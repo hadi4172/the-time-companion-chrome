@@ -152,6 +152,9 @@
     "options_chart_autres": {
         "message": "Autres"
     },
+    "options_sites_consultes": {
+        "message": "Sites les plus consultés de la semaine (h)"
+    },
     "popup": {
         "message": "field text"
     },
@@ -360,64 +363,214 @@
         "message": "Quitter"
     },
     "content_texteaentrer_1": {
-        "message": "Je ne dois pas perdre mon temps."
+        "message": "Pour que nous puissions pratiquer la maîtrise de soi, nous devons avoir un objectif."
     },
     "content_texteaentrer_2": {
-        "message": "Mon temps est important."
+        "message": "Nous ne devrions pas toujours avoir ce que nous voulons: ça gâche le meilleur d'entre nous, n'est-ce pas?"
     },
     "content_texteaentrer_3": {
-        "message": "Je suis quelqu'un de productif."
+        "message": "Vous décidez de votre propre niveau d'implication."
     },
     "content_texteaentrer_4": {
-        "message": "Je sais que ce que je fait actuellement est important."
+        "message": "Mettez-vous au défi tous les jours de votre vie."
     },
     "content_texteaentrer_5": {
-        "message": "Je dois bien utiliser mon temps pour réussir."
+        "message": "Nous devons avoir quelque chose à quoi nous disons oui et des choses auxquelles nous devons dire non."
     },
     "content_texteaentrer_6": {
-        "message": "La vie, ce n'est pas seulement s'amuser."
+        "message": "Croyez que vous pouvez vaincre l'ennemi et vous avez gagné la moitié de la bataille."
     },
     "content_texteaentrer_7": {
-        "message": "Je suis sur de vouloir continuer."
+        "message": "Lorsque son combat commence en lui-même, la personne vaut quelque chose."
     },
     "content_texteaentrer_8": {
-        "message": "Pour s'accomplir, il faut arrêter de parler et commencer à faire."
+        "message": "Votre succès dépend principalement de ce que vous pensez de vous-même et si vous croyez en vous."
     },
     "content_texteaentrer_9": {
-        "message": "J'ai installé cette extension pour m'améliorer dans ma vie."
+        "message": "La discipline est le pont entre les objectifs et l'accomplissement."
     },
     "content_texteaentrer_10": {
-        "message": "Est-ce que c'est une bonne idée de continuer?"
+        "message": "Tu dois avoir une discipline pour pouvoir t'amuser."
     },
     "content_texteaentrer_11": {
-        "message": "Je suis maitre de mon avenir."
+        "message": "Il n'y a rien de plus plaisant que d'atteindre son objectif."
     },
     "content_texteaentrer_12": {
-        "message": "L'avenir se construit sur ce que je fait au quotidien."
+        "message": "L'avenir est construit sur ce que nous faisons chaque jour."
     },
     "content_texteaentrer_13": {
-        "message": "La constance dans le bien est la clé de la réussite."
+        "message": "Tu ne peux t'attendre à aller au-delà de tes circonstances actuelles à moins que tu ne changes."
     },
     "content_texteaentrer_14": {
-        "message": "Ce que je fait actuellement est la meilleure chose à faire."
+        "message": "Une façon de maintenir l'élan est d'avoir des objectifs constamment plus importants."
     },
     "content_texteaentrer_15": {
-        "message": "La perte de temps est une source de malheur."
+        "message": "Si tu ne vises rien, tu n'atteindras rien."
     },
     "content_texteaentrer_16": {
-        "message": "Je suis conscient que mon temps est important."
+        "message": "Tu as besoin d'objectifs élevés, puis de le cimenter avec une excellente éthique de travail."
     },
     "content_texteaentrer_17": {
-        "message": "Je suis capable de quitter ce site web s'il n'est pas important."
+        "message": "Je suis en mesure de quitter ce site web s'il n'est pas important."
     },
     "content_texteaentrer_18": {
-        "message": "Bien gérer son temps permet d'accomplir des choses merveilleuses."
+        "message": "La bonne gestion du temps peut me faire accomplir des choses extraordinaires."
     },
     "content_texteaentrer_19": {
-        "message": "Je suis une personne responsable."
+        "message": "97% sont les personnes qui n'ont pas d'objectifs et ils finissent par travailler pour les 3%."
     },
     "content_texteaentrer_20": {
-        "message": "J'aime réussir ma vie."
+        "message": "Ne sous-estimes pas l'effet du temps perdu."
+    },
+    "content_texteaentrer_21": {
+        "message": "Tu as du pouvoir sur ton esprit, réalises le."
+    },
+    "content_texteaentrer_22": {
+        "message": "Si tu fixes tes objectifs très haut et que c'est un échec, tu échoueras au-dessus du succès de tout le monde."
+    },
+    "content_texteaentrer_23": {
+        "message": "La maîtrise de soi est l'élément principal du respect de soi."
+    },
+    "content_texteaentrer_24": {
+        "message": "Si vous vous conquérissez, alors vous conquérirez le monde."
+    },
+    "content_texteaentrer_25": {
+        "message": "Je ne peux pas faire confiance à quelqu'un pour contrôler les autres alors qu'il ne peut se contrôler."
+    },
+    "content_texteaentrer_26": {
+        "message": "La capacité de subordonner une impulsion à une valeur est l'essence de la personne proactive."
+    },
+    "content_texteaentrer_27": {
+        "message": "L'ennemi est à l'intérieur; C'est notre propre luxe que nous devons affronter."
+    },
+    "content_texteaentrer_28": {
+        "message": "Le plus grand ennemi de la volonté: la tentation."
+    },
+    "content_texteaentrer_29": {
+        "message": "Comment se débarrasser de l'ego dictateur et le transformer pour être à ton service, c'est l'objectif."
+    },
+    "content_texteaentrer_30": {
+        "message": "Les gens témoigneront contre eux-mêmes, malgré les excuses avec lesquelles ils viendront."
+    },
+    "content_texteaentrer_31": {
+        "message": "N'oubliez pas que votre concentration détermine votre réalité."
+    },
+    "content_texteaentrer_32": {
+        "message": "Restez concentré, poursuivez vos rêves et continuez à vous diriger vers vos objectifs."
+    },
+    "content_texteaentrer_33": {
+        "message": "Notre objectif est notre avenir et ce sur quoi nous nous concentrons déterminera notre vie."
+    },
+    "content_texteaentrer_34": {
+        "message": "Le secret du changement: concentrer son énergie sur la construction du renouveau, pas sur le combat du passé."
+    },
+    "content_texteaentrer_35": {
+        "message": "Je ne me concentre pas sur ce que je veut éviter, mais sur mes objectifs, et j'essaie d'ignorer le reste."
+    },
+    "content_texteaentrer_36": {
+        "message": "Le guerrier à succès est l'homme moyen, avec une concentration chirurgicale."
+    },
+    "content_texteaentrer_37": {
+        "message": "Si vous voulez être heureux, définissez un objectif qui commande vos pensées."
+    },
+    "content_texteaentrer_38": {
+        "message": "Les objectifs ne devraient jamais être faciles, ils devraient forcer à travailler."
+    },
+    "content_texteaentrer_39": {
+        "message": "Vous devez fixer des objectifs hors de votre portée, vous aurez donc toujours quelque chose pour lequel vivre."
+    },
+    "content_texteaentrer_40": {
+        "message": "Lorsque les objectifs ne peuvent pas être atteints, n'ajustez pas les objectifs, ajustez les étapes d'action."
+    },
+    "content_texteaentrer_41": {
+        "message": "Le danger n'est pas que l'objectif soit trop élevé et soit manqué, mais qu'il est trop bas et que nous l'atteignons."
+    },
+    "content_texteaentrer_42": {
+        "message": "Je suis toujours plus intéressé par ce que je suis sur le point de faire que sur ce que j'ai déjà fait."
+    },
+    "content_texteaentrer_43": {
+        "message": "Les objectifs sont le carburant dans la fournaise de la réussite."
+    },
+    "content_texteaentrer_44": {
+        "message": "Savoir ne suffit pas; Il faut appliquer. Vouloir ne suffit pas; Il faut faire."
+    },
+    "content_texteaentrer_45": {
+        "message": "Il n'y a que deux règles pour réussir. 1: déterminez exactement ce que vous voulez faire. 2: faites-le."
+    },
+    "content_texteaentrer_46": {
+        "message": "La vie peut être tirée par des objectifs aussi sûrement qu'elle peut être poussée par des envies."
+    },
+    "content_texteaentrer_47": {
+        "message": "La maîtrise de soi est la racine de la sagesse."
+    },
+    "content_texteaentrer_48": {
+        "message": "Ce que l'esprit de l'homme peut créer, le caractère de l'homme peut contrôler."
+    },
+    "content_texteaentrer_49": {
+        "message": "Si vous ne vous conquérissez pas, vous serez conquis par vous-même."
+    },
+    "content_texteaentrer_50": {
+        "message": "Votre cerveau devrait être serviteur au lieu de maître. Vous devez le diriger."
+    },
+    "content_texteaentrer_51": {
+        "message": "Celui qui ne peut pas s'obéir soi-même sera commandé. C'est la nature des créatures vivantes."
+    },
+    "content_texteaentrer_52": {
+        "message": "Plus brave est celui qui surmonte ses désirs que celui qui conquiert ses ennemis; car la victoire la plus difficile est sur soi."
+    },
+    "content_texteaentrer_53": {
+        "message": "L'autodiscipline commence par la maîtrise de vos pensées."
+    },
+    "content_texteaentrer_54": {
+        "message": "Si vous ne contrôlez pas ce que vous pensez, vous ne pouvez pas contrôler ce que vous faites."
+    },
+    "content_texteaentrer_55": {
+        "message": "L'autodiscipline vous permet de réfléchir d'abord et d'agir par la suite."
+    },
+    "content_texteaentrer_56": {
+        "message": "Il n'y a jamais eu et ne peut pas y avoir une bonne vie sans maîtrise de soi."
+    },
+    "content_texteaentrer_57": {
+        "message": "Nous nous améliorons par les victoires sur nous-mêmes. Il doit y avoir une compétition, et nous devons la gagner."
+    },
+    "content_texteaentrer_58": {
+        "message": "Si vous perdez la maîtrise de soi, tout tombera."
+    },
+    "content_texteaentrer_59": {
+        "message": "Si vous ne pouvez pas vous contrôler pour faire ce qui doit être fait, pensez-vous vraiment que vous réussirez?"
+    },
+    "content_texteaentrer_60": {
+        "message": "Vous ne pouvez pas changer votre destination en un jour, mais vous pouvez changer votre direction en un jour."
+    },
+    "content_texteaentrer_61": { 
+        "message": "Ne jamais abandonner. Aujourd'hui est difficile, demain sera pire, mais le après demain sera le lever du soleil."
+    },
+    "content_texteaentrer_62": {
+        "message": "Le succès n'est pas le résultat du temps que nous consacrons, mais de la qualité du temps que nous consacrons."
+    },
+    "content_texteaentrer_63": {
+        "message": "Un objectif sans échéancier n'est qu'un rêve."
+    },
+    "content_texteaentrer_64": {
+        "message": "Un an plus tard, vous souhaiteriez probablement avoir commencé aujourd'hui."
+    },
+    "content_texteaentrer_65": {
+        "message": "Aucune réalisation désirée n'est obtenue sans la fixation d'un objectif."
+    },
+    "content_texteaentrer_66": {
+        "message": "Si vous n'avez pas de grands rêves et objectifs, vous finirez par travailler pour quelqu'un qui en a."
+    },
+    "content_texteaentrer_67": {
+        "message": "Vous savez cette chose dont vous avez toujours rêvé ? Mettez-la par écrit. Puis faites le premier pas. Aujourd'hui."
+    },
+    "content_texteaentrer_68": {
+        "message": "La productivité dépend de l'exécution des tâches importantes conformément à vos objectifs."
+    },
+    "content_texteaentrer_69": {
+        "message": "N'oubliez pas que les objectifs ne sont pas des souhaits. Ce sont des choses que vous devez faire."
+    },
+    "content_texteaentrer_70": {
+        "message": "Hier était de l'histoire, demain sera un mystère, mais aujourd'hui est un cadeau. C'est pourquoi on l'appelle le présent."
     },
     "content_notifier_debut": {
         "message": "Vous venez d'entrer sur un site dans la liste noire."
@@ -435,13 +588,43 @@
         "message": "Vous êtes sur ce site depuis "
     },
     "content_notifier_l2_p2": {
-        "message": " minute(s)"
+        "message": " minutes"
     },
     "content_notifier_l2_p3": {
         "message": ", aujourd'hui."
     },
     "content_notifier_l2_p4": {
         "message": "Combien de temps avez vous encore besoin ? "
+    },
+    "content_notifier_l2_t1": {
+        "message": "Sélectionnez ce que vous faites"
+    },
+    "content_notifier_l2_t2": {
+        "message": "tâche(s) restante(s)"
+    },
+    "content_notifier_l2_t3": {
+        "message": "Rien, je ne veut pas prendre mon temps au sérieux"
+    },
+    "todolist_1": {
+        "message": "Qu'est-ce qui doit être fait ?"
+    },
+    "todolist_2": {
+        "message": "tâche"
+    },
+    "todolist_2_2": {
+        "message": "à faire"
+    },
+    "todolist_3": {
+        "message": "Tout"
+    },
+    "todolist_4": {
+        "message": "À faire"
+    },
+    "todolist_5": {
+        "message": "Complété"
+    },
+    "todolist_6": {
+        "message": "Supprimer complétées"
     },
     "content_notifier_l2_option_idk": {
         "message": "Je ne sais pas"
@@ -451,6 +634,12 @@
     },
     "content_notifier_l3": {
         "message": "Elle sera fermée dans 5 secondes..."
+    },
+    "content_notifier_l2_alert_time": {
+        "message": "Soyez prudent, il est facile de se laisser aller..."
+    },
+    "content_notifier_l2_alert_time_2": {
+        "message": "Désolé, je dois fermer cette fenêtre pour protéger votre temps."
     }
 
 }

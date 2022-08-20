@@ -152,6 +152,9 @@
     "options_chart_autres": {
         "message": "Others"
     },
+    "options_sites_consultes": {
+        "message": "Most consulted sites of the week (H)"
+    },
     "popup": {
         "message": "field text"
     },
@@ -360,52 +363,52 @@
         "message": "Exit"
     },
     "content_texteaentrer_1": {
-        "message": "I shouldn't waste my time."
+        "message": "In order for us to practice self-control, we must have a goal."
     },
     "content_texteaentrer_2": {
-        "message": "My time is important."
+        "message": "We shouldn't always have what we want: it spoils the best of us, doesn't it?"
     },
     "content_texteaentrer_3": {
-        "message": "I'm a productive person."
+        "message": "You decide your own level of involvement."
     },
     "content_texteaentrer_4": {
-        "message": "I know that what I'm doing right now is important."
+        "message": "Challenge yourself all the days of your life."
     },
     "content_texteaentrer_5": {
-        "message": "I have to use my time well to succeed."
+        "message": "We must have something we are saying yes to, and things that we must say no to."
     },
     "content_texteaentrer_6": {
-        "message": "There's more than just fun in life."
+        "message": "Believe that you can whip the enemy, and you have won half the battle."
     },
     "content_texteaentrer_7": {
-        "message": "I'm sure I want to keep going."
+        "message": "When the fight begins within himself, a man's worth something."
     },
     "content_texteaentrer_8": {
-        "message": "To be successful, you have to stop talking and start doing."
+        "message": "Your success depends mainly upon what you think of yourself and whether you believe in yourself."
     },
     "content_texteaentrer_9": {
-        "message": "I installed this extension to improve my life."
+        "message": "Discipline is the bridge between goals and accomplishment."
     },
     "content_texteaentrer_10": {
-        "message": "Is it a good idea to continue?"
+        "message": "You must have discipline to have fun."
     },
     "content_texteaentrer_11": {
-        "message": "I am master of my future."
+        "message": "There's nothing better than achieving your goals, whatever they might be."
     },
     "content_texteaentrer_12": {
-        "message": "The future is built on what I do every day."
+        "message": "The future is built on what we do every day."
     },
     "content_texteaentrer_13": {
-        "message": "Perseverance in good is the key to success."
+        "message": "You cannot expect to achieve new goals or move beyond your present circumstances unless you change."
     },
     "content_texteaentrer_14": {
-        "message": "What I'm doing right now is the right thing to do."
+        "message": "One way to keep momentum going is to have constantly greater goals."
     },
     "content_texteaentrer_15": {
-        "message": "Waste of time is a source of unhappiness."
+        "message": "If you aim for nothing, you'll hit it every time."
     },
     "content_texteaentrer_16": {
-        "message": "I am aware that my time is important."
+        "message": "You need lofty goals. Then cement it with a great work ethic."
     },
     "content_texteaentrer_17": {
         "message": "I am able to leave this website if it is not important."
@@ -414,10 +417,160 @@
         "message": "Good time management can make me accomplish wonderful things."
     },
     "content_texteaentrer_19": {
-        "message": "I'm a responsible person."
+        "message": "97 per cent are the people who don't have goals and they end up working for the 3 percent."
     },
     "content_texteaentrer_20": {
-        "message": "I like to make a success of my life."
+        "message": "You can't prevent birds from flying over your head, but you can prevent them from building nests in your hair."
+    },
+    "content_texteaentrer_21": {
+        "message": "You have power over your mind, realize this."
+    },
+    "content_texteaentrer_22": {
+        "message": "If you set your goals ridiculously high and it's a failure, you will fail above everyone else's success."
+    },
+    "content_texteaentrer_23": {
+        "message": "Self-control is the chief element in self-respect."
+    },
+    "content_texteaentrer_24": {
+        "message": "If you conquer yourself, then you conquer the world."
+    },
+    "content_texteaentrer_25": {
+        "message": "I cannot trust a man to control others who cannot control himself."
+    },
+    "content_texteaentrer_26": {
+        "message": "The ability to subordinate an impulse to a value is the essence of the proactive person."
+    },
+    "content_texteaentrer_27": {
+        "message": "The enemy is within the gates; it is our own luxury that we have to contend."
+    },
+    "content_texteaentrer_28": {
+        "message": "The biggest enemies of willpower: temptation, self-criticism, and stress."
+    },
+    "content_texteaentrer_29": {
+        "message": "How to get rid of ego as dictator and turn it to be in your service, is the trick."
+    },
+    "content_texteaentrer_30": {
+        "message": "People will testify against themselves, despite the excuses they come up with."
+    },
+    "content_texteaentrer_31": {
+        "message": "Always remember, your focus determines your reality."
+    },
+    "content_texteaentrer_32": {
+        "message": "Stay focused, go after your dreams and keep moving toward your goals."
+    },
+    "content_texteaentrer_33": {
+        "message": "Our focus is our future and what we focus on will multiply in our life."
+    },
+    "content_texteaentrer_34": {
+        "message": "The secret of change is to focus all of your energy, not on fighting the old, but on building the new."
+    },
+    "content_texteaentrer_35": {
+        "message": "I don't focus on what I'm up against. I focus on my goals and I try to ignore the rest."
+    },
+    "content_texteaentrer_36": {
+        "message": "The successful warrior is the average man, with laser-like focus."
+    },
+    "content_texteaentrer_37": {
+        "message": "If you want to be happy, set a goal that commands your thoughts."
+    },
+    "content_texteaentrer_38": {
+        "message": "I think goals should never be easy, they should force you to work."
+    },
+    "content_texteaentrer_39": {
+        "message": "You should set goals beyond your reach so you always have something to live for."
+    },
+    "content_texteaentrer_40": {
+        "message": "When it is obvious that the goals cannot be reached, don't adjust the goals, adjust the action steps."
+    },
+    "content_texteaentrer_41": {
+        "message": "The danger for most of us isn't that our aim is too high and miss it, but that it is too low and we reach it."
+    },
+    "content_texteaentrer_42": {
+        "message": "I am always more interested in what I am about to do than what I have already done."
+    },
+    "content_texteaentrer_43": {
+        "message": "Goals are the fuel in the furnace of achievement."
+    },
+    "content_texteaentrer_44": {
+        "message": "Knowing is not enough; we must apply. Willing is not enough; we must do."
+    },
+    "content_texteaentrer_45": {
+        "message": "There are only two rules for being successful. One, figure out exactly what you want to do, and two, do it."
+    },
+    "content_texteaentrer_46": {
+        "message": "Life can be pulled by goals just as surely as it can be pushed by drives."
+    },
+    "content_texteaentrer_47": {
+        "message": "Prudent, cautious self-control, is wisdom's root."
+    },
+    "content_texteaentrer_48": {
+        "message": "What man's mind can create, man's character can control."
+    },
+    "content_texteaentrer_49": {
+        "message": "If you do not conquer self, you will be conquered by self."
+    },
+    "content_texteaentrer_50": {
+        "message": "Your brain shall be your servant instead of your master. You will rule it instead of allowing it to rule you."
+    },
+    "content_texteaentrer_51": {
+        "message": "He who cannot obey himself will be commanded. That is the nature of living creatures."
+    },
+    "content_texteaentrer_52": {
+        "message": "Braver is who overcomes his desires than him who conquers his enemies; for the hardest victory is over self."
+    },
+    "content_texteaentrer_53": {
+        "message": "Self-discipline begins with the mastery of your thoughts."
+    },
+    "content_texteaentrer_54": {
+        "message": "If you don't control what you think, you can't control what you do."
+    },
+    "content_texteaentrer_55": {
+        "message": "Self-discipline enables you to think first and act afterward."
+    },
+    "content_texteaentrer_56": {
+        "message": "There never has been, and cannot be, a good life without self-control."
+    },
+    "content_texteaentrer_57": {
+        "message": "We improve ourselves by victories over ourselves. There must be contest, and we must win."
+    },
+    "content_texteaentrer_58": {
+        "message": "If you lose self-control everything will fall."
+    },
+    "content_texteaentrer_59": {
+        "message": "If you can not control yourself to do what needs to be done, do you really think that you will be successful?"
+    },
+    "content_texteaentrer_60": {
+        "message": "You cannot change your destination overnight, but you can change your direction overnight."
+    },
+    "content_texteaentrer_61": { 
+        "message": "Never give up. Today is hard, tomorrow will be worse, but the day after tomorrow will be sunshine."
+    },
+    "content_texteaentrer_62": {
+        "message": "Success isn't the result of the amount of time we put in at work, but it's the quality of time we put in."
+    },
+    "content_texteaentrer_63": {
+        "message": "A goal without a timeline is just a dream."
+    },
+    "content_texteaentrer_64": {
+        "message": "A year from now you may wish you had started today."
+    },
+    "content_texteaentrer_65": {
+        "message": "No desired achievement is gained without any goal setting."
+    },
+    "content_texteaentrer_66": {
+        "message": "If you don't have big dreams and goals, you'll end up working for someone that does."
+    },
+    "content_texteaentrer_67": {
+        "message": "You know that one thing you've always dreamed about? Write it down. Then take the first step. Today."
+    },
+    "content_texteaentrer_68": {
+        "message": "Productivity depends on executing important tasks in line with your goals."
+    },
+    "content_texteaentrer_69": {
+        "message": "Remember that goals are not wishes that you want to have. They are things that you have to do."
+    },
+    "content_texteaentrer_70": {
+        "message": "Yesterday is history, tomorrow is a mystery, but today is a gift. That's why it is called the present."
     },
     "content_notifier_debut": {
         "message": "You've just entered a blacklisted site."
@@ -435,13 +588,43 @@
         "message": "You are on this site since "
     },
     "content_notifier_l2_p2": {
-        "message": " minute(s)"
+        "message": " minutes"
     },
     "content_notifier_l2_p3": {
         "message": ", today."
     },
     "content_notifier_l2_p4": {
         "message": "How much more time do you need? "
+    },
+    "content_notifier_l2_t1": {
+        "message": "Select what you are doing"
+    },
+    "content_notifier_l2_t2": {
+        "message": "remaining task(s)"
+    },
+    "content_notifier_l2_t3": {
+        "message": "Nothing, I don't want to take my time seriously"
+    },
+    "todolist_1": {
+        "message": "What should be done?"
+    },
+    "todolist_2": {
+        "message": "item"
+    },
+    "todolist_2_2": {
+        "message": "left"
+    },
+    "todolist_3": {
+        "message": "All"
+    },
+    "todolist_4": {
+        "message": "Active"
+    },
+    "todolist_5": {
+        "message": "Completed"
+    },
+    "todolist_6": {
+        "message": "Clear completed"
     },
     "content_notifier_l2_option_idk": {
         "message": "I don't know"
@@ -451,6 +634,12 @@
     },
     "content_notifier_l3": {
         "message": "It'll shut down in 5 seconds...."
+    },
+    "content_notifier_l2_alert_time": {
+        "message": "Be careful, it's easy to let yourself get away with this."
+    },
+    "content_notifier_l2_alert_time_2": {
+        "message": "Sorry, I have to close this window to protect your time."
     }
 
 }

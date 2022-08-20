@@ -1,4 +1,4 @@
-window.onload = function () {
+window.onload = async function () {
 
     initialiserCheckboxes(Array.from(document.querySelectorAll("input[type=checkbox]")));
 
@@ -64,7 +64,7 @@ window.onload = function () {
     //charge les listeners des éléments HTML
     for (let i = 0, length = listes.length; i < length; i++) {
 
-        charger(i);
+        await charger(i,()=>{initFonctionRetirer(i)});
         // resetData();
         console.log(uRLS[i]);
 
@@ -76,10 +76,6 @@ window.onload = function () {
             if (e.keyCode === 13) {
                 initEventBtnAjout(i)
             }
-        });
-
-        setTimeout(() => {
-            initFonctionRetirer(i);
         });
 
         btnEnregistrer.addEventListener("click", function () {
@@ -206,22 +202,25 @@ window.onload = function () {
     }
 
     //charge les listes blanches et noires et obtient leur urls
-    function charger(i) {
-        chrome.storage.sync.get(Object.keys(indiceSauvegarde[i])[0], function (donnees) {
+    async function charger(i, callback) {
+        chrome.storage.sync.get([Object.keys(indiceSauvegarde[i])[0], Object.keys(uRLS[i])[0]], function (donnees) {
             if (typeof donnees[Object.keys(indiceSauvegarde[i])[0]] !== "undefined") {
                 listes[i].innerHTML = LZString.decompressFromUTF16(donnees[Object.keys(indiceSauvegarde[i])[0]]);
             }
-        });
 
-        chrome.storage.sync.get(Object.keys(uRLS[i])[0], function (tableau) {
-            if (typeof tableau[Object.keys(uRLS[i])[0]] !== "undefined") {
-                uRLS[i][Object.keys(uRLS[i])[0]] = tableau[Object.keys(uRLS[i])[0]];
+            if (typeof donnees[Object.keys(uRLS[i])[0]] !== "undefined") {
+                uRLS[i][Object.keys(uRLS[i])[0]] = donnees[Object.keys(uRLS[i])[0]];
                 setTimeout(() => {
-                    console.log('uRLS[i]:', JSON.stringify(tableau[Object.keys(uRLS[i])[0]]));
+                    console.log('uRLS[i]:', JSON.stringify(donnees[Object.keys(uRLS[i])[0]]));
                 }, 50);
 
             }
+
+            //fullfill the promise
+            callback();
+
         });
+      
 
     }
 

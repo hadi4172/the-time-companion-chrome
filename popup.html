@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Popup</title>
-		<meta charset="UTF-8">
-		<script src="library/Chart/Chart.min.js"></script>
-		<script src="js/popup.js"></script>
-		<link rel="stylesheet" type="text/css" href="css/popup.css">
-	</head>
 
-	<body>
-		<div class=titre><strong ></strong></div>
-		
-		<canvas id="myChart" width="250" height="250"></canvas>
-		<div class=titre2><span></span></div>
-		<p id="websites"><table><tbody></tbody></table><p>
-		<a style="margin: 10px auto 0 auto;" href="options.html" target="_blank" class="btn btn-3"></a> 
-	</body>
+<head>
+	<title>Popup</title>
+	<meta charset="UTF-8">
+	<script src="library/Chart/Chart.min.js"></script>
+	<script src="js/popup.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/popup.css">
+</head>
+
+<body>
+	<div style="display: flex; flex-direction:row;">
+		<div style="width: 265px; margin-right:10px; border-right: 2px solid lightgray;">
+			<div class=titre><strong></strong></div>
+
+			<canvas id="myChart" width="250" height="250"></canvas>
+			<div class=titre2><span></span></div>
+			<p id="websites">
+				<table>
+					<tbody></tbody>
+				</table>
+				<p>
+					<a style="margin: 10px auto 0 auto;" href="options.html" target="_blank" class="btn btn-3"></a>
+		</div>
+
+		<div style="width:255px; max-height: 550px; overflow: hidden;">
+			<iframe id=todo src="todolist/index.html" frameborder="0"></iframe>
+		</div>
+	</div>
+</body>
+
 </html>

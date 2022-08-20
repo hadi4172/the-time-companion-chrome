@@ -1,4 +1,5 @@
 window.onload = function () {
+    
 
     //affecte le texte dans la bonne langue de l'élément HTML
     document.querySelector(`.titre`).innerHTML = chrome.i18n.getMessage(`popup_titre`);
@@ -6,6 +7,8 @@ window.onload = function () {
     document.querySelector(`a[href="options.html"]`).innerHTML = chrome.i18n.getMessage(`popup_reglages_btn`);
 
     var tempsParUrl = [];
+
+    ajusterPageTodoList();
 
     //obtient les temps de chaque url du content script et les envoie au triage
     function initTempsParUrl() {
@@ -16,6 +19,18 @@ window.onload = function () {
                 console.log("[TEMPS PAR URL]:", tempsParUrl);
             }
         });
+    }
+
+    //ajustements la page todo list (iframe)
+    function ajusterPageTodoList() {
+        let iframedoc = document.querySelector(`#todo`).contentDocument;
+        iframedoc.querySelector("#return").style.display = "none";
+
+        //remove style of boxShadow of .limiter
+        iframedoc.querySelector(".limiter").style.boxShadow = "none";
+
+        //.light .list:before 
+        iframedoc.querySelector(".list").classList.add("slim");
     }
 
     //demande au content script de lui envoyer le temps de sa page

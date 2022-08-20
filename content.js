@@ -1,4 +1,3 @@
-
 var waitToInitialize = setInterval(() => {
     // console.log(`[Time Companion] Not yet initialized`);
     if (!document.hidden) {
@@ -6,15 +5,44 @@ var waitToInitialize = setInterval(() => {
         // initialise le timer d'activité sur la page web
         TimeMe.initialize({
             currentPageName: "webpage",
-            idleTimeoutInSeconds: 80 // secondes
+            idleTimeoutInSeconds: 80, // secondes
         });
         startScript();
         clearInterval(waitToInitialize);
     }
 }, 300);
 
+
+let todoListArray = [];
+
+chrome.storage.onChanged.addListener(function (changes, area) {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+        if (key === "todo") {
+            todoListArray = newValue;
+        }
+    }
+  });
+
+chrome.storage.local.get("todo", function (result) {
+    todoListArray = result.todo;
+} );
+
+
+
 function startScript() {
     disableDistractionByInjection();
+    injectCSS(/*css*/`
+    /* Hide scrollbar for Chrome, Safari and Opera */
+        #timecompanion-todolist::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        #timecompanion-todolist {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    `);
 
     var notificationSound = new Audio();
     notificationSound.volume = 0.6;
@@ -22,82 +50,103 @@ function startScript() {
     // window.onload = function () {
 
     setTimeout(() => {
-
         var previousTime = 0;
         var tempsDeBlocageLv3 = -1;
         var titreOriginel = document.title;
         var tabIsAudible = false;
 
-        var niveauDeSeverite = [];   //array de nombres
+        var niveauDeSeverite = []; //array de nombres
         var tempsActivationSeverite = []; //array de nombre;
-        var informationDebutOuDuree = [];  //array de bool ou d'int
+        var informationDebutOuDuree = []; //array de bool ou d'int
         var entreePhraseDeProductivite = []; //array de bool pertinent pour le niveau 2
 
-        var niveauActive = false;  //est-ce que la sévérité s'est déja activée ?
-        var niveau2EstActif = false;  //est-ce que le niveau 2 est présentement actif ?
-        var immuniserContreNiveau2 = false;  //l'utilisateur a deja indiqué le temps dont il a besoin donc pas besoin de repop un niveau 2 tant qu'il ne raffraichi pas la page
+        var niveauActive = false; //est-ce que la sévérité s'est déja activée ?
+        var niveau2EstActif = false; //est-ce que le niveau 2 est présentement actif ?
+        var immuniserContreNiveau2 = false; //l'utilisateur a deja indiqué le temps dont il a besoin donc pas besoin de repop un niveau 2 tant qu'il ne raffraichi pas la page
 
-        var attributsModal = {  //attributs du notificateur
+        var attributsModal = {
+            //attributs du notificateur
             maxNotifications: 2,
             labels: {
-                warning: /*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_warning")}</span>`,
-                alert: /*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_attributmodal_alert")}</span>`,
-                confirm: /*html*/`<span style="font-family:Arial;color: #606c71;">${chrome.i18n.getMessage("content_attributmodal_confirm")}</span>`,
+                warning: /*html*/ `<span style="font-family:Arial;">${chrome.i18n.getMessage(
+                    "content_attributmodal_warning"
+                )}</span>`,
+                alert: /*html*/ `<span style="font-family:Arial;">${chrome.i18n.getMessage(
+                    "content_attributmodal_alert"
+                )}</span>`,
+                confirm: /*html*/ `
+                    <div style="font-family:Verdana;color: #606c71;font-size: 17px; margin-top: 23px;">
+                        ${chrome.i18n.getMessage("content_attributmodal_confirm")}
+                    </div>`,
                 confirmOk: chrome.i18n.getMessage("content_attributmodal_confirmOk"),
-                confirmCancel: chrome.i18n.getMessage("content_attributmodal_confirmCancel")
+                confirmCancel: chrome.i18n.getMessage("content_attributmodal_confirmCancel"),
             },
             durations: {
-                warning: 0
+                warning: 0,
             },
             icons: {
-                confirm: "exclamation-circle"
-            }
+                confirm: "exclamation-circle",
+            },
         };
 
         //gestion des textes à entrer pour le niveau 2
         var texteAEntrer = [];
-        const nombreDeMessagesAEntrerDisponibles = 20;
+        const nombreDeMessagesAEntrerDisponibles = 70; 
 
         for (let i = 0; i < nombreDeMessagesAEntrerDisponibles; i++) {
-            texteAEntrer.push(chrome.i18n.getMessage(`content_texteaentrer_${i + 1}`))
+            texteAEntrer.push(chrome.i18n.getMessage(`content_texteaentrer_${i + 1}`));
         }
 
         var notifier = new AWN(attributsModal);
 
         //met à jour le temps des derniers accès au site web
         function updatePreviousTime() {
-            chrome.runtime.sendMessage({ sendMePreviousTimeData: window.location.href }, function (response) {
-                //tconsole.log("[PreviousTime]=" + response.responseMessage);
-                previousTime = response.responseMessage;
-            });
+            chrome.runtime.sendMessage(
+                { sendMePreviousTimeData: window.location.href },
+                function (response) {
+                    //tconsole.log("[PreviousTime]=" + response.responseMessage);
+                    previousTime = response.responseMessage;
+                }
+            );
         }
 
         //demande au background script de lui envoyer les niveaux de sévérités de cette page
         function getDonneesSeverite() {
-            niveauDeSeverite = []; tempsActivationSeverite = []; informationDebutOuDuree = []; entreePhraseDeProductivite = [];
+            niveauDeSeverite = [];
+            tempsActivationSeverite = [];
+            informationDebutOuDuree = [];
+            entreePhraseDeProductivite = [];
             //tconsole.log("Entree 1 dans getDonneesSeverite()");
-            chrome.runtime.sendMessage({ sendMeDonneesSeverite: window.location.href }, function (response) {
-                //tconsole.log("Entree 2 dans getDonneesSeverite()");
-                //tconsole.log("Reponse du background", response.responseMessage);
-                for (let i = 0, length = response.responseMessage.length; i < length; i++) {
-                    niveauDeSeverite.push(response.responseMessage[i][0]);
-                    tempsActivationSeverite.push(response.responseMessage[i][1]);
-                    informationDebutOuDuree.push(response.responseMessage[i][2]);
-                    if (response.responseMessage[i][3] === true) {
-                        entreePhraseDeProductivite.push(true);
-                    } else {
-                        entreePhraseDeProductivite.push(false);
+            chrome.runtime.sendMessage(
+                { sendMeDonneesSeverite: window.location.href },
+                function (response) {
+                    //tconsole.log("Entree 2 dans getDonneesSeverite()");
+                    //tconsole.log("Reponse du background", response.responseMessage);
+                    for (let i = 0, length = response.responseMessage.length; i < length; i++) {
+                        niveauDeSeverite.push(response.responseMessage[i][0]);
+                        tempsActivationSeverite.push(response.responseMessage[i][1]);
+                        informationDebutOuDuree.push(response.responseMessage[i][2]);
+                        if (response.responseMessage[i][3] === true) {
+                            entreePhraseDeProductivite.push(true);
+                        } else {
+                            entreePhraseDeProductivite.push(false);
+                        }
+                    }
+                    if (immuniserContreNiveau2) {
+                        retirerNiveaux2();
                     }
                 }
-                if (immuniserContreNiveau2) {
-                    retirerNiveaux2();
+            );
+            chrome.runtime.sendMessage(
+                { sendMeTempsDeBlocageLv3: window.location.href },
+                function (response) {
+                    if (response.tempsDeBlocageLv3 !== -1) {
+                        tempsDeBlocageLv3 = Math.ceil(
+                            (response.tempsDeBlocageLv3 - Date.now()) / (1000 * 60)
+                        );
+                    }
                 }
-            });
-            chrome.runtime.sendMessage({ sendMeTempsDeBlocageLv3: window.location.href }, function (response) {
-                if (response.tempsDeBlocageLv3 !== -1) {
-                    tempsDeBlocageLv3 = Math.ceil((response.tempsDeBlocageLv3 - Date.now()) / (1000 * 60));
-                }
-            });
+            );
             setTimeout(() => {
                 verifierTemps();
             }, 1000);
@@ -106,59 +155,114 @@ function startScript() {
         updatePreviousTime();
         getDonneesSeverite();
 
-
         setIntervalImmediately(() => {
             //tconsole.log(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime);
         }, 1000);
 
-
         //active le son sur la page
         chrome.runtime.sendMessage({ mute: 0 });
 
-
         // vérifie s'il y a des niveaux de sévérité avec le mode début activé et les lance
         setTimeout(() => {
-
             for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
-
                 if (informationDebutOuDuree[i] === true) {
                     switch (niveauDeSeverite[i]) {
                         case 1:
                             if (document.querySelector(".awn-toast-warning") == null) {
-                                notifier.warning(/*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_debut")}</span>`);
-                                notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
+                                notifier.warning(
+                                    /*html*/ `<span style="font-family:Arial;">${chrome.i18n.getMessage(
+                                        "content_notifier_debut"
+                                    )}</span>`
+                                );
+                                notificationSound.src = chrome.runtime.getURL("sounds/what-if.mp3");
                                 notificationSound.play();
-                                chrome.runtime.sendMessage({ immuniser: true }, function (response) {
-                                });
-
+                                chrome.runtime.sendMessage(
+                                    { immuniser: true },
+                                    function (response) {}
+                                );
                             }
                             break;
                         case 2:
-                            notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
+                            notificationSound.src = chrome.runtime.getURL("sounds/unsure.mp3");
                             notificationSound.play();
                             let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                            let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5; font-family: Arial;"><p style="text-align: center;">
-                        ${chrome.i18n.getMessage("content_notifier_debut")}</p>${entreePhraseDeProductivite[i] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                           <mark class="notranslate" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
-                           <form>
-                           <input type="text" name="${Math.random()}" class="notranslate" id=entreetexte style="min-width:97%; margin:10px 0 10px 0;"/></form>` : ""}
-                           <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
+                            let contenuDeLaBoite2 = /*html*/ `
+                            <div style="color: #606c71;line-height: 1.5; font-family: Arial;">
+                                <p style="text-align: center;">
+                                    ${chrome.i18n.getMessage("content_notifier_debut")}
+                                </p>
+                                ${entreePhraseDeProductivite[i] ? /*html*/ 
+                                `<p style="text-align: center;">
+                                    ${chrome.i18n.getMessage("content_notifier_l2")}
+                                    <br />
+                                    <mark class="notranslate" id="texttowrite"
+                                            style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #c7dbb5; color: black;">
+                                            ${texteAEntrer[texteChoisi]}
+                                    </mark>
+                                </p>
+                                <form>
+                                    <input type="text" name="${Math.random()}" class="notranslate" id=entreetexte style="min-width:97%; margin:10px 0 10px 0;border: revert !important;"/>
+                                </form>`
+                                : ""}
+                                <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage(
+                                    "content_notifier_l2_p4"
+                                )}
+                                    <select id="timeNeededDropdown" style="max-width:120px; text-align: center;">
+                                    </select>
+                                  
+                                </div>
+                                <hr style="margin: 15px 140px 10px 140px;"/>
+                                    
+                                <fieldset style="max-height: 100px; overflow-y: auto; line-height:80%; margin: revert!important;padding: revert!important; border: 2px rgb(192, 192, 192) solid;"
+                                            id=timecompanion-todolist>
+                                    <legend style="font-weight: bold;font-family:Arial;border: 1px lightgrey solid;padding: 5px;background-color: whitesmoke;" 
+                                            id=timecompanion-todolist-legend >
+                                        ${chrome.i18n.getMessage("content_notifier_l2_t1")} &ensp;
+                                        <a href="${chrome.runtime.getURL("todolist/index.html")}" target="_blank" style="color: #6ead33;">
+                                            (Todo&nbsp;List) 
+                                        </a>
+                                        <br/>
+                                        <div style="font-weight:300;font-size:12px; margin: 3px 0 0 20px;">
+                                            <b>${todoListArray.length}</b> ${chrome.i18n.getMessage("content_notifier_l2_t2")}
+                                        </div>
+                                    </legend>
+
+                                    ${(()=>{
+                                        let todoList = "";
+                                        for (let i = 0, length = todoListArray.length; i < length; i++) {
+                                            todoList += /*html*/ `
+                                            <div style="margin: 5px 0 5px 30px; font-family:Arial;">
+                                                <input type="checkbox" class="notranslate todo-check" id=${todoListArray[i]} />
+                                                <label for=${todoListArray[i]}>${todoListArray[i]}</label>
+                                            </div>`;
+                                        }
+                                        todoList += /*html*/ `
+                                            <hr style="margin: 0 0 0 0;"/>
+                                            <div style="margin: 5px 0 5px 30px; font-family:Arial; color:red">
+                                                <input type="checkbox" class="notranslate todo-check" id=wasting-time />
+                                                <label for=wasting-time>${chrome.i18n.getMessage("content_notifier_l2_t3")}</label>
+                                            </div>`;
+                                        return todoList;
+                                    })()}
+
+                                    
+
+                                </fieldset>
+                                
+                           </div>`;
 
                             creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                             break;
 
-                        default: break;
+                        default:
+                            break;
                     }
                 }
-
             }
-
         }, 500);
-
 
         // vérifie le temps écoulé et lance les niveaux de sévérité
         function verifierTemps() {
-
             //tconsole.log("niveauDeSeverite:", JSON.stringify(niveauDeSeverite));
             //tconsole.log("tempsActivationSeverite:", JSON.stringify(tempsActivationSeverite));
             //tconsole.log("informationDebutOuDuree:", JSON.stringify(informationDebutOuDuree));
@@ -169,15 +273,25 @@ function startScript() {
                     if (!isInactive(TimeMe.getTimeOnPageInMilliseconds("webpage"))) {
                         for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
                             switch (niveauDeSeverite[i]) {
-                                case 1: case 2:
-                                    if (((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) % (tempsActivationSeverite[i] * 60) < 1)
-                                        && (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) > 1) {
+                                case 1:
+                                case 2:
+                                    if (
+                                        (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) %
+                                            (tempsActivationSeverite[i] * 60) <
+                                            1 &&
+                                        TimeMe.getTimeOnCurrentPageInSeconds() + previousTime > 1
+                                    ) {
                                         traitementSeverite(niveauDeSeverite[i], i);
                                     }
                                     break;
-                                case 3: case 4:
-                                    if ((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) >= (tempsActivationSeverite[i] * 60)) {
-                                        if (tempsDeBlocageLv3 === -1) tempsDeBlocageLv3 = informationDebutOuDuree[i];
+                                case 3:
+                                case 4:
+                                    if (
+                                        TimeMe.getTimeOnCurrentPageInSeconds() + previousTime >=
+                                        tempsActivationSeverite[i] * 60
+                                    ) {
+                                        if (tempsDeBlocageLv3 === -1)
+                                            tempsDeBlocageLv3 = informationDebutOuDuree[i];
                                         traitementSeverite(niveauDeSeverite[i], i);
                                     }
                                     break;
@@ -190,7 +304,6 @@ function startScript() {
 
                 niveauActive = true;
             }
-
         }
 
         for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
@@ -200,31 +313,96 @@ function startScript() {
         //gère le lancement des niveaux de sévérité
         function traitementSeverite(niveau, index = -1) {
             //tconsole.log("Entree 1 traitementSeverite(niveau)");
-            let tempsEnMinutesArrondi = (Math.round((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60 * 10) / 10);
+            let tempsEnMinutesArrondi =
+                Math.round(((TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60) * 10) /
+                10;
             switch (niveau) {
                 case 1:
                     if (document.querySelector(".awn-toast-alert") == null) {
-                        notifier.alert(/*html*/`<span style="font-family:Arial;">${chrome.i18n.getMessage("content_notifier_l1_p1")}${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l1_p2")}</span>`);
-                        notificationSound.src = chrome.runtime.getURL('sounds/what-if.mp3');
+                        notifier.alert(
+                            /*html*/ `<span style="font-family:Arial;">${chrome.i18n.getMessage(
+                                "content_notifier_l1_p1"
+                            )}${tempsEnMinutesArrondi}${chrome.i18n.getMessage(
+                                "content_notifier_l1_p2"
+                            )}</span>`
+                        );
+                        notificationSound.src = chrome.runtime.getURL("sounds/what-if.mp3");
                         notificationSound.play();
                     }
                     break;
 
                 case 2:
                     if (document.querySelector("#awn-popup-wrapper") == null) {
-
-                        notificationSound.src = chrome.runtime.getURL('sounds/unsure.mp3');
+                        notificationSound.src = chrome.runtime.getURL("sounds/unsure.mp3");
                         //tconsole.log('son chargé');
                         notificationSound.play();
 
                         let texteChoisi = randomIntFromInterval(0, texteAEntrer.length - 1);
-                        let contenuDeLaBoite2 = /*html*/`<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">
-                        ${chrome.i18n.getMessage("content_notifier_l2_p1")}<strong>${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>
-                        ${chrome.i18n.getMessage("content_notifier_l2_p3")}</p>${entreePhraseDeProductivite[index] ? /*html*/`<p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l2")}<br />
-                    <mark class="notranslate" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #ADD08C;">${texteAEntrer[texteChoisi]}</mark></p>
-                    <form> 
-                    <input type="text" name="${Math.random()}" class="notranslate" id=entreetexte style="min-width:97%; margin:10px 0 10px 0;"/></form>` : ""}
-                    <div style="margin: 0 auto; width: fit-content;">${chrome.i18n.getMessage("content_notifier_l2_p4")}<select id="timeNeededDropdown" style="max-width:120px; text-align: center;"></select></div></div>`;
+                        let contenuDeLaBoite2 = /*html*/ `
+                            <div style="color: #606c71;line-height: 1.5;font-family: Arial;">
+                                <p style="text-align: center;">
+                                    ${chrome.i18n.getMessage("content_notifier_l2_p1")}
+                                    <strong style="font-weight: bold;">
+                                        ${tempsEnMinutesArrondi}${chrome.i18n.getMessage("content_notifier_l2_p2")}</strong>${chrome.i18n.getMessage("content_notifier_l2_p3")}
+                                </p>
+                                ${entreePhraseDeProductivite[index] ? /*html*/ `
+                                <p style="text-align: center;">
+                                    ${chrome.i18n.getMessage("content_notifier_l2")}
+                                    <br />
+                                    <mark 
+                                        class="notranslate" id="texttowrite"
+                                        style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #c7dbb5; color: black;">
+                                        ${texteAEntrer[texteChoisi]}
+                                    </mark>
+                                </p>
+                                <form> 
+                                    <input type="text" name="${Math.random()}" class="notranslate" id=entreetexte style="min-width:97%; margin:10px 0 10px 0;border: revert !important;"/>
+                                </form>`
+                                : ""
+                                }
+                                <div style="margin: 0 auto; width: fit-content;">
+                                    ${chrome.i18n.getMessage("content_notifier_l2_p4")}
+                                    <select id="timeNeededDropdown" style="max-width:120px; text-align: center;">
+                                    </select>
+                                </div>
+
+                                <hr style="margin: 15px 140px 10px 140px;"/>
+                                    
+                                <fieldset style="max-height: 100px; overflow-y: auto; line-height:80%; margin: revert!important;padding: revert!important; border: 2px rgb(192, 192, 192) solid;" 
+                                            id=timecompanion-todolist>
+                                    <legend style="font-weight: bold;font-family:Arial;border: 1px lightgrey solid;padding: 5px;background-color: whitesmoke;" 
+                                            id=timecompanion-todolist-legend >
+                                        ${chrome.i18n.getMessage("content_notifier_l2_t1")} &ensp;
+                                        <a href="${chrome.runtime.getURL("todolist/index.html")}" target="_blank" style="color: #6ead33;">
+                                            (Todo&nbsp;List) 
+                                        </a>
+                                        <br/>
+                                        <div style="font-weight:300;font-size:12px; margin: 3px 0 0 20px;">
+                                            <b>${todoListArray.length}</b> ${chrome.i18n.getMessage("content_notifier_l2_t2")}
+                                        </div>
+                                    </legend>
+
+                                    ${(()=>{
+                                        let todoList = "";
+                                        for (let i = 0, length = todoListArray.length; i < length; i++) {
+                                            todoList += /*html*/ `
+                                            <div style="margin: 0px 0 5px 30px; font-family:Arial;">
+                                                <input type="checkbox" class="notranslate todo-check" id=${todoListArray[i]} />
+                                                <label for=${todoListArray[i]}>${todoListArray[i]}</label>
+                                            </div>`;
+                                        }
+                                        todoList += /*html*/ `
+                                            <hr style="margin: 0 0 0 0;"/>
+                                            <div style="margin: 5px 0 5px 30px; font-family:Arial; color:red">
+                                                <input type="checkbox" class="notranslate todo-check" id=wasting-time />
+                                                <label for=wasting-time>${chrome.i18n.getMessage("content_notifier_l2_t3")}</label>
+                                            </div>`;
+                                        return todoList;
+                                    })()}
+
+                                </fieldset>
+                            </div>
+                                `;
                         niveau2EstActif = true;
                         creerBoxNiveau2(contenuDeLaBoite2, texteChoisi);
                     }
@@ -233,16 +411,23 @@ function startScript() {
 
                 case 3:
                     if (document.querySelector("#awn-popup-wrapper") == null) {
-                        let contenuDeLaBoite3 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">${chrome.i18n.getMessage("content_notifier_l3")}</p>`;
-                        let case3box = notifier.confirm(contenuDeLaBoite3, () => { ; }, false, {
-                            labels:
-                            {
-                                confirm:
-                                    `<span style="font-family:Arial;color: #606c71;">
-                                    ${chrome.i18n.getMessage("content_notifier_l3_title")}${tempsDeBlocageLv3 !== 0 ? JSON.stringify(tempsDeBlocageLv3) + chrome.i18n.getMessage("content_notifier_l2_p2") : ` ${chrome.i18n.getMessage("options_onseveriteinput_toutelajournee")}`}
-                                    </span>`
+                        let contenuDeLaBoite3 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">${chrome.i18n.getMessage(
+                            "content_notifier_l3"
+                        )}</p>`;
+                        let case3box = notifier.confirm(contenuDeLaBoite3, () => {}, false, {
+                            labels: {
+                                confirm: `<span style="font-family:Arial;color: #606c71;">
+                                    ${chrome.i18n.getMessage("content_notifier_l3_title")}${
+                                    tempsDeBlocageLv3 !== 0
+                                        ? JSON.stringify(tempsDeBlocageLv3) +
+                                          chrome.i18n.getMessage("content_notifier_l2_p2")
+                                        : ` ${chrome.i18n.getMessage(
+                                              "options_onseveriteinput_toutelajournee"
+                                          )}`
+                                }
+                                    </span>`,
                             },
-                            icons: { confirm: "exclamation-triangle" }
+                            icons: { confirm: "exclamation-triangle" },
                         }).newNode;
                         let buttons = case3box.querySelector(".awn-buttons");
                         buttons.parentNode.removeChild(buttons);
@@ -258,43 +443,62 @@ function startScript() {
                             }
                         }, 1000 * 2.5);
 
-                        notificationSound.src = chrome.runtime.getURL('sounds/piece-of-cake.mp3');
+                        notificationSound.src = chrome.runtime.getURL("sounds/piece-of-cake.mp3");
                         notificationSound.play();
                         chrome.runtime.sendMessage({ lauchThisLevelNow: 3 });
-                        chrome.runtime.sendMessage({ gererNiveau3: [informationDebutOuDuree[index], window.location.href, (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60] });
+                        chrome.runtime.sendMessage({
+                            gererNiveau3: [
+                                informationDebutOuDuree[index],
+                                window.location.href,
+                                (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60,
+                            ],
+                        });
                         previousTime -= 6;
                     }
                     break;
 
                 case 4:
                     //tconsole.log("Entree 1 traitementSeverite(niveau)");
-                    chrome.runtime.sendMessage({ lauchThisLevelNow: 4 }); break;
+                    chrome.runtime.sendMessage({ lauchThisLevelNow: 4 });
+                    break;
 
                 default:
-
                     break;
             }
-
         }
 
         //envoie au background script les informations nécéssaires pour mettre à jour le badge de l'extension
         function updateBadge() {
             let severiteLaPlusForte = Math.max(...niveauDeSeverite);
             switch (severiteLaPlusForte) {
-                case 1: case 2:
+                case 1:
+                case 2:
                     let secondesEcoules = TimeMe.getTimeOnCurrentPageInSeconds() + previousTime;
-                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesEcoules), tabIsAudible ? "#d534eb" : "#6BAB2F"] });
+                    chrome.runtime.sendMessage({
+                        setBadge: [
+                            fancyTimeFormat(secondesEcoules),
+                            tabIsAudible ? "#d534eb" : "#6BAB2F",
+                        ],
+                    });
 
                     break;
-                case 3: case 4:
+                case 3:
+                case 4:
                     let arrayDesIndexDuNiveau = [];
                     for (let i = 0, length = niveauDeSeverite.length; i < length; i++) {
                         if (niveauDeSeverite[i] === severiteLaPlusForte) {
                             arrayDesIndexDuNiveau.push(tempsActivationSeverite[i]);
                         }
                     }
-                    let secondesRestantes = ((Math.min(...arrayDesIndexDuNiveau) * 60) - (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime));
-                    chrome.runtime.sendMessage({ setBadge: [fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0), tabIsAudible ? "#72207d" : "#ed3a2d"] });
+                    let secondesRestantes =
+                        Math.min(...arrayDesIndexDuNiveau) * 60 -
+                        (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime);
+                    chrome.runtime.sendMessage({
+                        setBadge: [
+                            fancyTimeFormat(secondesRestantes > 0 ? secondesRestantes : 0),
+                            tabIsAudible ? "#72207d" : "#ed3a2d",
+                        ],
+                    });
 
                     break;
                 default:
@@ -303,7 +507,8 @@ function startScript() {
         }
 
         function retirerNiveaux2() {
-            for (let i = niveauDeSeverite.length - 1; i >= 0; i--) {  //immuniser tant que l'utilisateur n'a pas raffraichi la page
+            for (let i = niveauDeSeverite.length - 1; i >= 0; i--) {
+                //immuniser tant que l'utilisateur n'a pas raffraichi la page
                 if (niveauDeSeverite[i] === 2) {
                     niveauDeSeverite.splice(i, 1);
                     tempsActivationSeverite.splice(i, 1);
@@ -335,7 +540,8 @@ function startScript() {
             return ret;
         }
 
-        function randomIntFromInterval(min, max) { // min and max included 
+        function randomIntFromInterval(min, max) {
+            // min and max included
             return Math.floor(Math.random() * (max - min + 1) + min);
         }
 
@@ -357,8 +563,16 @@ function startScript() {
             }, 1500);
             let case2boxInterval = notifier.confirm(texte).newNode;
             let timeNeededDropdown = case2boxInterval.querySelector("#timeNeededDropdown");
-            let timeNeededPossibilities = ["1 min", "2 min", "5 min", "10 min", "20 min", "30 min"/*, "45 min", "1h", "1h30", "2h", "3h"*/, chrome.i18n.getMessage("content_notifier_l2_option_idk")];
-            let tempsCorrespondant = [1, 2, 5, 10, 20, 30/*, 45, 60, 90, 120, 180*/, false];
+            let timeNeededPossibilities = [
+                "1 min",
+                "2 min",
+                "5 min",
+                "10 min",
+                "20 min",
+                "30 min" /*, "45 min", "1h", "1h30", "2h", "3h"*/,
+                chrome.i18n.getMessage("content_notifier_l2_option_idk"),
+            ];
+            let tempsCorrespondant = [1, 2, 5, 10, 20, 30 /*, 45, 60, 90, 120, 180*/, false];
 
             //source : https://stackoverflow.com/a/18194993/7551620
             (function shuffle(obj1, obj2) {
@@ -378,73 +592,165 @@ function startScript() {
             })(timeNeededPossibilities, tempsCorrespondant);
 
             for (let i = 0, length = timeNeededPossibilities.length; i < length; i++) {
-                timeNeededDropdown.innerHTML += /*html*/`<option>${timeNeededPossibilities[i]}</option>`
+                timeNeededDropdown.innerHTML += /*html*/ `<option>${timeNeededPossibilities[i]}</option>`;
             }
 
             case2boxInterval.style.backdropFilter = "blur(2px)";
 
-            case2boxInterval.querySelector(".awn-btn-success").addEventListener("click", function () {
-                //tconsole.log('Cliqué!');
+            case2boxInterval.firstChild.style.direction = "ltr";
+            case2boxInterval.firstChild.style.border = "10px #7fae4b solid";
+            case2boxInterval.firstChild.style.borderRadius = "20px";
+            case2boxInterval.firstChild.style.backgroundColor = "#f8fde6";
 
-                const continuer = () => {
-                    if (informationDebutOuDuree.some((x, i) => { return (x == true && niveauDeSeverite[i] === 2); })) {
-                        chrome.runtime.sendMessage({ immuniser: true }, function (response) { });
+            case2boxInterval.querySelector("i").outerHTML = /*html*/`
+            <img src="${chrome.runtime.getURL("img/icon128.png")}" width="128" height="128" style="position: absolute; top: -80px;">`;
+            
+            case2boxInterval.querySelectorAll(".awn-btn").forEach(e => e.style.borderRadius = "20px");
+
+            if (case2boxInterval.querySelector("form") !== null) {
+                let textInput = case2boxInterval.querySelector("#entreetexte");
+                let textLabel = case2boxInterval.querySelector("#texttowrite");
+
+                // textLabel.innerHTML = textLabel.innerHTML.split("").join(" ");
+                // put all letters in independant span
+                let initialState = textLabel.innerHTML = textLabel.innerText.trim().split("").map((e, i)=> /*html*/`<span index="${i}">${e}</span>`).join("");
+
+                textInput.addEventListener("input", function () {
+                    textLabel.innerHTML = initialState;
+                    let letters = Array.from(textLabel.querySelectorAll("span"));
+
+                    for (let i = 0; i < textInput.value.length; i++) {
+                        
+                        letters[i].style.fontWeight = "bold";
+                        
+                        if(!strAreEqualNoAccents(textInput.value.charAt(i),texteAEntrer[texteChoisi].charAt(i))) { 
+                            // make the char in textLabel red
+                            letters[i].style.color = "red";
+                        } else {
+                            letters[i].style.color = "black";
+                        }
                     }
+                });
+            }
 
-                    if (timeNeededDropdown.value !== chrome.i18n.getMessage("content_notifier_l2_option_idk")) {
-                        let optionChoisie = tempsCorrespondant[timeNeededDropdown.options.selectedIndex];
-                        let valeurLancementNiveau3 = optionChoisie + (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60;
-                        niveauDeSeverite.push(3);
-                        tempsActivationSeverite.push(valeurLancementNiveau3);
-                        informationDebutOuDuree.push((optionChoisie >= 5 ? 5 : 3) + (optionChoisie >= 10 ? 5 : 0) + (optionChoisie >= 20 ? 5 : 0));
-                        chrome.runtime.sendMessage({ ajouterAUnGroupeCache: [valeurLancementNiveau3, window.location.href, optionChoisie, Date.now() + (optionChoisie + (informationDebutOuDuree[informationDebutOuDuree.length - 1])) * 60 * 1000] }, function (response) { });
-                        immuniserContreNiveau2 = true;
-                        retirerNiveaux2();
-                    }
+            case2boxInterval
+                .querySelector(".awn-btn-success")
+                .addEventListener("click", function () {
+                    //tconsole.log('Cliqué!');
 
-                    chrome.runtime.sendMessage({ mute: 0 });
-                    if (tabIsAudible) TimeMe.setIdleDurationInSeconds(800000);
-                    body.style.overflow = "initial";
-                    niveau2EstActif = false;
-                    case2boxInterval.parentNode.removeChild(case2boxInterval);
-                }
+                    const continuer = () => {
 
-                if (case2boxInterval.querySelector('form') !== null) {
-                    let textInput = case2boxInterval.querySelector("#entreetexte");
-                    // textInput.addEventListener('focus', function () {
-                    //     textInput.removeAttribute("name");
-                    //     console.log("foccus");
-                    // });
-                    // textInput.addEventListener("blur", function () {
-                    //     textInput.setAttribute("name", "ghaba");
-                    //     console.log("bllur");
-                    // });
-                    if (textInput.value == texteAEntrer[texteChoisi]) {
-                        continuer();
+
+                        if(case2boxInterval.querySelector("#wasting-time").checked) {
+                            // 0.25% chance of showing an alert
+                            if (Math.random() < 0.25) {
+                                alert("[Time Companion] " + chrome.i18n.getMessage("content_notifier_l2_alert_time"));
+                            }
+                            // 0.05% chance of showing closing the tab
+                            if (Math.random() < 0.05) {
+                                confirm("[Time Companion] " + chrome.i18n.getMessage("content_notifier_l2_confirm_time"));
+                                window.close();
+                            }
+                        }
+
+                        if (
+                            informationDebutOuDuree.some((x, i) => {
+                                return x == true && niveauDeSeverite[i] === 2;
+                            })
+                        ) {
+                            chrome.runtime.sendMessage({ immuniser: true }, function (response) {});
+                        }
+
+                        if (
+                            timeNeededDropdown.value !==
+                            chrome.i18n.getMessage("content_notifier_l2_option_idk")
+                        ) {
+                            let optionChoisie =
+                                tempsCorrespondant[timeNeededDropdown.options.selectedIndex];
+                            let valeurLancementNiveau3 =
+                                optionChoisie +
+                                (TimeMe.getTimeOnCurrentPageInSeconds() + previousTime) / 60;
+                            niveauDeSeverite.push(3);
+                            tempsActivationSeverite.push(valeurLancementNiveau3);
+                            informationDebutOuDuree.push(
+                                (optionChoisie >= 5 ? 5 : 3) +
+                                    (optionChoisie >= 10 ? 5 : 0) +
+                                    (optionChoisie >= 20 ? 5 : 0)
+                            );
+                            chrome.runtime.sendMessage(
+                                {
+                                    ajouterAUnGroupeCache: [
+                                        valeurLancementNiveau3,
+                                        window.location.href,
+                                        optionChoisie,
+                                        Date.now() +
+                                            (optionChoisie +
+                                                informationDebutOuDuree[
+                                                    informationDebutOuDuree.length - 1
+                                                ]) *
+                                                60 *
+                                                1000,
+                                    ],
+                                },
+                                function (response) {}
+                            );
+                            immuniserContreNiveau2 = true;
+                            retirerNiveaux2();
+                        }
+
+                        chrome.runtime.sendMessage({ mute: 0 });
+                        if (tabIsAudible) TimeMe.setIdleDurationInSeconds(800000);
+                        body.style.overflow = "initial";
+                        niveau2EstActif = false;
+                        case2boxInterval.parentNode.removeChild(case2boxInterval);
+                    };
+
+                    if(!Array.from(case2boxInterval.querySelectorAll(".todo-check")).some(e => e.checked)){
+                        let legend = case2boxInterval.querySelector("#timecompanion-todolist-legend");
+                        legend.style.color = "red";
+                        legend.style.textDecoration = "underline";
+
+                    } else if (case2boxInterval.querySelector("form") !== null) {
+                        let textInput = case2boxInterval.querySelector("#entreetexte");
+                        // textInput.addEventListener('focus', function () {
+                        //     textInput.removeAttribute("name");
+                        //     console.log("foccus");
+                        // });
+                        // textInput.addEventListener("blur", function () {
+                        //     textInput.setAttribute("name", "ghaba");
+                        //     console.log("bllur");
+                        // });
+                        
+                        if (strAreEqualNoAccents(textInput.value,texteAEntrer[texteChoisi])) {
+                            continuer();
+                        } else {
+                            textInput.style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
+                        }
                     } else {
-                        textInput.style.boxShadow = "0 0 2px 2px rgba(255, 0, 0, 0.582)";
+                        continuer();
                     }
-                } else {
-                    continuer();
-                }
+                });
 
-            });
-
-            case2boxInterval.querySelector(".awn-btn-cancel").addEventListener("click", function () {
-                //tconsole.log('Cliqué Quitter!');
-                niveau2EstActif = false;
-                chrome.runtime.sendMessage({ lauchThisLevelNow: 2 });
-            });
+            case2boxInterval
+                .querySelector(".awn-btn-cancel")
+                .addEventListener("click", function () {
+                    //tconsole.log('Cliqué Quitter!');
+                    niveau2EstActif = false;
+                    chrome.runtime.sendMessage({ lauchThisLevelNow: 2 });
+                });
         }
-
-
 
         //envoie les données du temps au background script avant que la page ne soit fermée
         window.onbeforeunload = function (e) {
-            if (typeof chrome.runtime !== 'undefined') {
+            if (typeof chrome.runtime !== "undefined") {
                 document.title = titreOriginel;
 
-                chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
+                chrome.runtime.sendMessage({
+                    timeElapsed: [
+                        TimeMe.getTimeOnCurrentPageInSeconds() + previousTime,
+                        window.location.href,
+                    ],
+                });
                 //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
 
                 if (niveau2EstActif) {
@@ -457,15 +763,20 @@ function startScript() {
         //envoie les données du temps au background script quand l'utilisateur change de page
         document.addEventListener("visibilitychange", function () {
             if (document.hidden) {
-                chrome.runtime.sendMessage({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
+                chrome.runtime.sendMessage({
+                    timeElapsed: [
+                        TimeMe.getTimeOnCurrentPageInSeconds() + previousTime,
+                        window.location.href,
+                    ],
+                });
                 TimeMe.stopTimer();
                 //tconsole.log("Browser tab is hidden");
                 //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
-            }
-            else {
+            } else {
                 setTimeout(() => {
                     //tconsole.log("Browser tab is now visible");
-                    if (!document.hidden) {     //reverification apres la seconde passée
+                    if (!document.hidden) {
+                        //reverification apres la seconde passée
                         updatePreviousTime();
                         getDonneesSeverite();
                         TimeMe.resetRecordedPageTime("webpage");
@@ -488,42 +799,49 @@ function startScript() {
         };
 
         // gère les ordres du background script
-        chrome.runtime.onMessage.addListener(
-            function (message, sender, sendResponse) {
-                if (message.todo == "howMuchTimeElapsed") {  //envoie combien de temps s'est écoulé sur la page
-                    sendResponse({ timeElapsed: [(TimeMe.getTimeOnCurrentPageInSeconds() + previousTime), window.location.href] });
-                    //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
-                } else if (message.resetYourTime) {  //recommence le temps de cette page
-                    TimeMe.resetRecordedPageTime("webpage");
-                    previousTime = 0;
-                    getDonneesSeverite();
-                } else if (message.keepTracking === 1) {  //considère tout le temps passé sur la page comme actif quand du son est en train de jouer
-                    TimeMe.setIdleDurationInSeconds(800000);
-                    if (!document.hidden) {
-                        TimeMe.stopTimer();
-                        TimeMe.startTimer();
-                    }
-                    tabIsAudible = true;
-                } else if (message.keepTracking === 0) {  //quand le son arrête de jouer, revien à l'état normal
-                    TimeMe.setIdleDurationInSeconds(80);
-                    tabIsAudible = false;
+        chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+            if (message.todo == "howMuchTimeElapsed") {
+                //envoie combien de temps s'est écoulé sur la page
+                sendResponse({
+                    timeElapsed: [
+                        TimeMe.getTimeOnCurrentPageInSeconds() + previousTime,
+                        window.location.href,
+                    ],
+                });
+                //tconsole.log("[VALUE SAVED : " + TimeMe.getTimeOnCurrentPageInSeconds() + " + " + previousTime + "]");
+            } else if (message.resetYourTime) {
+                //recommence le temps de cette page
+                TimeMe.resetRecordedPageTime("webpage");
+                previousTime = 0;
+                getDonneesSeverite();
+            } else if (message.keepTracking === 1) {
+                //considère tout le temps passé sur la page comme actif quand du son est en train de jouer
+                TimeMe.setIdleDurationInSeconds(800000);
+                if (!document.hidden) {
+                    TimeMe.stopTimer();
+                    TimeMe.startTimer();
                 }
-            });
-
-
+                tabIsAudible = true;
+            } else if (message.keepTracking === 0) {
+                //quand le son arrête de jouer, revien à l'état normal
+                TimeMe.setIdleDurationInSeconds(80);
+                tabIsAudible = false;
+            }
+        });
     });
     // };
 
     //injecte du code css qui enlève les distractions si l'utilisateur a coché la case de ce siteweb dans la page d'option
     function disableDistractionByInjection() {
         let urlActuelle = window.location.href;
-        chrome.storage.sync.get('etatCheckboxesDistraction', function (arg) {
-            if (typeof arg.etatCheckboxesDistraction !== 'undefined') {
+        chrome.storage.sync.get("etatCheckboxesDistraction", function (arg) {
+            if (typeof arg.etatCheckboxesDistraction !== "undefined") {
                 let etatCheckboxesDistraction = arg.etatCheckboxesDistraction;
 
                 let injectionParSite = [
                     [
-                        /.*:\/\/.*.youtube.com\/?.*/, /*css*/`
+                        /.*:\/\/.*.youtube.com\/?.*/,
+                        /*css*/ `
                         [page-subtype="home"] #primary {
                             display: none !important;
                           }
@@ -540,8 +858,11 @@ function startScript() {
                           .ytp-endscreen-content, ytd-watch-next-secondary-results-renderer, [data-content-type="related"], .ytp-ce-element.ytp-ce-video, .ytp-ce-element.ytp-ce-playlist {
                             display: none !important;
                           }
-                          `],
-                    [/.*:\/\/.*.twitter.com\/?.*/, /*css*/`
+                          `,
+                    ],
+                    [
+                        /.*:\/\/.*.twitter.com\/?.*/,
+                        /*css*/ `
                           .Trends, [aria-label="Timeline: Trending now"], [href="/explore"], [aria-label="Timeline: Explore"] {
                               display: none !important;
                             }
@@ -554,8 +875,11 @@ function startScript() {
                             [role='main']#timeline .stream-container, [aria-label="Timeline: Your Home Timeline"] {
                               visibility: hidden !important;
                             }
-                            `],
-                    [/.*:\/\/.*.facebook.com\/?.*/, /*css*/`
+                            `,
+                    ],
+                    [
+                        /.*:\/\/.*.facebook.com\/?.*/,
+                        /*css*/ `
                           .home .newsFeedComposer #contentArea, #m_newsfeed_stream, #MComposer, #MStoriesTray, [role="main"] [role="feed"], [data-pagelet="Stories"] {
                               display: none !important;
                             }
@@ -571,8 +895,11 @@ function startScript() {
                             [aria-label="Watch"], #watch_feed, [href*="facebook.com/watch"] {
                               display: none !important;
                             }
-                            `],
-                    [/.*:\/\/.*.reddit.com\/?.*/, /*css*/`
+                            `,
+                    ],
+                    [
+                        /.*:\/\/.*.reddit.com\/?.*/,
+                        /*css*/ `
                           .commentarea, .CommentTree, .CommentsPage__tools {
                               display: none !important;
                             }
@@ -591,8 +918,11 @@ function startScript() {
                             a[href='/r/all/'] {
                               display: none !important;
                             }
-                            `],
-                    [/.*:\/\/.*.wikipedia.org\/?.*/, /*css*/`
+                            `,
+                    ],
+                    [
+                        /.*:\/\/.*.wikipedia.org\/?.*/,
+                        /*css*/ `
                           a, a:visited, .extiw {
                               pointer-events:none;
                               color : #222222 !important ;
@@ -603,8 +933,11 @@ function startScript() {
                               pointer-events:auto;
                           }
                           
-                            `],
-                    [/.*:\/\/.*.quora.com\/?.*/, /*css*/`
+                            `,
+                    ],
+                    [
+                        /.*:\/\/.*.quora.com\/?.*/,
+                        /*css*/ `
                           .question_related, .first_content_page_feed{
                             display: none;
                           }
@@ -614,8 +947,11 @@ function startScript() {
                           .qu-mt--small, .qu-mb--large{
                               display: none;
                           }
-                            `],
-                    [/.*:\/\/.*.linkedin.com\/?.*/, /*css*/`
+                            `,
+                    ],
+                    [
+                        /.*:\/\/.*.linkedin.com\/?.*/,
+                        /*css*/ `
                           #voyager-feed .core-rail > :not(:nth-child(1)) {
                               visibility: hidden !important;
                             }
@@ -634,7 +970,8 @@ function startScript() {
                             #msg-overlay {
                               display: none !important;
                             }
-                            `]
+                            `,
+                    ],
                 ];
                 for (let i = 0, length = injectionParSite.length; i < length; i++) {
                     if (etatCheckboxesDistraction[i] === true) {
@@ -648,16 +985,18 @@ function startScript() {
                 if (etatCheckboxesDistraction[injectionParSite.length]) {
                     notificationSound.volume = 0;
                 }
-
             }
         });
+    }
 
+    function strAreEqualNoAccents(a, b){
+        return a.normalize("NFD").replace(/\p{Diacritic}/gu, "") === b.normalize("NFD").replace(/\p{Diacritic}/gu, "");
     }
 
     function injectCSS(css) {
-        let style = document.createElement('style');
-        style.setAttribute('id', 'timecompanion-style');
-        style.type = 'text/css';
+        let style = document.createElement("style");
+        style.setAttribute("id", "timecompanion-style");
+        style.type = "text/css";
         style.appendChild(document.createTextNode(css));
         document.head.appendChild(style);
     }

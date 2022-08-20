@@ -7,17 +7,21 @@ strong{
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
-div{
+/* div{
+  text-align: center;
+  color: dimgray;
+} */
+
+.titre{
+  margin-bottom: 10px;
   text-align: center;
   color: dimgray;
 }
 
-.titre{
-  margin-bottom: 10px;
-}
-
 .titre2{
   margin-top: 10px;
+  text-align: center;
+  color: dimgray;
 }
 
 table{
@@ -73,4 +77,31 @@ td{
     text-shadow: -1px -1px 0 #2c6db8;
     -webkit-transition: all 250ms linear;
     transition: all 250ms linear;
+  }
+
+  #todo {
+    -ms-overflow-style: none!important;  /* IE and Edge */
+    scrollbar-width: none!important;  /* Firefox */
+  }
+  
+  #todo::-webkit-scrollbar {
+    display: none!important; 
+  }
+
+  iframe {
+    width: 375px;
+    height: 800px;
+    border: 0;
+
+    -ms-transform: scale(0.7);
+    -moz-transform: scale(0.7);
+    -o-transform: scale(0.7);
+    -webkit-transform: scale(0.7);
+    transform: scale(0.7);
+
+    -ms-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -o-transform-origin: 0 0;
+    -webkit-transform-origin: 0 0;
+    transform-origin: 0 0;
   }
