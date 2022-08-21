@@ -411,7 +411,7 @@ function startScript() {
 
                 case 3:
                     if (document.querySelector("#awn-popup-wrapper") == null) {
-                        let contenuDeLaBoite3 = `<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">${chrome.i18n.getMessage(
+                        let contenuDeLaBoite3 = /*html*/`<div style="color: #606c71;line-height: 1.5;font-family: Arial;"><p style="text-align: center;">${chrome.i18n.getMessage(
                             "content_notifier_l3"
                         )}</p>`;
                         let case3box = notifier.confirm(contenuDeLaBoite3, () => {}, false, {
@@ -648,8 +648,8 @@ function startScript() {
                             }
                             // 0.05% chance of showing closing the tab
                             if (Math.random() < 0.05) {
-                                confirm("[Time Companion] " + chrome.i18n.getMessage("content_notifier_l2_confirm_time"));
-                                window.close();
+                                confirm("[Time Companion] " + chrome.i18n.getMessage("content_notifier_l2_alert_time_2"));
+                                chrome.runtime.sendMessage({lauchThisLevelNow: 2});
                             }
                         }
 
